@@ -1,0 +1,28 @@
+{
+ "name": "CoZjem",
+ "short_name": "CoZjem",
+ "description": "What should I cook today? Meals, week plan and shopping list for Lidl, Aldi, Biedronka and Auchan.",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#EDF1EB",
+ "theme_color": "#8A1E4C",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}

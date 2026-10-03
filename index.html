@@ -1,0 +1,1262 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CoZjem</title>
+<meta name="description" content="Zaznacz, co masz w lodówce. CoZjem wybierze danie, ułoży plan tygodnia, porówna ceny w Lidlu, Aldi, Biedronce i Auchan i przypomni o promocjach.">
+<meta name="theme-color" content="#8A1E4C">
+<meta property="og:title" content="CoZjem? Co dziś ugotować?">
+<meta property="og:description" content="Polish, European and African dishes from what you already have, with shop price comparison and promotion alerts for Lidl, Aldi, Biedronka and Auchan.">
+<meta property="og:type" content="website">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CoZjem">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Familjen+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: kitchen counter. Left = fridge + goal, right = Today / Week tabs, below = eating habits for the chosen goal. Stacks on phones. */
+:root{
+  --bg:#EDF1EB; --surface:#FBFCFA; --ink:#1E2420; --muted:#5E6A61; --line:#D3DBD2;
+  --beet:#8A1E4C; --beet-soft:#F3E1E8; --dill:#3D7A3A; --dill-soft:#DDEDD9; --paper:#FFFFFF; --paper-ink:#2A2A2A;
+  --f-display:"Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+  --f-body:"Familjen Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141916; --surface:#1C231F; --ink:#E7ECE6; --muted:#9AA79D; --line:#2E3832;
+  --beet:#E07AA5; --beet-soft:#3A1F2B; --dill:#8FCB86; --dill-soft:#22351F; --paper:#F4F2EC; --paper-ink:#232323; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141916; --surface:#1C231F; --ink:#E7ECE6; --muted:#9AA79D; --line:#2E3832;
+  --beet:#E07AA5; --beet-soft:#3A1F2B; --dill:#8FCB86; --dill-soft:#22351F; --paper:#F4F2EC; --paper-ink:#232323; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:20px 48px}
+.wrap{max-width:1160px;margin-inline:auto;display:flex;flex-direction:column;gap:24px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+.brand h1{font-family:var(--f-display);font-weight:800;font-size:clamp(2.2rem,6vw,3.4rem);line-height:1;margin:0;letter-spacing:-.02em}
+.brand h1 span{color:var(--beet)}
+.brand p{margin:.4rem 0 0;color:var(--muted);max-width:50ch;text-wrap:pretty}
+.lang{display:flex;border:1.5px solid var(--ink);border-radius:999px;overflow:hidden;background:var(--surface)}
+.lang button{border:0;background:none;color:var(--ink);font:600 .95rem var(--f-body);padding:.5rem 1rem;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+main{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.2fr);gap:24px;align-items:start}
+@media (max-width:900px){main{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.label{font:600 .75rem var(--f-body);text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:0 0 8px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg button,.stores button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:.55rem .4rem;font:600 .92rem var(--f-body);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--beet);border-color:var(--beet);color:var(--surface)}
+.seg.goal{grid-template-columns:repeat(2,1fr)}
+.seg.goal button[aria-pressed="true"]{background:var(--dill);border-color:var(--dill)}
+.stores{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+@media (max-width:420px){.stores{grid-template-columns:repeat(2,1fr)}}
+.stores button[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);background:var(--surface)}
+.search{display:flex;gap:8px;align-items:center}
+.search input{flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:.55rem .75rem;font:inherit}
+.linkbtn{border:0;background:none;color:var(--muted);font:500 .85rem var(--f-body);text-decoration:underline;cursor:pointer;padding:.3rem}
+.cat{display:flex;flex-direction:column;gap:6px}
+.cat h3{margin:0;font:600 .8rem var(--f-body);color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:.32rem .7rem;font:500 .88rem var(--f-body);cursor:pointer;display:inline-flex;align-items:center;gap:.35rem}
+.chip::before{content:"";width:.55rem;height:.55rem;border-radius:50%;border:1.5px solid var(--muted)}
+.chip[aria-pressed="true"]{background:var(--dill-soft);border-color:var(--dill)}
+.chip[aria-pressed="true"]::before{background:var(--dill);border-color:var(--dill)}
+.basics{font-size:.85rem;color:var(--muted);margin:0}
+.go{border:0;background:var(--ink);color:var(--bg);border-radius:12px;padding:.85rem 1rem;font:700 1.05rem var(--f-display);cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--beet);outline-offset:2px}
+.count{font-size:.85rem;color:var(--muted)}
+
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:-4px 0 0}
+.tabs button{border:0;background:none;color:var(--muted);font:700 1.05rem var(--f-display);padding:.4rem .8rem .6rem;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--beet)}
+.result{gap:18px}
+.flash{animation:flash .9s ease}
+@keyframes flash{0%{box-shadow:0 0 0 0 var(--beet)}30%{box-shadow:0 0 0 4px var(--beet-soft)}100%{box-shadow:0 0 0 0 transparent}}
+.dish-top{display:flex;flex-direction:column;gap:6px}
+.eyebrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tag{font:600 .72rem var(--f-body);text-transform:uppercase;letter-spacing:.08em;padding:.2rem .5rem;border-radius:6px;background:var(--beet-soft);color:var(--beet)}
+.tag.plain{background:var(--bg);color:var(--muted)}
+.tag.good{background:var(--dill-soft);color:var(--dill)}
+.dish-top h2{font-family:var(--f-display);font-weight:800;font-size:clamp(1.9rem,4.5vw,2.7rem);line-height:1.02;margin:4px 0 0;letter-spacing:-.015em;text-wrap:balance}
+.meter{display:flex;align-items:center;gap:10px;font-size:.9rem}
+.bar{flex:1;height:8px;border-radius:99px;background:var(--bg);overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;background:var(--dill);border-radius:99px;transition:width .4s ease}
+.cols{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:560px){.cols{grid-template-columns:minmax(0,1fr)}}
+.have ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:.92rem}
+.have li{display:flex;gap:8px}
+.have li b{color:var(--dill);font-weight:600}
+.have li.miss b{color:var(--beet)}
+ol.steps{margin:0;padding-left:1.3rem;display:flex;flex-direction:column;gap:8px}
+ol.steps li{padding-left:.2rem;max-width:62ch}
+ol.steps li::marker{font-family:var(--f-display);font-weight:700;color:var(--beet)}
+
+.receipt{background:var(--paper);color:var(--paper-ink);font-family:var(--f-mono);font-size:.82rem;padding:16px 16px 22px;box-shadow:0 1px 0 rgba(0,0,0,.06),0 8px 20px -12px rgba(0,0,0,.35);
+  -webkit-mask:linear-gradient(#000 0 0) top/100% calc(100% - 8px) no-repeat, radial-gradient(circle 5px at 50% 100%,transparent 98%,#000) bottom/12px 9px repeat-x;
+  mask:linear-gradient(#000 0 0) top/100% calc(100% - 8px) no-repeat, radial-gradient(circle 5px at 50% 100%,transparent 98%,#000) bottom/12px 9px repeat-x}
+.receipt .rh{text-align:center;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+.receipt .rs{text-align:center;opacity:.7;margin-bottom:8px}
+.receipt hr{border:0;border-top:1px dashed #9a9a9a;margin:8px 0}
+.receipt .row{display:flex;justify-content:space-between;gap:10px;font-variant-numeric:tabular-nums}
+.receipt .tot{font-weight:600;font-size:.95rem}
+.receipt .note{opacity:.7;font-size:.72rem;margin-top:8px;line-height:1.4}
+.receipt .done{text-align:center;padding:10px 0}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:.55rem .85rem;font:600 .9rem var(--f-body);cursor:pointer}
+.btn.primary{background:var(--beet);border-color:var(--beet);color:var(--surface)}
+.alts{display:flex;flex-direction:column;gap:6px}
+.alt{display:flex;justify-content:space-between;gap:10px;align-items:center;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:.55rem .75rem;cursor:pointer;color:var(--ink);font:inherit;text-align:left;width:100%}
+.alt small{color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.empty{color:var(--muted)}
+
+/* week planner */
+.week{display:flex;flex-direction:column;gap:6px}
+.wrow{display:grid;grid-template-columns:5.5rem repeat(3,minmax(0,1fr));gap:6px;align-items:stretch}
+.whead{font:600 .72rem var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:0 .2rem}
+.wday{display:flex;flex-direction:column;justify-content:center;font-family:var(--f-display);font-weight:700;font-size:1.05rem;line-height:1.1}
+.wday small{font:500 .72rem var(--f-body);color:var(--muted);font-variant-numeric:tabular-nums;margin-top:3px}
+.cell{position:relative;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:.45rem 1.8rem .45rem .55rem;min-width:0;display:flex;flex-direction:column;gap:2px}
+.cell button.open{border:0;background:none;padding:0;text-align:left;color:var(--ink);font:600 .85rem/1.25 var(--f-body);cursor:pointer}
+.cell button.open:hover{text-decoration:underline}
+.cell small{color:var(--muted);font-size:.72rem;font-variant-numeric:tabular-nums}
+.cell .miss{color:var(--beet)}
+.cell button.swap{position:absolute;top:4px;right:4px;width:1.5rem;height:1.5rem;border:0;border-radius:6px;background:none;color:var(--muted);cursor:pointer;font-size:.9rem;line-height:1}
+.cell button.swap:hover{background:var(--surface);color:var(--ink)}
+@media (max-width:620px){
+  .wrow{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .wrow.head{display:none}
+  .wday{grid-column:1/-1;flex-direction:row;align-items:baseline;gap:8px;margin-top:6px}
+  .cell::before{content:attr(data-m);font:600 .65rem var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+}
+.weekfoot{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:620px){.weekfoot{grid-template-columns:minmax(0,1fr)}}
+.stat{display:flex;flex-direction:column;gap:4px}
+.stat b{font-family:var(--f-display);font-size:1.6rem;line-height:1;font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:.85rem}
+
+/* habits */
+.habits{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:24px}
+@media (max-width:760px){.habits{grid-template-columns:minmax(0,1fr)}}
+.habits h2{font-family:var(--f-display);font-weight:800;font-size:1.7rem;line-height:1.05;margin:0 0 6px;text-wrap:balance}
+.habits p{margin:0;color:var(--muted)}
+.tips{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px}
+@media (max-width:560px){.tips{grid-template-columns:minmax(0,1fr)}}
+.tips li{border-top:2px solid var(--dill);padding-top:8px}
+.tips li b{display:block;margin-bottom:2px}
+.tips li span{color:var(--muted);font-size:.93rem}
+.disc{font-size:.8rem;color:var(--muted);margin-top:12px}
+footer{color:var(--muted);font-size:.8rem;max-width:80ch}
+
+/* finished dish illustration */
+.dish-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,220px);gap:16px;align-items:center}
+@media (max-width:560px){.dish-hero{grid-template-columns:minmax(0,1fr)}.art{max-width:240px;justify-self:center}}
+.art{width:100%;height:auto;overflow:visible}
+.art .ves{animation:drop .55s cubic-bezier(.2,.9,.3,1.2) both}
+.art .shad{animation:shad .55s ease both}
+.art .food{animation:fill .5s .25s cubic-bezier(.2,.9,.3,1.3) both}
+.art .gar{animation:pop2 .35s var(--d) cubic-bezier(.2,.9,.3,1.6) both}
+.art .st{fill:none;stroke:var(--muted);stroke-width:2.4;stroke-linecap:round;opacity:0;animation:steam2 2.8s var(--d) ease-in-out infinite}
+@keyframes drop{from{transform:translateY(-26px);opacity:.3}to{transform:none;opacity:1}}
+@keyframes shad{from{transform:scaleX(.5);opacity:.2}to{transform:none;opacity:1}}
+@keyframes fill{from{transform:scale(.2)}to{transform:scale(1)}}
+@keyframes pop2{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes steam2{0%{opacity:0;transform:translateY(6px)}40%{opacity:.7}100%{opacity:0;transform:translateY(-10px)}}
+.art .shad{transform-origin:120px 134px}
+a.img{font-size:.78rem;color:var(--beet);text-decoration:none;border-bottom:1px solid currentColor;white-space:nowrap}
+.receipt .rsub{text-align:center;margin:8px 0 4px;opacity:.75;text-transform:uppercase;letter-spacing:.1em;font-size:.72rem}
+
+.have li{align-items:flex-start}
+.hv{flex:none;width:20px;height:20px;margin-top:1px;border-radius:5px;border:2px solid var(--beet);background:var(--surface);color:var(--surface);font:700 .75rem/1 var(--f-body);cursor:pointer;display:grid;place-items:center;padding:0}
+.hv[aria-pressed="true"]{background:var(--dill);border-color:var(--dill)}
+.hint{margin:-4px 0 8px;font-size:.8rem;color:var(--muted)}
+.still .art .ves,.still .art .shad,.still .art .food,.still .art .gar,.still>*{animation:none!important}
+/* cook with what I have */
+.cookwith{display:flex;flex-direction:column;gap:10px;padding:14px;margin:-6px -6px 0;border-radius:12px;background:var(--dill-soft)}
+.cookwith .label{margin:0}
+.cookwith .search input{background:var(--surface)}
+.go.sug{background:var(--dill);color:var(--surface)}
+.chip.mine{background:var(--surface);border-color:var(--dill);padding-right:.35rem}
+.chip.mine::before{background:var(--dill);border-color:var(--dill)}
+.chip.mine .x{display:inline-grid;place-items:center;width:1.1rem;height:1.1rem;border-radius:50%;color:var(--muted);font-size:.85rem;line-height:1}
+.chip.mine:hover .x{background:var(--beet-soft);color:var(--beet)}
+.chip.mine.free{border-style:dashed}
+.sugh{display:flex;flex-direction:column;gap:4px}
+.sugh h2{font-family:var(--f-display);font-weight:800;font-size:1.6rem;line-height:1.05;margin:0;text-wrap:balance}
+.sugh p{margin:0;color:var(--muted);font-size:.92rem}
+.thinking{display:flex;align-items:center;gap:12px;padding:16px;border:1px dashed var(--line);border-radius:12px;background:var(--bg)}
+.thinking .pot{width:38px;height:38px;flex:none}
+.thinking .pot .lid{animation:lid 1s ease-in-out infinite;transform-origin:20px 14px}
+@keyframes lid{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-3px) rotate(-6deg)}}
+.thinking span{flex:1;color:var(--muted)}
+.ainote{font-size:.78rem;color:var(--muted);margin:0}
+.notice{padding:12px 14px;border-radius:10px;background:var(--beet-soft);color:var(--ink);font-size:.9rem;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.alt .uses{display:block;color:var(--muted);font-size:.78rem;margin-top:2px}
+/* bookmarks */
+.titlerow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-top:4px}
+.titlerow h2{margin:0!important}
+.bm{flex:none;display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:.4rem .75rem .4rem .55rem;font:600 .85rem var(--f-body);cursor:pointer;transition:border-color .15s ease,background-color .15s ease,transform .15s ease}
+.bm svg{width:16px;height:16px}
+.bm svg path{fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round;transition:fill .2s ease}
+.bm:hover{border-color:var(--beet)}
+.bm[aria-pressed="true"]{border-color:var(--beet);background:var(--beet-soft);color:var(--beet)}
+.bm[aria-pressed="true"] svg path{fill:currentColor}
+.bm.pop svg{animation:bmpop .35s cubic-bezier(.2,.9,.3,1.6)}
+@keyframes bmpop{0%{transform:scale(1)}40%{transform:scale(1.45) rotate(-8deg)}100%{transform:scale(1)}}
+.tabs{overflow-x:auto;scrollbar-width:none}
+.tabs button{white-space:nowrap}
+@media (max-width:480px){.tabs button{padding:.4rem .55rem .6rem;font-size:.95rem}}
+.tcount{display:inline-grid;place-items:center;min-width:1.3rem;height:1.3rem;padding:0 .3rem;border-radius:99px;background:var(--beet);color:var(--surface);font:700 .72rem var(--f-body);vertical-align:2px}
+.savedgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.scard{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:12px;min-width:0}
+.scard .art{max-width:150px;align-self:center}
+.scard h3{margin:0;font:700 1.1rem/1.15 var(--f-display);text-wrap:balance}
+.scard .eyebrow .tag{font-size:.64rem}
+.scard small{color:var(--muted);font-size:.78rem}
+.scard .actions{margin-top:auto}
+/* price comparison + promotions */
+.cmp{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface)}
+.cmp .label{margin:0}
+.cmpsave{margin:0;font-weight:600}
+.cmpsave.ok{color:var(--dill)}
+.cmprows{display:flex;flex-direction:column;gap:6px}
+.cmprow{display:grid;grid-template-columns:minmax(0,8.5rem) minmax(40px,1fr) auto minmax(5.5rem,auto);gap:10px;align-items:center;font-size:.9rem}
+.cmprow .cs{font-weight:600;min-width:0}
+.cmprow .cbar{height:8px;border-radius:99px;background:var(--bg);overflow:hidden}
+.cmprow .cbar i{display:block;height:100%;background:var(--muted);border-radius:99px;opacity:.45}
+.cmprow.best .cbar i{background:var(--dill);opacity:1}
+.cmprow.cur .cbar i{opacity:.9}
+.cmprow .ct{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.cmprow .cyou{font-size:.75rem;color:var(--muted);text-align:center}
+.cmprow .pill{font-size:.6rem;vertical-align:1px}
+@media (max-width:480px){.cmprow{grid-template-columns:minmax(0,1fr) auto auto}.cmprow .cbar{display:none}}
+.cmpmix{margin:0;font-size:.85rem}
+.cmpnote{margin:0;font-size:.75rem;color:var(--muted)}
+.cmpnote a{color:inherit}
+.palert{border-radius:12px;padding:12px 14px;background:var(--beet-soft);border:1.5px solid var(--beet);display:flex;flex-direction:column;gap:6px;animation:rise .4s ease both}
+.palert .ph{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-weight:600}
+.palert ul{margin:0;padding-left:1.1rem;font-size:.88rem;display:flex;flex-direction:column;gap:3px}
+.palert s{color:var(--muted)}
+.palert .linkbtn{padding:0 .2rem;color:var(--beet)}
+.pbox{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:16px}
+.pbox .label{margin:0}
+.pform{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pform input,.pform select{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:.5rem .65rem;font:inherit;min-width:0}
+.pform #pfItem{flex:1 1 12rem}
+.pform #pfPrice{width:6.5rem}
+.pfp{display:inline-flex;align-items:center;gap:6px;font-size:.88rem}
+.pferr{flex-basis:100%;color:var(--beet);font-size:.85rem;min-height:0}
+.pferr:empty{display:none}
+.pcols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+@media (max-width:620px){.pcols{grid-template-columns:minmax(0,1fr)}}
+.pbox a.btn{text-decoration:none}
+/* batch + tracker */
+.wtop{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center}
+.toggle{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:.4rem .8rem .4rem .45rem;font:600 .88rem var(--f-body);cursor:pointer}
+.toggle .knob{width:30px;height:18px;border-radius:99px;background:var(--line);position:relative;transition:background .2s ease}
+.toggle .knob::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--surface);transition:transform .2s ease}
+.toggle[aria-pressed="true"] .knob{background:var(--dill)}
+.toggle[aria-pressed="true"] .knob::after{transform:translateX(12px)}
+.badge{align-self:flex-start;font:600 .64rem var(--f-body);text-transform:uppercase;letter-spacing:.06em;padding:.1rem .35rem;border-radius:5px;margin-top:2px}
+.badge.cook{background:var(--dill-soft);color:var(--dill)}
+.badge.lo{background:var(--beet-soft);color:var(--beet)}
+.shopstats{display:flex;flex-wrap:wrap;gap:24px}
+.shopcols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:620px){.shopcols{grid-template-columns:minmax(0,1fr)}}
+.track{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.track li{display:flex;align-items:center;gap:10px;padding:.5rem 0;border-bottom:1px solid var(--line)}
+.track .nm{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;font-size:.92rem}
+.track li:has(.tick) .nm{flex-direction:row;flex-wrap:wrap;gap:6px;align-items:baseline}
+.track .nm small{color:var(--muted);font-size:.75rem}
+.track .pr{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.85rem;white-space:nowrap}
+.tick{flex:none;width:22px;height:22px;border-radius:6px;border:2px solid var(--muted);background:var(--surface);cursor:pointer;transition:background .15s ease,border-color .15s ease}
+.tick:hover{border-color:var(--dill);background:var(--dill-soft)}
+.dot{flex:none;width:9px;height:9px;border-radius:50%;background:var(--line)}
+.dot.fresh{background:var(--dill)}.dot.soon{background:#D9932B}.dot.check{background:var(--beet)}
+.pill{font:600 .68rem var(--f-body);text-transform:uppercase;letter-spacing:.06em;padding:.15rem .45rem;border-radius:99px;white-space:nowrap}
+.pill.fresh{background:var(--dill-soft);color:var(--dill)}
+.pill.soon{background:var(--beet-soft);color:var(--ink)}
+.pill.check{background:var(--beet);color:var(--surface)}
+.btn.sm{padding:.3rem .6rem;font-size:.78rem}
+
+/* logo + motion */
+.brand{display:flex;align-items:center;gap:14px}
+.brand .txt{display:flex;flex-direction:column}
+.logo{width:clamp(52px,9vw,68px);height:auto;flex:none}
+.logo .steam{stroke:var(--surface);stroke-width:2.6;stroke-linecap:round;fill:none;animation:steam 2.6s ease-in-out infinite}
+.logo .steam:nth-of-type(2){animation-delay:.4s}.logo .steam:nth-of-type(3){animation-delay:.8s}
+@keyframes steam{0%,100%{transform:translateY(0);opacity:.55}50%{transform:translateY(-3px);opacity:1}}
+.logo:hover .bowl{animation:wobble .6s ease}
+.logo .bowl{transform-origin:24px 34px}
+@keyframes wobble{0%,100%{transform:rotate(0)}30%{transform:rotate(-6deg)}60%{transform:rotate(4deg)}}
+.panel,.habits{animation:rise .5s ease both}
+main .panel:nth-child(2){animation-delay:.08s}.habits{animation-delay:.16s}
+.rise{animation:rise .4s ease both;animation-delay:calc(var(--i,0) * 45ms)}
+@keyframes rise{from{opacity:.25;transform:translateY(10px)}to{opacity:1;transform:none}}
+.pop{animation:pop .28s ease}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.1)}100%{transform:scale(1)}}
+.btn,.go,.alt,.seg button,.stores button,.chip{transition:transform .15s ease,background-color .15s ease,border-color .15s ease}
+.btn:hover,.go:hover,.alt:hover{transform:translateY(-1px)}
+.btn:active,.go:active,.chip:active{transform:scale(.97)}
+.cell{transition:border-color .15s ease,transform .15s ease}
+.cell:hover{border-color:var(--muted);transform:translateY(-1px)}
+.cell.rise{animation-delay:calc(var(--i,0) * 22ms)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 48 48" role="img" aria-label="CoZjem logo">
+        <rect width="48" height="48" rx="14" fill="var(--beet)"/>
+        <path class="steam" d="M17 10c-2 3 2 5 0 8"/>
+        <path class="steam" d="M24 8c-2 3 2 5 0 8"/>
+        <path class="steam" d="M31 10c-2 3 2 5 0 8"/>
+        <g class="bowl">
+          <path d="M9 24h30c0 8.3-6.7 15-15 15S9 32.3 9 24z" fill="var(--surface)"/>
+          <rect x="7" y="22" width="34" height="3.4" rx="1.7" fill="var(--surface)"/>
+          <path d="M34 21c3-5 8-5 9-4-1 4-5 6-9 4z" fill="var(--dill)"/>
+          <circle cx="24" cy="31" r="2.4" fill="var(--beet)"/>
+        </g>
+      </svg>
+      <div class="txt">
+        <h1>Co<span>Zjem</span>?</h1>
+        <p id="tagline"></p>
+      </div>
+    </div>
+    <div class="lang" role="group" aria-label="Language">
+      <button id="lang-pl" type="button" aria-pressed="true">Polski</button>
+      <button id="lang-en" type="button" aria-pressed="false">English</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <div class="cookwith">
+        <p class="label" id="l-mine"></p>
+        <form id="mineForm" class="search" autocomplete="off">
+          <input id="mineIn" type="text" enterkeyhint="done">
+          <button class="btn" id="mineAdd" type="submit"></button>
+        </form>
+        <div class="chips" id="mine"></div>
+        <button class="go sug" id="suggest" type="button"></button>
+        <p class="basics" id="mineHint"></p>
+      </div>
+      <div>
+        <p class="label" id="l-goal"></p>
+        <div class="seg goal" id="goals"></div>
+      </div>
+      <div>
+        <p class="label" id="l-meal"></p>
+        <div class="seg" id="meals"></div>
+      </div>
+      <div>
+        <p class="label" id="l-store"></p>
+        <div class="stores" id="stores"></div>
+      </div>
+      <div>
+        <p class="label" id="l-fridge"></p>
+        <div class="search">
+          <input id="q" type="search" autocomplete="off">
+          <button class="linkbtn" id="clear" type="button"></button>
+        </div>
+      </div>
+      <div id="cats" style="display:flex;flex-direction:column;gap:14px"></div>
+      <p class="basics" id="basics"></p>
+      <button class="go" id="go" type="button"></button>
+      <span class="count" id="count"></span>
+    </section>
+
+    <section class="panel result" id="result">
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" id="tab-today"></button>
+        <button type="button" role="tab" id="tab-week"></button>
+        <button type="button" role="tab" id="tab-shop"></button>
+        <button type="button" role="tab" id="tab-saved"></button>
+      </div>
+      <div id="view" aria-live="polite" style="display:flex;flex-direction:column;gap:18px"></div>
+    </section>
+  </main>
+
+  <section class="panel habits" id="habits"></section>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+const CAT = {dairy:{pl:"Nabiał i jajka",en:"Dairy & eggs"}, meat:{pl:"Mięso i ryby",en:"Meat & fish"}, veg:{pl:"Warzywa i owoce",en:"Fruit & veg"}, pantry:{pl:"Spiżarnia",en:"Pantry"}, afr:{pl:"Ze sklepu afrykańskiego",en:"From an African shop"}};
+// id: [pl, en, approx PLN, category]
+const ING = {
+ jajka:["Jajka (10 szt.)","Eggs (10)",9.99,"dairy"], maslo:["Masło 200 g","Butter 200 g",7.49,"dairy"], mleko:["Mleko 1 l","Milk 1 l",3.79,"dairy"],
+ twarog:["Twaróg 250 g","Quark (twaróg) 250 g",4.49,"dairy"], smietana:["Śmietana 18%","Sour cream 18%",3.49,"dairy"], ser:["Ser żółty 150 g","Sliced cheese 150 g",5.99,"dairy"],
+ feta:["Ser feta 200 g","Feta 200 g",6.49,"dairy"], grana:["Grana Padano 100 g","Grana Padano 100 g",8.99,"dairy"], skyr:["Skyr naturalny 450 g","Natural skyr 450 g",5.99,"dairy"],
+ boczek:["Boczek wędzony 200 g","Smoked bacon 200 g",7.99,"meat"], kielbasa:["Kiełbasa 400 g","Kiełbasa sausage 400 g",11.99,"meat"],
+ schab:["Schab 500 g","Pork loin 500 g",13.99,"meat"], mielone:["Mięso mielone 500 g","Minced meat 500 g",12.99,"meat"], kurczak:["Filet z kurczaka 500 g","Chicken breast 500 g",15.99,"meat"],
+ tunczyk:["Tuńczyk w puszce","Canned tuna",6.99,"meat"],
+ ziemniaki:["Ziemniaki 2 kg","Potatoes 2 kg",6.99,"veg"], cebula:["Cebula 1 kg","Onions 1 kg",3.49,"veg"], czosnek:["Czosnek","Garlic",2.49,"veg"],
+ marchew:["Marchew 1 kg","Carrots 1 kg",2.99,"veg"], pietruszka:["Pietruszka (korzeń)","Parsley root",2.99,"veg"], pomidory:["Pomidory 500 g","Tomatoes 500 g",5.99,"veg"],
+ ogorek:["Ogórek","Cucumber",2.99,"veg"], kiszone:["Ogórki kiszone","Pickled cucumbers",6.99,"veg"], papryka:["Papryka 3 szt.","Bell peppers (3)",6.99,"veg"],
+ cukinia:["Cukinia","Courgette",3.99,"veg"], pieczarki:["Pieczarki 500 g","Mushrooms 500 g",5.99,"veg"], rzodkiewka:["Rzodkiewka (pęczek)","Radishes (bunch)",2.99,"veg"],
+ szczypiorek:["Szczypiorek","Chives",2.49,"veg"], koperek:["Koperek","Dill",2.49,"veg"], natka:["Natka pietruszki","Parsley leaves",2.49,"veg"],
+ kapusta:["Kapusta biała","White cabbage",4.99,"veg"], kwaszona:["Kapusta kiszona 900 g","Sauerkraut 900 g",5.49,"veg"], jablka:["Jabłka 1 kg","Apples 1 kg",3.99,"veg"],
+ banan:["Banany 1 kg","Bananas 1 kg",5.49,"veg"], brokul:["Brokuł","Broccoli",4.99,"veg"],
+ maka:["Mąka pszenna 1 kg","Wheat flour 1 kg",3.29,"pantry"], ryz:["Ryż 1 kg","Rice 1 kg",5.99,"pantry"], makaron:["Makaron spaghetti 500 g","Spaghetti 500 g",4.49,"pantry"],
+ kasza:["Kasza jęczmienna 400 g","Pearl barley 400 g",3.99,"pantry"], kaszag:["Kasza gryczana 400 g","Buckwheat 400 g",4.49,"pantry"], platki:["Płatki owsiane 500 g","Rolled oats 500 g",3.99,"pantry"], chleb:["Chleb","Bread loaf",4.99,"pantry"],
+ bagietka:["Bagietka","Baguette",2.99,"pantry"], bulka:["Bułka tarta","Breadcrumbs",2.99,"pantry"], cukier:["Cukier 1 kg","Sugar 1 kg",3.99,"pantry"],
+ drozdze:["Drożdże świeże","Fresh yeast",1.49,"pantry"], passata:["Passata 500 g","Passata 500 g",3.99,"pantry"], bulion:["Bulion w kostkach","Stock cubes",2.99,"pantry"],
+ zakwas:["Zakwas na żurek","Żurek sour starter",3.99,"pantry"], pesto:["Pesto bazyliowe","Basil pesto",7.99,"pantry"], oliwki:["Oliwki (słoik)","Olives (jar)",5.99,"pantry"],
+ ketchup:["Ketchup","Ketchup",4.99,"pantry"], cynamon:["Cynamon","Cinnamon",2.49,"pantry"], ppapryka:["Papryka słodka mielona","Sweet paprika",2.49,"pantry"],
+ majeranek:["Majeranek","Marjoram",2.29,"pantry"], ziele:["Liść laurowy i ziele angielskie","Bay leaf & allspice",2.99,"pantry"],
+ chili:["Papryczki chili","Chilli peppers",3.49,"veg"], szpinak:["Szpinak mrożony 450 g","Frozen spinach 450 g",4.99,"veg"], bataty:["Bataty 1 kg","Sweet potatoes 1 kg",7.99,"veg"],
+ jarmuz:["Jarmuż 200 g","Kale 200 g",4.99,"veg"], imbir:["Imbir","Fresh ginger",2.99,"veg"], wolowina:["Wołowina gulaszowa 500 g","Stewing beef 500 g",22.99,"meat"],
+ soczewica:["Soczewica czerwona 400 g","Red lentils 400 g",5.49,"pantry"], ciecierzyca:["Ciecierzyca (puszka)","Chickpeas (tin)",3.49,"pantry"], kuskus:["Kuskus 400 g","Couscous 400 g",4.49,"pantry"],
+ maslo_orz:["Masło orzechowe 350 g","Peanut butter 350 g",8.99,"pantry"], mkukurydziana:["Mąka kukurydziana 500 g","Maize flour 500 g",4.49,"pantry"],
+ kmin:["Kmin rzymski","Ground cumin",2.99,"pantry"], curry:["Curry i tymianek","Curry powder & thyme",4.99,"pantry"],
+ egusi:["Egusi (mielone pestki melona)","Ground egusi seeds",14.99,"afr"], palmowy:["Olej palmowy 500 ml","Red palm oil 500 ml",16.99,"afr"],
+ plantan:["Plantany (2 szt.)","Plantains (2)",8.99,"afr"], garri:["Garri 1 kg","Garri 1 kg",14.99,"afr"],
+ fasolaoko:["Fasola czarne oczko 1 kg","Black-eyed beans 1 kg",12.99,"afr"], berbere:["Przyprawa berbere","Berbere spice",12.99,"afr"]
+};
+const ORIGIN = {pl:{pl:"Polska",en:"Poland"},it:{pl:"Włochy",en:"Italy"},gr:{pl:"Grecja",en:"Greece"},hu:{pl:"Węgry",en:"Hungary"},me:{pl:"Bliski Wschód",en:"Middle East"},fr:{pl:"Francja",en:"France"},is:{pl:"Islandia",en:"Iceland"},eu:{pl:"Europa",en:"Europe"},ng:{pl:"Nigeria",en:"Nigeria"},gh:{pl:"Ghana",en:"Ghana"},sn:{pl:"Senegal",en:"Senegal"},ma:{pl:"Maroko",en:"Morocco"},et:{pl:"Etiopia",en:"Ethiopia"},ke:{pl:"Kenia",en:"Kenya"},wa:{pl:"Afryka Zachodnia",en:"West Africa"}};
+// m: b breakfast, l lunch, d dinner. k = approx kcal per serving, p = approx protein g per serving
+const R = [
+ {id:"jajecznica",k:420,p:22,pl:"Jajecznica ze szczypiorkiem",en:"Scrambled eggs with chives",o:"pl",m:"bd",t:10,s:2,n:["jajka","maslo","szczypiorek","chleb"],
+  sp:["Rozpuść łyżkę masła na patelni na małym ogniu.","Wbij 4 do 6 jajek, dopraw solą i pieprzem.","Mieszaj powoli, aż jajka się zetną, ale zostaną wilgotne.","Posyp posiekanym szczypiorkiem i podaj z chlebem."],
+  se:["Melt a tablespoon of butter in a pan over low heat.","Crack in 4 to 6 eggs and season with salt and pepper.","Stir slowly until just set but still soft.","Top with chopped chives and serve with bread."]},
+ {id:"twarozek",k:380,p:26,pl:"Twarożek ze rzodkiewką",en:"Quark spread with radishes",o:"pl",m:"bd",t:10,s:2,n:["twarog","smietana","rzodkiewka","szczypiorek","chleb"],
+  sp:["Rozgnieć twaróg widelcem w misce.","Dodaj 2 do 3 łyżek śmietany i wymieszaj na gładko.","Pokrój rzodkiewkę w kostkę, posiekaj szczypiorek i dodaj do sera.","Dopraw solą i pieprzem, podawaj na chlebie."],
+  se:["Mash the quark with a fork in a bowl.","Stir in 2 to 3 spoons of sour cream until smooth.","Dice the radishes, chop the chives and fold them in.","Season with salt and pepper and spread on bread."]},
+ {id:"owsianka",k:380,p:13,pl:"Owsianka z jabłkiem i cynamonem",en:"Porridge with apple and cinnamon",o:"pl",m:"b",t:10,s:2,n:["platki","mleko","jablka","cynamon"],
+  sp:["Zagotuj 500 ml mleka w garnku.","Wsyp 1 szklankę płatków i gotuj 4 do 5 minut, mieszając.","Zetrzyj jabłko na tarce i dodaj pod koniec.","Posyp cynamonem i podawaj na ciepło."],
+  se:["Bring 500 ml milk to a simmer.","Add 1 cup of oats and cook 4 to 5 minutes, stirring.","Grate in an apple near the end.","Dust with cinnamon and serve warm."]},
+ {id:"skyrbowl",k:350,p:27,pl:"Skyr z bananem i płatkami",en:"Skyr bowl with banana and oats",o:"is",m:"b",t:5,s:1,n:["skyr","banan","platki"],
+  sp:["Przełóż skyr do miski.","Pokrój banana w plasterki.","Posyp 3 łyżkami płatków owsianych.","Jeśli lubisz słodko, dodaj cynamon lub łyżeczkę miodu."],
+  se:["Spoon the skyr into a bowl.","Slice the banana on top.","Sprinkle over 3 spoons of oats.","Add cinnamon or a teaspoon of honey if you like it sweeter."]},
+ {id:"racuchy",k:520,p:12,pl:"Racuchy z jabłkami",en:"Racuchy apple fritters",o:"pl",m:"bd",t:45,s:3,n:["maka","mleko","jajka","drozdze","cukier","jablka"],
+  sp:["Rozpuść 20 g drożdży w ciepłym mleku z łyżką cukru.","Dodaj 2 szklanki mąki i jajko, wymieszaj na gęste ciasto.","Odstaw na 30 minut do wyrośnięcia.","Wmieszaj pokrojone jabłka.","Smaż łyżką małe placki na oleju, z obu stron na złoto."],
+  se:["Dissolve 20 g yeast in warm milk with a spoon of sugar.","Add 2 cups of flour and an egg, mix into a thick batter.","Leave to rise for 30 minutes.","Fold in chopped apples.","Spoon small fritters into hot oil and fry golden on both sides."]},
+ {id:"szakszuka",k:400,p:20,pl:"Szakszuka",en:"Shakshuka",o:"me",m:"bd",t:25,s:2,n:["jajka","passata","papryka","cebula","czosnek","ppapryka","chleb"],
+  sp:["Zeszklij cebulę i paprykę na oleju.","Dodaj czosnek i łyżeczkę słodkiej papryki.","Wlej passatę i duś 10 minut.","Zrób wgłębienia i wbij 4 jajka.","Przykryj i gotuj, aż białka się zetną. Podawaj z chlebem."],
+  se:["Soften onion and pepper in oil.","Add garlic and a teaspoon of sweet paprika.","Pour in the passata and simmer 10 minutes.","Make wells and crack in 4 eggs.","Cover until the whites set. Serve with bread."]},
+ {id:"omlet",k:450,p:28,pl:"Omlet z serem i pomidorem",en:"Cheese and tomato omelette",o:"fr",m:"bd",t:10,s:1,n:["jajka","ser","pomidory","maslo"],
+  sp:["Roztrzep 3 jajka z solą i pieprzem.","Rozgrzej masło i wlej jajka.","Gdy spód się zetnie, połóż ser i plasterki pomidora.","Złóż na pół i podawaj od razu."],
+  se:["Beat 3 eggs with salt and pepper.","Heat butter and pour in the eggs.","When the base sets, add cheese and tomato slices.","Fold in half and serve straight away."]},
+ {id:"pomidorowa",k:300,p:7,pl:"Zupa pomidorowa z ryżem",en:"Tomato soup with rice",o:"pl",m:"l",t:40,s:4,n:["bulion","passata","marchew","pietruszka","smietana","ryz"],
+  sp:["Zagotuj 1,5 l wody z 2 kostkami bulionu, marchewką i pietruszką.","Gotuj 20 minut, wyjmij warzywa.","Dodaj passatę i gotuj 5 minut.","Zahartuj śmietanę wywarem i wlej do zupy.","Podawaj z ugotowanym ryżem."],
+  se:["Boil 1.5 l water with 2 stock cubes, carrot and parsley root.","Simmer 20 minutes, then lift out the veg.","Add the passata and cook 5 minutes.","Temper the sour cream with hot broth and stir it in.","Serve over cooked rice."]},
+ {id:"zurek",k:480,p:20,pl:"Żurek z kiełbasą i jajkiem",en:"Żurek sour rye soup",o:"pl",m:"l",t:40,s:4,n:["zakwas","kielbasa","ziemniaki","jajka","czosnek","majeranek","smietana"],
+  sp:["Ugotuj pokrojoną kiełbasę i ziemniaki w 1,2 l wody, około 20 minut.","Wlej zakwas i zagotuj.","Dodaj przeciśnięty czosnek i majeranek.","Zahartuj śmietanę i wlej do zupy.","Podawaj z połówkami jajek na twardo."],
+  se:["Simmer sliced kiełbasa and diced potatoes in 1.2 l water for about 20 minutes.","Pour in the żurek starter and bring to a boil.","Add crushed garlic and marjoram.","Temper the sour cream and stir it in.","Serve with halved hard boiled eggs."]},
+ {id:"ogorkowa",k:250,p:5,pl:"Zupa ogórkowa",en:"Pickled cucumber soup",o:"pl",m:"l",t:40,s:4,n:["kiszone","ziemniaki","marchew","pietruszka","bulion","smietana","koperek"],
+  sp:["Ugotuj bulion z marchewką, pietruszką i ziemniakami w kostkę.","Zetrzyj 4 do 5 ogórków kiszonych i dodaj do zupy.","Wlej trochę zalewy z ogórków do smaku.","Zahartuj śmietanę i wlej.","Posyp koperkiem."],
+  se:["Cook stock with carrot, parsley root and diced potatoes.","Grate 4 to 5 pickles into the pot.","Add a splash of pickle brine to taste.","Temper the sour cream and stir it in.","Finish with dill."]},
+ {id:"krem",k:230,p:7,pl:"Zupa krem z brokułów",en:"Cream of broccoli soup",o:"pl",m:"ld",t:30,s:4,n:["brokul","ziemniaki","cebula","bulion","smietana"],
+  sp:["Zeszklij cebulę na odrobinie oleju.","Dodaj brokuł, 2 ziemniaki w kostkę i 1 l bulionu.","Gotuj 15 minut do miękkości.","Zmiksuj na gładko i dodaj 2 łyżki śmietany."],
+  se:["Soften an onion in a little oil.","Add the broccoli, 2 diced potatoes and 1 l stock.","Simmer 15 minutes until soft.","Blend smooth and stir in 2 spoons of sour cream."]},
+ {id:"schabowy",k:750,p:42,pl:"Schabowy z ziemniakami i mizerią",en:"Pork schnitzel, potatoes and cucumber salad",o:"pl",m:"l",t:45,s:4,n:["schab","jajka","maka","bulka","ziemniaki","ogorek","smietana","koperek"],
+  sp:["Ugotuj ziemniaki w osolonej wodzie.","Pokrój schab na plastry i rozbij tłuczkiem.","Obtocz w mące, jajku i bułce tartej.","Smaż na oleju po 3 do 4 minuty z każdej strony.","Mizeria: cienko pokrojony ogórek, sól, śmietana i koperek."],
+  se:["Boil the potatoes in salted water.","Slice the pork loin and pound it thin.","Coat in flour, egg and breadcrumbs.","Fry in oil 3 to 4 minutes per side.","Mizeria: thinly sliced cucumber, salt, sour cream and dill."]},
+ {id:"kurczakkasza",k:520,p:45,pl:"Kurczak z kaszą gryczaną i brokułem",en:"Chicken with buckwheat and broccoli",o:"pl",m:"ld",t:30,s:3,n:["kurczak","kaszag","brokul","czosnek"],
+  sp:["Ugotuj szklankę kaszy w 2 szklankach osolonej wody, około 15 minut.","Pokrój kurczaka w kostkę, dopraw solą, pieprzem i czosnkiem.","Smaż na łyżce oleju 6 do 8 minut.","Brokuł podziel na różyczki i gotuj 5 minut.","Podawaj wszystko razem."],
+  se:["Cook a cup of buckwheat in 2 cups of salted water, about 15 minutes.","Dice the chicken and season with salt, pepper and garlic.","Fry in a spoon of oil for 6 to 8 minutes.","Cut the broccoli into florets and boil 5 minutes.","Serve together."]},
+ {id:"pieczony",k:380,p:42,pl:"Kurczak pieczony z warzywami",en:"Tray baked chicken and vegetables",o:"eu",m:"ld",t:40,s:3,n:["kurczak","cukinia","papryka","cebula","czosnek","ppapryka"],
+  sp:["Rozgrzej piekarnik do 200°C.","Pokrój kurczaka i warzywa w duże kawałki.","Wymieszaj z 2 łyżkami oleju, czosnkiem, słodką papryką i solą.","Rozłóż na blasze i piecz 25 do 30 minut."],
+  se:["Heat the oven to 200°C.","Cut the chicken and vegetables into large pieces.","Toss with 2 spoons of oil, garlic, sweet paprika and salt.","Spread on a tray and bake 25 to 30 minutes."]},
+ {id:"placki",k:520,p:10,pl:"Placki ziemniaczane",en:"Potato pancakes",o:"pl",m:"ld",t:35,s:3,n:["ziemniaki","cebula","jajka","maka","smietana"],
+  sp:["Zetrzyj 1 kg ziemniaków i cebulę na drobnej tarce.","Odlej nadmiar wody.","Dodaj jajko, 2 łyżki mąki i sól.","Smaż cienkie placki na oleju na złoto.","Podawaj ze śmietaną."],
+  se:["Finely grate 1 kg potatoes and an onion.","Drain off the excess liquid.","Mix in an egg, 2 spoons of flour and salt.","Fry thin pancakes in oil until golden.","Serve with sour cream."]},
+ {id:"pierogi",k:650,p:22,pl:"Pierogi ruskie",en:"Pierogi with potato and cheese",o:"pl",m:"l",t:75,s:4,n:["maka","ziemniaki","twarog","cebula"],
+  sp:["Ugotuj i rozgnieć 600 g ziemniaków.","Wymieszaj z twarogiem i podsmażoną połową cebuli, dopraw pieprzem.","Zagnieć ciasto z 500 g mąki, szklanki ciepłej wody i łyżki oleju.","Rozwałkuj, wykrawaj krążki, nakładaj farsz i sklejaj.","Gotuj w osolonej wodzie 2 minuty od wypłynięcia. Polej resztą smażonej cebuli."],
+  se:["Boil and mash 600 g potatoes.","Mix with quark and half the onion, fried. Season with pepper.","Knead a dough from 500 g flour, a cup of warm water and a spoon of oil.","Roll out, cut circles, fill and pinch shut.","Boil in salted water for 2 minutes after they float. Top with the rest of the fried onion."]},
+ {id:"bolognese",k:650,p:33,pl:"Spaghetti bolognese",en:"Spaghetti bolognese",o:"it",m:"ld",t:40,s:4,n:["makaron","mielone","passata","cebula","czosnek","marchew","grana"],
+  sp:["Podsmaż drobno pokrojoną cebulę, marchew i czosnek.","Dodaj mięso mielone i smaż, aż się zrumieni.","Wlej passatę i duś 20 minut.","Ugotuj makaron al dente.","Wymieszaj z sosem i posyp tartym serem Grana."],
+  se:["Gently fry finely chopped onion, carrot and garlic.","Add the minced meat and brown it.","Pour in the passata and simmer 20 minutes.","Cook the pasta al dente.","Toss with the sauce and top with grated Grana."]},
+ {id:"leczo",k:450,p:18,pl:"Leczo z kiełbasą",en:"Lecsó with sausage",o:"hu",m:"ld",t:35,s:4,n:["kielbasa","papryka","cukinia","cebula","passata","ppapryka"],
+  sp:["Podsmaż pokrojoną kiełbasę i cebulę.","Dodaj paprykę i cukinię w kostkę.","Wsyp łyżeczkę słodkiej papryki.","Wlej passatę i duś 20 minut.","Podawaj z chlebem lub ryżem."],
+  se:["Fry sliced kiełbasa and onion.","Add diced peppers and courgette.","Stir in a teaspoon of sweet paprika.","Add the passata and simmer 20 minutes.","Serve with bread or rice."]},
+ {id:"bigos",k:480,p:22,pl:"Bigos",en:"Bigos hunter's stew",o:"pl",m:"l",t:120,s:6,n:["kwaszona","kapusta","kielbasa","boczek","pieczarki","cebula","passata","ziele","majeranek"],
+  sp:["Duś kapustę kiszoną z liściem laurowym i zielem angielskim przez 40 minut.","Poszatkuj białą kapustę i dodaj do garnka.","Podsmaż boczek, kiełbasę, cebulę i pieczarki, przełóż do kapusty.","Dodaj passatę i majeranek.","Duś na małym ogniu jeszcze godzinę. Dzień później smakuje lepiej."],
+  se:["Simmer the sauerkraut with bay leaf and allspice for 40 minutes.","Shred the white cabbage and add it.","Fry bacon, kiełbasa, onion and mushrooms, then add to the pot.","Stir in passata and marjoram.","Cook low for another hour. It tastes better the next day."]},
+ {id:"risotto",k:520,p:14,pl:"Risotto z pieczarkami",en:"Mushroom risotto",o:"it",m:"ld",t:35,s:3,n:["ryz","pieczarki","cebula","czosnek","bulion","maslo","grana"],
+  sp:["Przygotuj 1 l gorącego bulionu.","Zeszklij cebulę i czosnek na maśle, dodaj pokrojone pieczarki.","Wsyp 1,5 szklanki ryżu i mieszaj minutę.","Dolewaj bulion chochlą, mieszając, przez 18 minut.","Na koniec dodaj masło i tarty ser Grana."],
+  se:["Heat 1 l of stock.","Soften onion and garlic in butter, add sliced mushrooms.","Add 1.5 cups of rice and stir for a minute.","Add stock a ladle at a time, stirring, for 18 minutes.","Finish with butter and grated Grana."]},
+ {id:"krupnik",k:360,p:28,pl:"Krupnik z kurczakiem",en:"Krupnik barley soup",o:"pl",m:"l",t:50,s:4,n:["kasza","ziemniaki","marchew","pietruszka","kurczak","natka"],
+  sp:["Gotuj kurczaka w 1,5 l osolonej wody 20 minut.","Dodaj marchew i pietruszkę w kostkę.","Wsyp pół szklanki kaszy i ziemniaki.","Gotuj, aż wszystko zmięknie, około 20 minut.","Pokrój mięso, wróć do zupy i posyp natką."],
+  se:["Simmer the chicken in 1.5 l salted water for 20 minutes.","Add diced carrot and parsley root.","Add half a cup of barley and the potatoes.","Cook until tender, about 20 minutes.","Shred the chicken back in and finish with parsley."]},
+ {id:"grecka",k:330,p:12,pl:"Sałatka grecka",en:"Greek salad",o:"gr",m:"ld",t:10,s:2,n:["pomidory","ogorek","papryka","cebula","feta","oliwki"],
+  sp:["Pokrój pomidory, ogórek i paprykę w kostkę.","Dodaj cienkie piórka cebuli i oliwki.","Połóż na wierzchu ser feta.","Skrop olejem lub oliwą, dopraw solą i pieprzem."],
+  se:["Chop the tomatoes, cucumber and pepper.","Add thinly sliced onion and the olives.","Top with feta.","Dress with oil, salt and pepper."]},
+ {id:"tunczyk",k:320,p:32,pl:"Sałatka z tuńczykiem i jajkiem",en:"Tuna and egg salad",o:"eu",m:"ld",t:15,s:2,n:["tunczyk","jajka","pomidory","ogorek","cebula"],
+  sp:["Ugotuj 3 jajka na twardo, około 9 minut.","Pokrój pomidory, ogórek i odrobinę cebuli.","Dodaj odsączonego tuńczyka i ćwiartki jajek.","Skrop olejem, dopraw solą i pieprzem."],
+  se:["Hard boil 3 eggs, about 9 minutes.","Chop the tomatoes, cucumber and a little onion.","Add the drained tuna and quartered eggs.","Dress with oil, salt and pepper."]},
+ {id:"nalesniki",k:550,p:25,pl:"Naleśniki z twarogiem",en:"Crepes with sweet quark",o:"pl",m:"bd",t:30,s:3,n:["maka","mleko","jajka","twarog","cukier","smietana"],
+  sp:["Zmiksuj szklankę mąki, szklankę mleka, pół szklanki wody, 2 jajka i szczyptę soli.","Smaż cienkie naleśniki na lekko natłuszczonej patelni.","Twaróg wymieszaj z cukrem i łyżką śmietany.","Nałóż farsz, zwiń w rulony lub trójkąty."],
+  se:["Blend a cup of flour, a cup of milk, half a cup of water, 2 eggs and a pinch of salt.","Fry thin crepes in a lightly oiled pan.","Mix the quark with sugar and a spoon of sour cream.","Fill and roll or fold into triangles."]},
+ {id:"zapiekanka",k:600,p:22,pl:"Zapiekanka z pieczarkami",en:"Zapiekanka open baguette",o:"pl",m:"d",t:25,s:2,n:["bagietka","pieczarki","cebula","ser","maslo","ketchup"],
+  sp:["Podsmaż pokrojone pieczarki z cebulą na maśle, dopraw solą.","Przekrój bagietkę wzdłuż.","Nałóż pieczarki i ser żółty.","Zapiekaj w 200°C przez 10 minut.","Polej ketchupem i podawaj na gorąco."],
+  se:["Fry sliced mushrooms and onion in butter, season with salt.","Split the baguette lengthwise.","Top with the mushrooms and cheese.","Bake at 200°C for 10 minutes.","Finish with ketchup and eat hot."]},
+ {id:"pesto",k:600,p:18,pl:"Makaron z pesto i pomidorami",en:"Pesto pasta with tomatoes",o:"it",m:"ld",t:15,s:2,n:["makaron","pesto","pomidory","grana"],
+  sp:["Ugotuj makaron w osolonej wodzie.","Pokrój pomidory.","Odcedź makaron, zostaw trochę wody.","Wymieszaj z pesto, pomidorami i odrobiną wody z gotowania.","Posyp tartym serem Grana."],
+  se:["Cook the pasta in salted water.","Chop the tomatoes.","Drain, keeping a splash of the water.","Toss with pesto, tomatoes and the pasta water.","Top with grated Grana."]}
+,
+ {id:"jollof",k:620,p:35,pl:"Jollof z kurczakiem",en:"Jollof rice with chicken",o:"wa",m:"ld",t:50,s:4,n:["ryz","passata","papryka","cebula","chili","bulion","kurczak","curry"],
+  sp:["Zmiksuj paprykę, połowę cebuli, chili i passatę na gładki sos.","Podsmaż kurczaka w kawałkach i resztę cebuli na oleju, wyjmij kurczaka.","Wlej sos, dodaj curry, tymianek i kostkę bulionu, smaż 10 minut, aż zgęstnieje.","Wsyp 2 szklanki opłukanego ryżu i 2 szklanki wody, przykryj szczelnie.","Gotuj na małym ogniu 25 minut, w połowie dołóż kurczaka. Nie mieszaj za często."],
+  se:["Blend the peppers, half the onion, chilli and passata into a smooth sauce.","Brown the chicken pieces and the rest of the onion in oil, then lift out the chicken.","Add the sauce, curry, thyme and a stock cube and fry 10 minutes until thick.","Add 2 cups of rinsed rice and 2 cups of water and cover tightly.","Cook on low for 25 minutes, returning the chicken halfway. Stir as little as possible."]},
+ {id:"egusi",k:720,p:38,pl:"Zupa egusi z eba",en:"Egusi soup with eba",o:"ng",m:"l",t:60,s:4,n:["egusi","palmowy","szpinak","wolowina","cebula","chili","bulion","garri"],
+  sp:["Ugotuj wołowinę z cebulą i kostką bulionu do miękkości, około 40 minut.","Rozgrzej 4 łyżki oleju palmowego, dodaj zmiksowane chili i cebulę.","Wmieszaj egusi z odrobiną wody i smaż, aż powstaną grudki, około 10 minut.","Dolej wywar z mięsem, a na koniec szpinak, gotuj 5 minut.","Eba: zalej garri wrzątkiem i ugniataj na gładką masę. Podawaj z zupą."],
+  se:["Simmer the beef with onion and a stock cube until tender, about 40 minutes.","Heat 4 spoons of palm oil and add blended chilli and onion.","Stir in the egusi with a splash of water and fry until it clumps, about 10 minutes.","Add the meat and stock, then the spinach, and cook 5 minutes.","Eba: pour boiling water over garri and stir into a smooth dough. Serve with the soup."]},
+ {id:"dodo",k:480,p:16,pl:"Dodo z jajkami",en:"Dodo and eggs",o:"ng",m:"bd",t:15,s:2,n:["plantan","jajka","pomidory","cebula","chili"],
+  sp:["Obierz dojrzałe plantany i pokrój ukośnie w plastry.","Smaż na oleju na złoto z obu stron.","Na drugiej patelni podsmaż cebulę, pomidory i chili.","Wbij jajka i mieszaj, aż się zetną.","Podawaj jajka obok smażonego plantana."],
+  se:["Peel ripe plantains and slice them on the diagonal.","Fry in oil until golden on both sides.","In another pan fry onion, tomato and chilli.","Add the eggs and scramble until set.","Serve the eggs next to the fried plantain."]},
+ {id:"akara",k:350,p:14,pl:"Akara (placuszki z fasoli)",en:"Akara bean fritters",o:"ng",m:"bd",t:40,s:3,n:["fasolaoko","cebula","chili"],
+  sp:["Namocz 2 szklanki fasoli na noc i zetrzyj skórki, płucząc w wodzie.","Zmiksuj fasolę z cebulą, chili i odrobiną wody na gęstą pastę.","Ubijaj łyżką 2 minuty, żeby ciasto było puszyste, dopraw solą.","Smaż łyżką małe kulki w głębokim oleju na złoto."],
+  se:["Soak 2 cups of beans overnight and rub off the skins while rinsing.","Blend the beans with onion, chilli and a little water into a thick paste.","Whisk with a spoon for 2 minutes to make it fluffy, then salt it.","Drop spoonfuls into deep oil and fry until golden."]},
+ {id:"redred",k:560,p:18,pl:"Red red z plantanem",en:"Red red with plantain",o:"gh",m:"ld",t:45,s:4,n:["fasolaoko","palmowy","cebula","pomidory","chili","plantan"],
+  sp:["Ugotuj namoczoną fasolę do miękkości, około 30 minut.","Na oleju palmowym podsmaż cebulę, chili i pomidory na gęsty sos.","Dodaj fasolę, dopraw solą i duś 10 minut.","Podawaj ze smażonym plantanem."],
+  se:["Boil the soaked beans until soft, about 30 minutes.","Fry onion, chilli and tomatoes in palm oil into a thick sauce.","Add the beans, salt and simmer 10 minutes.","Serve with fried plantain."]},
+ {id:"maafe",k:680,p:38,pl:"Maafe, gulasz orzechowy",en:"Maafe peanut stew",o:"sn",m:"ld",t:50,s:4,n:["kurczak","maslo_orz","passata","bataty","cebula","czosnek","imbir","ryz"],
+  sp:["Podsmaż kurczaka, cebulę, czosnek i starty imbir.","Dodaj passatę i 3 łyżki masła orzechowego rozmieszane z gorącą wodą.","Wrzuć bataty w kostkę i duś pod przykryciem 25 minut.","Podawaj z ryżem."],
+  se:["Brown the chicken with onion, garlic and grated ginger.","Add the passata and 3 spoons of peanut butter loosened with hot water.","Add diced sweet potato and simmer covered for 25 minutes.","Serve with rice."]},
+ {id:"tagine",k:600,p:40,pl:"Kurczak po marokańsku z kuskusem",en:"Moroccan chicken with couscous",o:"ma",m:"ld",t:40,s:4,n:["kurczak","ciecierzyca","kuskus","cebula","czosnek","passata","kmin","cynamon"],
+  sp:["Podsmaż kurczaka z cebulą i czosnkiem.","Dodaj łyżeczkę kminu i szczyptę cynamonu.","Wlej passatę i odsączoną ciecierzycę, duś 20 minut.","Kuskus zalej wrzątkiem 1:1, przykryj na 5 minut i rozdziel widelcem.","Podawaj gulasz na kuskusie."],
+  se:["Brown the chicken with onion and garlic.","Add a teaspoon of cumin and a pinch of cinnamon.","Pour in the passata and drained chickpeas and simmer 20 minutes.","Cover the couscous with the same volume of boiling water for 5 minutes, then fluff.","Serve the stew over couscous."]},
+ {id:"misir",k:380,p:18,pl:"Misir wot z soczewicy",en:"Misir wot lentil stew",o:"et",m:"ld",t:40,s:4,n:["soczewica","cebula","czosnek","imbir","passata","berbere"],
+  sp:["Zeszklij dużo drobno posiekanej cebuli na oleju, 10 minut.","Dodaj czosnek, imbir i 2 łyżki przyprawy berbere.","Wsyp opłukaną soczewicę, passatę i 3 szklanki wody.","Gotuj 25 minut, aż soczewica się rozpadnie. Podawaj z chlebem lub ryżem."],
+  se:["Slowly soften plenty of finely chopped onion in oil, 10 minutes.","Add garlic, ginger and 2 spoons of berbere.","Add the rinsed lentils, passata and 3 cups of water.","Simmer 25 minutes until the lentils break down. Serve with bread or rice."]},
+ {id:"sukuma",k:420,p:11,pl:"Sukuma wiki z ugali",en:"Sukuma wiki with ugali",o:"ke",m:"ld",t:30,s:3,n:["jarmuz","pomidory","cebula","mkukurydziana"],
+  sp:["Ugali: zagotuj 3 szklanki wody, wsypuj mąkę kukurydzianą, mieszając.","Mieszaj drewnianą łyżką 8 do 10 minut, aż masa odejdzie od garnka.","Podsmaż cebulę, dodaj pomidory i duś 5 minut.","Dodaj posiekany jarmuż i duś do miękkości. Podawaj z ugali."],
+  se:["Ugali: boil 3 cups of water and pour in the maize flour while stirring.","Keep stirring with a wooden spoon for 8 to 10 minutes until it pulls away from the pot.","Fry the onion, add tomatoes and cook 5 minutes.","Add the chopped kale and cook until tender. Serve with the ugali."]}
+];
+const BK=new Set(["pomidorowa","zurek","ogorkowa","krem","bigos","leczo","bolognese","krupnik","pierogi","jollof","egusi","redred","maafe","tagine","misir","kurczakkasza","risotto"]);
+R.forEach(r=>r.bk=BK.has(r.id));
+const LIFE_CAT={dairy:7,meat:2,veg:7,pantry:180,afr:120};
+const LIFE={jajka:21,maslo:30,ser:14,grana:60,skyr:10,ziemniaki:30,cebula:30,czosnek:30,jablka:21,banan:5,kiszone:30,kwaszona:30,marchew:21,kapusta:21,pietruszka:14,tunczyk:365,kielbasa:7,boczek:7,plantan:7,chleb:4,bagietka:2,szpinak:90,imbir:21,bataty:21,chili:10,szczypiorek:4,koperek:4,natka:4,rzodkiewka:5,pomidory:6,ogorek:6,brokul:5,cukinia:7,pieczarki:5,drozdze:10};
+const shelf=k=>LIFE[k]??LIFE_CAT[ING[k][3]];
+const RB = Object.fromEntries(R.map(r=>[r.id,r]));
+const STORES = ["Lidl","Aldi","Biedronka","Auchan"];
+const DAYS = {pl:["Poniedziałek","Wtorek","Środa","Czwartek","Piątek","Sobota","Niedziela"],en:["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]};
+const DSHORT = {pl:["Pon","Wt","Śr","Czw","Pt","Sob","Ndz"],en:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]};
+const TIPS = {
+ gain:{pl:{h:"Na przybranie wagi",i:"Plan wybiera sycące, bardziej kaloryczne dania, nadal z porządną porcją białka.",t:[
+   ["Stała nadwyżka","Zwykle wystarcza około 300 do 500 kcal ponad zapotrzebowanie. Waż się raz w tygodniu, o tej samej porze."],
+   ["Więcej posiłków","Trzy główne posiłki i 2 do 3 przekąsek, np. skyr, kanapka z masłem orzechowym, banan z mlekiem."],
+   ["Kalorie bez objętości","Masło orzechowe, oliwa, ryż, kasza, płatki z mlekiem dają dużo energii bez uczucia przejedzenia."],
+   ["Koktajl dziennie","Mleko, banan, płatki owsiane i łyżka masła orzechowego to łatwe 500 kcal do wypicia."],
+   ["Trening siłowy","Ćwiczenia sprawiają, że przybywa mięśni, a nie tylko tłuszczu."],
+   ["Nie pomijaj śniadania","Jeśli rano brak apetytu, zacznij od czegoś do picia i małej porcji."]]},
+  en:{h:"For weight gain",i:"The plan picks filling, higher calorie dishes that still bring decent protein.",t:[
+   ["A steady surplus","About 300 to 500 kcal above maintenance is usually enough. Weigh yourself once a week at the same time."],
+   ["More eating occasions","Three main meals and 2 to 3 snacks, like skyr, peanut butter toast or a banana with milk."],
+   ["Calories without volume","Peanut butter, oil, rice, kasza and oats with milk add energy without feeling stuffed."],
+   ["A shake a day","Milk, banana, oats and a spoon of peanut butter is an easy 500 kcal to drink."],
+   ["Strength training","Training makes sure the extra weight is muscle, not only fat."],
+   ["Don't skip breakfast","If you're not hungry in the morning, start with a drink and a small portion."]]}},
+ bal:{pl:{h:"Zbilansowana kuchnia",i:"Prosty, zróżnicowany tydzień bez liczenia każdej kalorii.",t:[
+   ["Pół talerza warzyw","Do obiadu i kolacji dokładaj surówkę, mizerię albo warzywa z patelni."],
+   ["Białko w każdym posiłku","Jajka, twaróg, skyr, kurczak lub tuńczyk pomagają dłużej czuć sytość."],
+   ["Kasze zamiast samego białego pieczywa","Gryczana i jęczmienna są tanie w każdym dyskoncie i dają więcej błonnika."],
+   ["Gotuj raz, jedz dwa razy","Zupy i bigos przygotuj na dwa dni. Mniej gotowania, mniej marnowania."]]},
+  en:{h:"Balanced eating",i:"A varied week without counting every calorie.",t:[
+   ["Half the plate vegetables","Add a salad, mizeria or pan fried veg to lunch and dinner."],
+   ["Protein at every meal","Eggs, twaróg, skyr, chicken or tuna keep you full for longer."],
+   ["Kasza, not only white bread","Buckwheat and barley are cheap at every discounter and bring more fibre."],
+   ["Cook once, eat twice","Make soups and bigos for two days. Less cooking, less waste."]]}},
+ gym:{pl:{h:"Pod siłownię",i:"Plan ustawia wyżej dania bogate w białko, a kasze, ryż i ziemniaki dają energię na trening.",t:[
+   ["Białko przez cały dzień","Często podawany zakres to około 1,6 do 2,2 g białka na kg masy ciała dziennie, rozłożone na 3 do 4 posiłki."],
+   ["Lekka nadwyżka kalorii","Przy budowaniu masy zwykle wystarcza około 200 do 400 kcal ponad Twoje zapotrzebowanie."],
+   ["Węglowodany wokół treningu","Owsianka, ryż, kasza lub ziemniaki 1 do 3 godzin przed treningiem i po nim."],
+   ["Tanie białko z dyskontu","Twaróg, skyr, jajka, filet z kurczaka i tuńczyk to najtańsze źródła białka w Lidlu, Biedronce, Aldi i Auchan."],
+   ["Sen i regularność","Mięśnie rosną między treningami. 7 do 9 godzin snu robi dużą różnicę."],
+   ["Woda","Pij regularnie przez cały dzień, więcej w dni treningowe."]]},
+  en:{h:"For the gym",i:"The plan ranks protein rich dishes higher, and kasza, rice and potatoes fuel your training.",t:[
+   ["Protein through the day","A commonly cited range is about 1.6 to 2.2 g of protein per kg of body weight a day, spread over 3 to 4 meals."],
+   ["A small calorie surplus","For building muscle, about 200 to 400 kcal above your maintenance is usually enough."],
+   ["Carbs around training","Porridge, rice, kasza or potatoes 1 to 3 hours before and after you train."],
+   ["Cheap protein at the discounter","Twaróg, skyr, eggs, chicken breast and canned tuna are the cheapest protein at Lidl, Biedronka, Aldi and Auchan."],
+   ["Sleep and consistency","Muscle grows between sessions. 7 to 9 hours of sleep makes a real difference."],
+   ["Water","Drink steadily through the day, more on training days."]]}},
+ loss:{pl:{h:"Na redukcję",i:"Plan wybiera lżejsze dania z dużą ilością białka i warzyw, a smażone i ciężkie zostawia na rzadziej.",t:[
+   ["Umiarkowany deficyt","Bezpieczne tempo to zwykle deficyt około 300 do 500 kcal dziennie. Wolniej znaczy trwalej."],
+   ["Białko trzyma sytość","Twaróg, skyr, jajka i kurczak pomagają nie podjadać i chronią mięśnie."],
+   ["Zupy na start","Ogórkowa, krupnik czy krem z brokułów dają dużo objętości przy niewielu kaloriach."],
+   ["Uważaj na dodatki","Olej, masło i śmietana szybko dodają kalorii. Śmietanę często da się zamienić na skyr."],
+   ["Nie pomijaj posiłków","Regularne jedzenie ułatwia kontrolę głodu wieczorem."],
+   ["Zakupy z listą","Plan tygodnia i jedna lista zakupów to mniej impulsywnych słodyczy przy kasie."]]},
+  en:{h:"For weight loss",i:"The plan favours lighter dishes with plenty of protein and vegetables, and keeps fried, heavy dishes for less often.",t:[
+   ["A moderate deficit","A safe pace is usually a deficit of about 300 to 500 kcal a day. Slower lasts longer."],
+   ["Protein keeps you full","Twaróg, skyr, eggs and chicken help stop snacking and protect muscle."],
+   ["Start with soup","Ogórkowa, krupnik or broccoli soup give lots of volume for few calories."],
+   ["Watch the extras","Oil, butter and sour cream add calories fast. Skyr often works in place of śmietana."],
+   ["Don't skip meals","Eating regularly makes evening hunger easier to manage."],
+   ["Shop with a list","A weekly plan and one list means fewer impulse sweets at the till."]]}}
+};
+const T = {
+ pl:{tag:"Zaznacz, co masz w lodówce. CoZjem wybierze danie z kuchni europejskiej lub afrykańskiej, ułoży plan na tydzień i poda listę zakupów do Twojego sklepu.",
+  goal:"Twój cel", goals:{bal:"Zbilansowane",gym:"Siłownia",loss:"Redukcja",gain:"Przybranie wagi"},
+  meal:"Na kiedy?", meals:{b:"Śniadanie",l:"Obiad",d:"Kolacja"}, store:"Gdzie robisz zakupy?", fridge:"Co masz w domu?", search:"Szukaj składnika…", clear:"Wyczyść",
+  basics:"Zakładamy, że masz sól, pieprz, olej i wodę.", go:"Wybierz za mnie", count:n=>`Zaznaczone: ${n}`,
+  tToday:"Dziś", tWeek:"Plan tygodnia",
+  today:{b:"Na śniadanie",l:"Na obiad",d:"Na kolację"}, min:"min", serves:"porcje", have:(a,b)=>`Masz ${a} z ${b} składników`,
+  kcal:"kcal/porcja", prot:"g białka", hiP:"Dużo białka", light:"Lekkie",
+  ingr:"Składniki", steps:"Przygotowanie", list:"Lista zakupów", wlist:"Lista na cały tydzień", shop:s=>`Zakupy: ${s}`, total:"Razem ok.", all:"Masz wszystko. Do garnków!",
+  note:s=>`Ceny orientacyjne z października 2026. W ${s} mogą się różnić, sprawdź gazetkę.`, wnote:"Jedno opakowanie każdego produktu na cały tydzień.",
+  another:"Inny pomysł", copy:"Kopiuj listę", copied:"Skopiowano", regen:"Ułóż nowy tydzień",
+  alts:"Też możesz zrobić", none:"Zaznacz kilka składników, a coś wymyślimy.", miss:"do kupienia", ok:"masz", swap:"Zamień",
+  wIntro:"Kliknij danie, aby zobaczyć przepis, albo ↻, żeby je zamienić. Długie dania jak bigos i pierogi trafiają na weekend.",
+  avgK:"średnio kcal dziennie", avgP:"średnio g białka dziennie", toBuy:n=>`${n} produktów do kupienia`, perDay:"dziennie",
+  disc:"Wartości kalorii i białka są przybliżone. To ogólne wskazówki, nie porada medyczna. Jeśli masz choroby przewlekłe lub specjalną dietę, skonsultuj się z dietetykiem.",
+  cmpH:"Gdzie najtaniej?", cheapest:"Najtaniej", yourShop:"Twój sklep", shopHere:"Kupuj tutaj", promoN:n=>`${n} w promocji`,
+  saveAt:(s,v)=>`W ${s} zapłacisz około ${v} mniej za tę listę.`, bestAlready:"Twój sklep jest najtańszy dla tej listy.",
+  mixLine:(l,sum,sv)=>`Najtaniej po rozdzieleniu: ${l}, razem ${sum}, czyli jeszcze ${sv} mniej.`,
+  cmpNote:"Szacunek: ceny bazowe skorygowane o indeks sklepu z badania koszyka ASM (czerwiec 2026: Auchan najtańszy, Aldi najdroższy; Lidl i Biedronka liczone jako średnia), plus ceny i promocje, które sam wpiszesz.", cmpSrc:"Źródło",
+  legend:"[PROMO] promocja, * Twoja cena.", promo:"Promocja", promoAlert:"Promocja", promoOnList:n=>n===1?"Produkt z Twojej listy jest w promocji":`${n} produkty z Twojej listy są w promocji`, until:d=>`do ${d}`,
+  pricesH:"Ceny i promocje", pricesSub:"Widzisz cenę w sklepie lub w gazetce? Wpisz ją. CoZjem użyje jej w porównaniu i powiadomi Cię, gdy promocja dotyczy Twojej listy.",
+  pfItem:"Produkt, np. masło", store:"Sklep", pfPromo:"To promocja", pfUntil:"ważna do", pfSave:"Zapisz cenę",
+  pfErrItem:"Wybierz produkt z listy podpowiedzi.", pfErrPrice:"Wpisz cenę w złotych, np. 5,99.", pfErrDate:"Data końca promocji nie może być w przeszłości.",
+  activeH:"Aktywne promocje", mineH:"Twoje ceny", noPromos:"Brak zapisanych promocji.", noMine:"Nie zapisałeś jeszcze żadnych cen.", leafH:"Aktualne gazetki",
+  tSaved:"Zapisane", save:"Zapisz", savedL:"Zapisane", unsave:"Usuń z zapisanych", open:"Otwórz",
+  savedH:"Twoje zapisane dania", savedSub:"Kliknij zakładkę przy daniu, żeby je tu zapisać. Zapisane dania częściej trafiają do planu tygodnia.",
+  savedEmpty:"Nic tu jeszcze nie ma. Otwórz danie i kliknij Zapisz.", savedOn:d=>`Zapisane ${d}`, backSaved:"Wróć do zapisanych",
+  mineL:"Gotuj z tego, co masz", minePh:"np. łosoś, szpinak, ryż", mineAdd:"Dodaj", suggest:"Zaproponuj danie",
+  mineHintAi:"Wpisz dowolny składnik, także spoza listy. Claude ułoży przepis z tym, co masz.", mineHintNo:"Pokażemy nasze przepisy z tymi składnikami.",
+  remove:"Usuń", sugH:"Dania z Twoich składników", sugSub:l=>`Masz: ${l}`, fromUs:"Z naszych przepisów", noneUs:"Żaden z naszych przepisów nie używa jeszcze tych składników.",
+  uses:l=>`Wykorzystuje: ${l}`, aiTag:"Przepis od Claude", thinking:"Claude układa przepis…", writing:"Prawie gotowe…", stop:"Stop",
+  aiFail:"Nie udało się teraz przygotować przepisu.", aiRate:"Za dużo zapytań. Odczekaj chwilę i spróbuj ponownie.", aiOff:"Propozycje od Claude nie są tu dostępne, poniżej nasze przepisy.",
+  tryAgain:"Spróbuj ponownie", emptyMine:"Najpierw dodaj przynajmniej jeden składnik.", aiNote:"Ceny, kalorie i białko to szacunki Claude.", unk:"?",
+  backPick:"Wróć do propozycji dnia", askAi:"Poproś Claude o przepis",
+  see:"zdjęcia ↗", tickHint:"Kliknij kwadrat, jeśli masz składnik. Danie zostaje na ekranie.", afrShop:"Sklep afrykański", tShop:"Zakupy",
+  batch:"Gotowanie na zapas", batchIntro:"Obiad gotujesz co drugi dzień na dwa dni, wybierane są dania, które dobrze się przechowują.",
+  cook2:"Gotuj na 2 dni", leftover:"Z zapasu", saved:"mniej dni gotowania obiadu", keeps:"Dobre na zapas",
+  shopIntro:"Odhacz produkty, które kupiłeś. Trafią do Twojej kuchni i do listy składników po lewej. Pilnujemy też, co trzeba szybko zużyć.",
+  toBuyH:"Do kupienia", kitchenH:"W Twojej kuchni", spent:"wydane w ostatnich 7 dniach", inKitchen:"produktów w kuchni",
+  buyAll:"Wszystko kupione", markBought:"Oznacz jako kupione", used:"Zużyte", boughtAgo:d=>d===0?"kupione dziś":d===1?"kupione wczoraj":`kupione ${d} dni temu`,
+  noDate:"bez daty zakupu", fresh:"Świeże", soon:"Zużyj wkrótce", check:"Sprawdź", nothingToBuy:"Masz wszystko na ten tydzień.", emptyKitchen:"Odhacz zakupy albo zaznacz składniki po lewej.",
+  foot:"Przepisy są uproszczone. Ceny to szacunki dla typowych produktów dostępnych w Lidlu, Aldi, Biedronce i Auchan, a produkty oznaczone jako „sklep afrykański” kupisz w sklepach z żywnością afrykańską w Polsce. To nie są oferty sklepów. Linki „zdjęcia” otwierają wyszukiwarkę grafiki, żeby zobaczyć, jak wygląda produkt. CoZjem nie jest powiązany z żadną z tych sieci."},
+ en:{tag:"Tick what's in your fridge. CoZjem picks a European or African dish, plans your week and gives you a shopping list for your store.",
+  goal:"Your goal", goals:{bal:"Balanced",gym:"Gym",loss:"Weight loss",gain:"Weight gain"},
+  meal:"Which meal?", meals:{b:"Breakfast",l:"Lunch",d:"Dinner"}, store:"Where do you shop?", fridge:"What do you have?", search:"Search ingredients…", clear:"Clear",
+  basics:"We assume you have salt, pepper, oil and water.", go:"Pick for me", count:n=>`Selected: ${n}`,
+  tToday:"Today", tWeek:"Week plan",
+  today:{b:"For breakfast",l:"For lunch",d:"For dinner"}, min:"min", serves:"servings", have:(a,b)=>`You have ${a} of ${b} ingredients`,
+  kcal:"kcal/serving", prot:"g protein", hiP:"High protein", light:"Light",
+  ingr:"Ingredients", steps:"Method", list:"Shopping list", wlist:"List for the whole week", shop:s=>`Shop: ${s}`, total:"Total approx.", all:"You have everything. Start cooking!",
+  note:s=>`Approximate prices, October 2026. ${s} may differ, check the weekly leaflet.`, wnote:"One pack of each product for the whole week.",
+  another:"Another idea", copy:"Copy list", copied:"Copied", regen:"Plan a new week",
+  alts:"You could also make", none:"Tick a few ingredients and we'll find something.", miss:"to buy", ok:"have", swap:"Swap",
+  wIntro:"Tap a dish to see the recipe, or ↻ to swap it. Long dishes like bigos and pierogi go on the weekend.",
+  avgK:"average kcal a day", avgP:"average g protein a day", toBuy:n=>`${n} products to buy`, perDay:"a day",
+  disc:"Calorie and protein values are approximate. This is general guidance, not medical advice. If you have a health condition or a special diet, talk to a dietitian.",
+  cmpH:"Where is it cheapest?", cheapest:"Cheapest", yourShop:"Your shop", shopHere:"Shop here", promoN:n=>`${n} on promo`,
+  saveAt:(s,v)=>`You'd pay about ${v} less for this list at ${s}.`, bestAlready:"Your shop is the cheapest for this list.",
+  mixLine:(l,sum,sv)=>`Cheapest if you split it: ${l}, ${sum} in total, a further ${sv} less.`,
+  cmpNote:"Estimate: base prices adjusted by a store index from the ASM shopping basket survey (June 2026: Auchan cheapest, Aldi most expensive; Lidl and Biedronka counted as average), plus any prices and promotions you enter.", cmpSrc:"Source",
+  legend:"[PROMO] promotion, * your price.", promo:"Promo", promoAlert:"Promotion", promoOnList:n=>n===1?"An item on your list is on promotion":`${n} items on your list are on promotion`, until:d=>`until ${d}`,
+  pricesH:"Prices and promotions", pricesSub:"Seen a price in store or in a leaflet? Enter it. CoZjem uses it in the comparison and alerts you when a promotion matches your list.",
+  pfItem:"Product, e.g. butter", store:"Store", pfPromo:"It's a promotion", pfUntil:"valid until", pfSave:"Save price",
+  pfErrItem:"Pick a product from the suggestions.", pfErrPrice:"Enter a price in złoty, e.g. 5.99.", pfErrDate:"The promotion end date can't be in the past.",
+  activeH:"Active promotions", mineH:"Your prices", noPromos:"No promotions saved yet.", noMine:"You haven't saved any prices yet.", leafH:"This week's leaflets",
+  tSaved:"Saved", save:"Save", savedL:"Saved", unsave:"Remove from saved", open:"Open",
+  savedH:"Your saved meals", savedSub:"Tap the bookmark on any dish to keep it here. Saved meals turn up more often in your week plan.",
+  savedEmpty:"Nothing here yet. Open a dish and tap Save.", savedOn:d=>`Saved ${d}`, backSaved:"Back to saved",
+  mineL:"Cook with what you have", minePh:"e.g. salmon, spinach, rice", mineAdd:"Add", suggest:"Suggest a meal",
+  mineHintAi:"Type any ingredient, even one that isn't on the list. Claude builds a recipe around what you have.", mineHintNo:"We'll show our recipes that use these ingredients.",
+  remove:"Remove", sugH:"Meals with your ingredients", sugSub:l=>`You have: ${l}`, fromUs:"From our recipes", noneUs:"None of our recipes use these ingredients yet.",
+  uses:l=>`Uses: ${l}`, aiTag:"Recipe by Claude", thinking:"Claude is writing a recipe…", writing:"Almost ready…", stop:"Stop",
+  aiFail:"Couldn't get a recipe right now.", aiRate:"Too many requests. Wait a minute and try again.", aiOff:"Claude suggestions aren't available here, so here are our recipes.",
+  tryAgain:"Try again", emptyMine:"Add at least one ingredient first.", aiNote:"Prices, calories and protein are Claude's estimates.", unk:"?",
+  backPick:"Back to today's pick", askAi:"Ask Claude for a recipe",
+  see:"photos ↗", tickHint:"Tap a box when you have it. This dish stays on screen.", afrShop:"African shop", tShop:"Groceries",
+  batch:"Batch cooking", batchIntro:"Lunch is cooked every other day for two days, using dishes that keep well.",
+  cook2:"Cook for 2 days", leftover:"Leftovers", saved:"fewer lunch cooking days", keeps:"Keeps well",
+  shopIntro:"Tick off what you've bought. It moves into your kitchen and into the ingredient list on the left. We also flag what to use up soon.",
+  toBuyH:"To buy", kitchenH:"In your kitchen", spent:"spent in the last 7 days", inKitchen:"items in your kitchen",
+  buyAll:"Bought everything", markBought:"Mark as bought", used:"Used up", boughtAgo:d=>d===0?"bought today":d===1?"bought yesterday":`bought ${d} days ago`,
+  noDate:"no purchase date", fresh:"Fresh", soon:"Use soon", check:"Check it", nothingToBuy:"You have everything for this week.", emptyKitchen:"Tick off your shopping or select ingredients on the left.",
+  foot:"Recipes are simplified. Prices are estimates for typical products sold at Lidl, Aldi, Biedronka and Auchan, and items marked African shop come from African food shops in Poland. These are not store offers. The photos links open an image search so you can see what the product looks like. CoZjem is not affiliated with any of these chains."}
+};
+const DEFAULT = ["jajka","maslo","mleko","ziemniaki","cebula","maka","chleb","szczypiorek","twarog","kurczak"];
+let st = {lang:/^pl\b/i.test(navigator.language||"")?"pl":"en", goal:"bal", meal:"l", store:"Biedronka", have:new Set(DEFAULT), q:"", pick:0, forced:null, view:"today", plan:null, batch:false, bought:{}, mine:[], saved:[], prices:{}, promos:[], mode:"pick", aiDish:null, aiState:"idle", aiErr:null, aiPrev:[]};
+try{const s=JSON.parse(localStorage.getItem("cozjem")||"null"); if(s){
+  ["lang","meal","store","goal","view"].forEach(k=>{if(s[k])st[k]=s[k]});
+  if(Array.isArray(s.mine)) st.mine=s.mine.filter(m=>m&&((m.k&&ING[m.k])||(typeof m.t==="string"&&m.t.trim()))).slice(0,20);
+  if(s.aiDish&&typeof s.aiDish==="object"&&typeof s.aiDish.name==="string") st.aiDish=s.aiDish;
+  if(Array.isArray(s.saved)) st.saved=s.saved.filter(x=>x&&((x.type==="r"&&RB[x.id])||(x.type==="ai"&&x.d&&typeof x.d.name==="string"&&Array.isArray(x.d.ings)&&Array.isArray(x.d.steps)))).slice(0,100);
+  if(s.prices&&typeof s.prices==="object") Object.entries(s.prices).forEach(([k,o])=>{ if(ING[k]&&o&&typeof o==="object") Object.entries(o).forEach(([sx,m])=>{ if(STORES.includes(sx)&&m&&Number.isFinite(m.p)) (st.prices[k]=st.prices[k]||{})[sx]={p:m.p,ts:m.ts||Date.now()}; }); });
+  if(Array.isArray(s.promos)) st.promos=s.promos.filter(p=>p&&ING[p.k]&&STORES.includes(p.store)&&Number.isFinite(p.p)&&Number.isFinite(p.until)).filter(p=>p.until>=day0()-30*864e5).slice(-100);
+  if(s.mode==="suggest"||(s.mode==="ai"&&st.aiDish)) st.mode=s.mode;
+  st.batch=!!s.batch; if(s.bought&&typeof s.bought==="object") Object.entries(s.bought).forEach(([k,v])=>{if(ING[k]&&typeof v==="number")st.bought[k]=v});
+  if(Array.isArray(s.have)) st.have=new Set(s.have.filter(k=>ING[k]));
+  if(Array.isArray(s.plan)&&s.plan.length===7&&s.plan.every(d=>d&&RB[d.b]&&RB[d.l]&&RB[d.d])) st.plan=s.plan;
+}}catch(e){}
+if(!TIPS[st.goal]) st.goal="bal";
+if(!["today","week","shop","saved"].includes(st.view)) st.view="today";
+const save=()=>{try{localStorage.setItem("cozjem",JSON.stringify({lang:st.lang,meal:st.meal,store:st.store,goal:st.goal,view:st.view,have:[...st.have],plan:st.plan,batch:st.batch,bought:st.bought,mine:st.mine,aiDish:st.aiDish,mode:st.mode,saved:st.saved,prices:st.prices,promos:st.promos}))}catch(e){}};
+const $=id=>document.getElementById(id);
+const L=()=>T[st.lang];
+const fmt=(v,d=2)=>v.toLocaleString(st.lang==="pl"?"pl-PL":"en-GB",{minimumFractionDigits:d,maximumFractionDigits:d});
+const zl=v=>fmt(v)+" zł";
+const nm=k=>st.lang==="pl"?ING[k][0]:ING[k][1];
+const nmS=k=>nm(k)+(ING[k][3]==="afr"?` [${T[st.lang].afrShop}]`:"");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function imgUrl(k){
+  const base=ING[k][0].replace(/ \d.*$| \(.*\)$/,"");
+  const q=ING[k][3]==="afr"?`${base} ${ING[k][1]} African food`:`${base} ${st.store}`;
+  return "https://www.google.com/search?tbm=isch&q="+encodeURIComponent(q);
+}
+const VIS={jajecznica:["plate","#F2C94C",["#4A8C3A","#C98A3E"]],twarozek:["plate","#F5F1E8",["#D9455F","#4A8C3A"]],owsianka:["bowl","#D9C3A0",["#E8D9A8","#8B5A2B","#C0392B"]],
+ skyrbowl:["bowl","#F7F5F0",["#F2D46B","#D9C3A0"]],racuchy:["plate","#D9A441",["#F5F0E6","#E8D9A8"]],szakszuka:["pan","#C0392B",["#FFFFFF","#F2B61F","#4A8C3A"]],
+ omlet:["plate","#F2C94C",["#D63A2F","#F5A623"]],pomidorowa:["bowl","#D9532B",["#FFFFFF","#F0E4D0"]],zurek:["bowl","#E8DCC4",["#FFFFFF","#F2B61F","#A0522D"]],
+ ogorkowa:["bowl","#DCD7A8",["#5A8F3A","#F0E8C0"]],krem:["bowl","#6E9E3E",["#F5F1E8"]],schabowy:["plate","#C98A3E",["#F2E2A0","#9FC46B"]],
+ kurczakkasza:["plate","#8B5E3C",["#F0D9B5","#3E8E41"]],pieczony:["pan","#E6B66A",["#E04B3A","#F2C230","#6E9E3E"]],placki:["plate","#D9A441",["#F7F3EA"]],
+ pierogi:["plate","#F3E7CF",["#C98A3E","#E8D2A6"]],bolognese:["plate","#E8C77A",["#A23B2A","#F5F1E8"]],leczo:["bowl","#C94A2F",["#E8B830","#6E9E3E","#8B3A2A"]],
+ bigos:["bowl","#8C6B3E",["#5C3A21","#C9B27A"]],risotto:["plate","#EDE3C8",["#8B6B4A","#F5F1E8"]],krupnik:["bowl","#E8D9A8",["#F0B45A","#4A8C3A","#F5F0E6"]],
+ grecka:["plate","#D63A2F",["#F5F5F0","#6E9E3E","#2B2B2B"]],tunczyk:["plate","#9CC46B",["#D63A2F","#F5F1E8","#C9A07A"]],nalesniki:["plate","#EBCB8B",["#F7F5F0"]],
+ zapiekanka:["plate","#D9A441",["#F2C94C","#C0392B"]],pesto:["plate","#E8C77A",["#3E7D32","#D63A2F"]],jollof:["plate","#D9542B",["#F0D9B5","#4A8C3A"]],
+ egusi:["bowl","#C9A227",["#2E6B2E","#7A3E2A"]],dodo:["plate","#E8932B",["#F2C94C","#D63A2F"]],akara:["plate","#C9852F",["#B5702A","#E0A04A"]],
+ redred:["bowl","#C2412D",["#E8932B","#8B3A2A"]],maafe:["bowl","#B5652B",["#F0D9B5","#E08A3A"]],tagine:["plate","#F0D9A0",["#C96A2B","#E6C27A","#4A8C3A"]],
+ misir:["bowl","#B8452B",["#E8DCC4"]],sukuma:["plate","#F5F1E8",["#2E6B2E","#D63A2F"]]};
+function art(r){
+  const [type,base,gs]=r.vis||VIS[r.id]||["plate","#D9A441",["#4A8C3A"]];
+  let h=0; for(const c of r.id) h=(h*31+c.charCodeAt(0))>>>0; const rnd=()=>{h=(h*1103515245+12345)>>>0;return (h>>>8)/16777216;};
+  const cy=type==="bowl"?82:96, rx=type==="bowl"?66:62, ry=type==="bowl"?11:20;
+  let v="";
+  if(type==="plate") v=`<ellipse cx="120" cy="100" rx="98" ry="34" fill="#FFFFFF" stroke="#D8D8D2"/><ellipse cx="120" cy="99" rx="74" ry="24" fill="#F4F4F0"/>`;
+  if(type==="pan") v=`<rect x="196" y="90" width="44" height="9" rx="4.5" fill="#2E2E2E"/><ellipse cx="120" cy="98" rx="86" ry="32" fill="#3A3A3A"/><ellipse cx="120" cy="95" rx="78" ry="27" fill="#4A4A4A"/>`;
+  if(type==="bowl") v=`<path d="M38 80h164c0 34-37 52-82 52S38 114 38 80z" fill="#FFFFFF" stroke="#D8D8D2"/><ellipse cx="120" cy="80" rx="82" ry="16" fill="#F4F4F0"/>`;
+  const food=type==="bowl"?`<ellipse cx="120" cy="${cy}" rx="${rx}" ry="${ry}" fill="${base}"/>`
+    :`<ellipse cx="120" cy="${cy}" rx="${rx}" ry="${ry}" fill="${base}"/><ellipse cx="${108+rnd()*20}" cy="${cy-6}" rx="${rx*.55}" ry="${ry*.6}" fill="${base}" style="filter:brightness(1.08)"/>`;
+  let g=""; const n=type==="bowl"?9:12;
+  for(let i=0;i<n;i++){const a=rnd()*Math.PI*2, d=Math.sqrt(rnd())*.82, x=120+Math.cos(a)*rx*d, y=cy-3+Math.sin(a)*ry*d, c=gs[i%gs.length], s=2.2+rnd()*3.2;
+    g+=`<ellipse class="gar" style="--d:${.45+i*.05}s;transform-origin:${x.toFixed(1)}px ${y.toFixed(1)}px" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="${(s*1.3).toFixed(1)}" ry="${s.toFixed(1)}" fill="${c}"/>`;}
+  const steam=[95,120,145].map((x,i)=>`<path class="st" style="--d:${1+i*.35}s" d="M${x} ${cy-22}c-5 -7 5 -11 0 -18s5 -11 0 -18"/>`).join("");
+  return `<svg class="art" viewBox="0 0 240 150" role="img" aria-label="${esc(r[st.lang])}"><ellipse cx="120" cy="134" rx="92" ry="8" fill="var(--line)" class="shad"/>
+    <g class="ves">${v}<g class="food" style="transform-origin:120px ${cy}px">${food}</g>${g}</g>${steam}</svg>`;
+}
+function goalFit(r,g=st.goal){
+  if(g==="gym") return Math.min(r.p/40,1)*0.8 + (r.k>=450?0.2:0.1);
+  if(g==="gain") return Math.min(r.k/700,1)*0.7 + Math.min(r.p/35,1)*0.3;
+  if(g==="loss"){const kc=r.k<=350?1:r.k<=450?0.75:r.k<=550?0.4:0.1; return kc*0.6 + Math.min(r.p/r.k*10,1)*0.4;}
+  return 0.5;
+}
+// Store price index from the ASM Sales Force "Koszyk Zakupowy" survey, June 2026 (40 products, 13 chains):
+// Auchan 280.94 zł, Aldi 350.69 zł, average 325.64 zł. Lidl and Biedronka had no published figure, so they use the average.
+const SF={Lidl:1,Aldi:350.69/325.64,Biedronka:1,Auchan:280.94/325.64};
+const SF_KNOWN={Auchan:true,Aldi:true};
+const LEAF={Lidl:"https://blix.pl/sklep/lidl/",Aldi:"https://blix.pl/sklep/aldi/",Biedronka:"https://blix.pl/sklep/biedronka/",Auchan:"https://blix.pl/sklep/auchan/"};
+const day0=()=>{const d=new Date();d.setHours(0,0,0,0);return d.getTime()};
+const activePromos=()=>{const t0=day0();return st.promos.filter(p=>p.until>=t0)};
+function priceAt(k,store){
+  if(ING[k][3]==="afr") return {p:ING[k][2],src:"afr"};
+  const pm=activePromos().filter(p=>p.k===k&&p.store===store).sort((a,b)=>a.p-b.p)[0]; if(pm) return {p:pm.p,src:"promo",until:pm.until};
+  const m=st.prices[k]&&st.prices[k][store]; if(m) return {p:m.p,src:"mine",ts:m.ts};
+  return {p:Math.round(ING[k][2]*SF[store]*100)/100,src:"est"};
+}
+const pr=k=>priceAt(k,st.store).p;
+function compare(ks){
+  const loc=ks.filter(k=>ING[k][3]!=="afr");
+  const tot=STORES.map(s=>({s,sum:loc.reduce((a,k)=>a+priceAt(k,s).p,0),promos:loc.filter(k=>priceAt(k,s).src==="promo").length})).sort((a,b)=>a.sum-b.sum);
+  const mix={}; let mixSum=0;
+  loc.forEach(k=>{const b=STORES.map(s=>({s,p:priceAt(k,s).p})).sort((a,b)=>a.p-b.p||(a.s===st.store?-1:b.s===st.store?1:0))[0]; mixSum+=b.p; (mix[b.s]=mix[b.s]||[]).push(k);});
+  return {loc,tot,mix,mixSum};
+}
+const fmtDay=ts=>new Date(ts).toLocaleDateString(st.lang==="pl"?"pl-PL":"en-GB",{day:"numeric",month:"short"});
+function compareHtml(ks){
+  const t=L(), c=compare(ks); if(!c.loc.length) return "";
+  const best=c.tot[0], cur=c.tot.find(x=>x.s===st.store), max=c.tot[c.tot.length-1].sum||1;
+  const rows=c.tot.map((x,i)=>`<div class="cmprow${x.s===st.store?" cur":""}${i===0?" best":""}">
+     <span class="cs">${x.s}${i===0?` <span class="pill fresh">${t.cheapest}</span>`:""}${x.promos?` <span class="pill soon">${t.promoN(x.promos)}</span>`:""}</span>
+     <span class="cbar" aria-hidden="true"><i style="width:${Math.max(8,x.sum/max*100).toFixed(1)}%"></i></span>
+     <span class="ct">${zl(x.sum)}</span>
+     ${x.s===st.store?`<span class="cyou">${t.yourShop}</span>`:`<button type="button" class="btn sm" data-setstore="${x.s}">${t.shopHere}</button>`}</div>`).join("");
+  const save=cur.sum-best.sum;
+  const mixStores=Object.keys(c.mix);
+  const mixLine=mixStores.length>1&&best.sum-c.mixSum>=1?`<p class="cmpmix">${t.mixLine(mixStores.map(s=>`<b>${s}</b> (${c.mix[s].map(k=>esc(baseName(nm(k)))).join(", ")})`).join(" + "),zl(c.mixSum),zl(best.sum-c.mixSum))}</p>`:"";
+  return `<div class="cmp"><p class="label">${t.cmpH}</p>
+    ${save>=0.5?`<p class="cmpsave">${t.saveAt(best.s,zl(save))}</p>`:`<p class="cmpsave ok">${t.bestAlready}</p>`}
+    <div class="cmprows">${rows}</div>${mixLine}
+    <p class="cmpnote">${t.cmpNote} <a href="https://wiadomoscispozywcze.pl/artykuly/16316/koszyk-zakupowy-w-czerwcu-ceny-spady-ale-wciaz-jest-drozej-niz-rok-temu-auchan-nadal-liderem/" target="_blank" rel="noopener">${t.cmpSrc}</a></p></div>`;
+}
+function alertHtml(ks){
+  const t=L(), set=new Set(ks), hits=activePromos().filter(p=>set.has(p.k)).sort((a,b)=>a.until-b.until);
+  if(!hits.length) return "";
+  return `<div class="palert" role="status"><div class="ph"><span class="pill check">${t.promoAlert}</span><span>${t.promoOnList(hits.length)}</span></div>
+    <ul>${hits.map(p=>{const reg=Math.round(ING[p.k][2]*SF[p.store]*100)/100;return `<li><b>${esc(baseName(nm(p.k)))}</b> · ${p.store} · ${zl(p.p)}${reg>p.p?` <s>${zl(reg)}</s>`:""} · ${t.until(fmtDay(p.until))}${p.store!==st.store?` <button type="button" class="linkbtn" data-setstore="${p.store}">${t.shopHere}</button>`:""}</li>`}).join("")}</ul></div>`;
+}
+function evalR(r){
+  const own=r.n.filter(k=>st.have.has(k)), miss=r.n.filter(k=>!st.have.has(k));
+  return {r,own,miss,cost:miss.reduce((a,k)=>a+pr(k),0),match:own.length/r.n.length};
+}
+function ranked(){
+  return R.filter(r=>r.m.includes(st.meal)).map(evalR)
+    .map(x=>({...x,score:x.match*0.7+goalFit(x.r)*0.3}))
+    .sort((a,b)=>b.score-a.score||a.miss.length-b.miss.length||a.cost-b.cost);
+}
+
+// week planner
+function candScore(r,d,m,used,row){
+  const x=evalR(r); let s=x.match*0.55+goalFit(r)*0.45;
+  if(st.batch&&m==="l"&&r.bk) s+=0.35;
+  if(isSavedR(r.id)) s+=0.2;
+  s-=(used[r.id]||0)*0.7;
+  if(r.t>=75&&d<5) s-=0.6;
+  if(row&&Object.values(row).includes(r.id)) s-=1;
+  return s+Math.random()*0.18;
+}
+function genWeek(){
+  const used={}, plan=[];
+  for(let d=0;d<7;d++){const row={};
+    for(const m of "bld"){
+      if(m==="l"&&st.batch&&d%2===1&&d<6){row.l=plan[d-1].l; row.lo=true; continue;}
+      const c=R.filter(r=>r.m.includes(m)).map(r=>[r.id,candScore(r,d,m,used,row)]).sort((a,b)=>b[1]-a[1]);
+      row[m]=c[0][0]; used[c[0][0]]=(used[c[0][0]]||0)+1;
+    } plan.push(row);}
+  st.plan=plan; save();
+}
+function swapCell(d,m){
+  if(m==="l"&&st.plan[d].lo) d=d-1;
+  const used={}; st.plan.forEach(row=>["b","l","d"].forEach(m=>used[row[m]]=(used[row[m]]||0)+1));
+  const cur=st.plan[d][m]; const row={b:st.plan[d].b,l:st.plan[d].l,d:st.plan[d].d}; delete row[m];
+  const c=R.filter(r=>r.m.includes(m)&&r.id!==cur).map(r=>[r.id,candScore(r,d,m,used,row)+Math.random()*0.25]).sort((a,b)=>b[1]-a[1]);
+  if(c.length){st.plan[d][m]=c[0][0]; if(m==="l"&&st.plan[d+1]&&st.plan[d+1].lo) st.plan[d+1].l=c[0][0]; save();}
+}
+function weekShop(){
+  const need=new Set(); st.plan.forEach(row=>["b","l","d"].map(m=>row[m]).forEach(id=>RB[id].n.forEach(k=>{if(!st.have.has(k))need.add(k)})));
+  const ks=[...need].sort((a,b)=>Object.keys(CAT).indexOf(ING[a][3])-Object.keys(CAT).indexOf(ING[b][3]));
+  return {ks,cost:ks.reduce((a,k)=>a+pr(k),0)};
+}
+
+function renderMine(){
+  const t=L();
+  $("mine").innerHTML=st.mine.map((m,i)=>`<button type="button" class="chip mine${m.k?"":" free"}" data-rm="${i}" aria-label="${t.remove}: ${esc(mineName(m))}">${esc(mineName(m))}<span class="x" aria-hidden="true">×</span></button>`).join("");
+  $("mineHint").textContent=sampleFn===false?t.mineHintNo:t.mineHintAi;
+}
+function renderStatic(){
+  const t=L(); document.documentElement.lang=st.lang;
+  $("l-mine").textContent=t.mineL; $("mineIn").placeholder=t.minePh; $("mineAdd").textContent=t.mineAdd; $("suggest").textContent=t.suggest; renderMine();
+  $("tagline").textContent=t.tag; $("l-goal").textContent=t.goal; $("l-meal").textContent=t.meal; $("l-store").textContent=t.store; $("l-fridge").textContent=t.fridge;
+  $("q").placeholder=t.search; $("clear").textContent=t.clear; $("basics").textContent=t.basics; $("go").textContent=st.view==="week"?t.regen:t.go; $("foot").textContent=t.foot;
+  $("tab-today").textContent=t.tToday; $("tab-week").textContent=t.tWeek; $("tab-shop").textContent=t.tShop; $("tab-shop").setAttribute("aria-selected",st.view==="shop");
+  $("tab-saved").innerHTML=`${t.tSaved}${st.saved.length?` <span class="tcount">${st.saved.length}</span>`:""}`; $("tab-saved").setAttribute("aria-selected",st.view==="saved");
+  $("tab-today").setAttribute("aria-selected",st.view==="today"); $("tab-week").setAttribute("aria-selected",st.view==="week");
+  $("lang-pl").setAttribute("aria-pressed",st.lang==="pl"); $("lang-en").setAttribute("aria-pressed",st.lang==="en");
+  $("goals").innerHTML=["bal","gym","loss","gain"].map(g=>`<button type="button" data-goal="${g}" aria-pressed="${st.goal===g}">${t.goals[g]}</button>`).join("");
+  $("meals").innerHTML=["b","l","d"].map(m=>`<button type="button" data-meal="${m}" aria-pressed="${st.meal===m}">${t.meals[m]}</button>`).join("");
+  $("meals").parentElement.hidden=st.view!=="today";
+  $("stores").innerHTML=STORES.map(s=>`<button type="button" data-store="${s}" aria-pressed="${st.store===s}">${s}</button>`).join("");
+  renderChips(); renderHabits();
+}
+function renderChips(){
+  const q=st.q.trim().toLowerCase();
+  $("cats").innerHTML=Object.keys(CAT).map(c=>{
+    const ks=Object.keys(ING).filter(k=>ING[k][3]===c&&(!q||ING[k][0].toLowerCase().includes(q)||ING[k][1].toLowerCase().includes(q)));
+    if(!ks.length) return "";
+    return `<div class="cat"><h3>${CAT[c][st.lang]}</h3><div class="chips">${ks.map(k=>`<button type="button" class="chip" data-ing="${k}" aria-pressed="${st.have.has(k)}">${esc(nm(k).replace(/ \d.*$| \(.*\)$/,""))}</button>`).join("")}</div></div>`;
+  }).join("");
+  $("count").textContent=L().count(st.have.size);
+}
+function renderHabits(){
+  const h=TIPS[st.goal][st.lang], t=L();
+  $("habits").innerHTML=`<div><p class="label">${t.goals[st.goal]}</p><h2>${h.h}</h2><p>${h.i}</p><p class="disc">${t.disc}</p></div>
+   <ul class="tips">${h.t.map(([a,b])=>`<li><b>${esc(a)}</b><span>${esc(b)}</span></li>`).join("")}</ul>`;
+}
+function nutTags(r){
+  const t=L(); let s=`<span class="tag plain">~${r.k} ${t.kcal}</span><span class="tag plain">${r.p} ${t.prot}</span>`;
+  if(r.p>=28) s+=`<span class="tag good">${t.hiP}</span>`; else if(r.k<=350) s+=`<span class="tag good">${t.light}</span>`;
+  return s;
+}
+function receipt(title,ks,cost,note){
+  const t=L(); const row=k=>{const q=priceAt(k,st.store);return `<div class="row"><span>${esc(nm(k))}${q.src==="promo"?" [PROMO]":q.src==="mine"?" *":""}</span><span>${zl(q.p)}</span></div>`};
+  const loc=ks.filter(k=>ING[k][3]!=="afr"), af=ks.filter(k=>ING[k][3]==="afr");
+  const rows=loc.map(row).join("")+(af.length?`<div class="rsub">${t.afrShop}</div>`+af.map(row).join(""):"");
+  return `<div class="receipt" aria-label="${title}"><div class="rh">${title}</div><div class="rs">${t.shop(esc(st.store))}</div><hr>
+    ${ks.length?rows+`<hr><div class="row tot"><span>${t.total}</span><span>${zl(cost)}</span></div>`:`<div class="done">${t.all}</div>`}
+    <div class="note">${note?note+" ":""}${t.note(st.store)} ${t.legend}</div></div>`;
+}
+let sampleFn=null, aiCtl=null; // null = not known yet, false = unavailable
+const norm=x=>String(x).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ł/g,"l").trim();
+const baseName=x=>x.replace(/ \d.*$| \(.*\)$/,"");
+function findKey(text){
+  const n=norm(text); if(n.length<3) return null;
+  for(const k in ING){ for(const nmx of [ING[k][0],ING[k][1]]){
+    const a=norm(baseName(nmx)); if(a===n) return k; } }
+  for(const k in ING){ for(const nmx of [ING[k][0],ING[k][1]]){
+    const a=norm(baseName(nmx)), first=a.split(" ")[0];
+    if(a.startsWith(n)||(n.startsWith(first)&&first.length>=4)) return k; } }
+  if(n.length>=4) for(const k in ING){ for(const nmx of [ING[k][0],ING[k][1]]){
+    if(norm(baseName(nmx)).split(/\s+/).some(w=>w.length>=4&&(w.startsWith(n)||n.startsWith(w)))) return k; } }
+  return null;
+}
+const mineName=m=>m.k?baseName(nm(m.k)):m.t;
+function addMine(raw){
+  const parts=String(raw).split(/[,;\n]+/).map(x=>x.trim()).filter(Boolean).slice(0,10);
+  for(const p of parts){
+    const clean=p.replace(/[<>]/g,"").slice(0,40); if(!clean) continue;
+    const k=findKey(clean);
+    if(k){ st.have.add(k); if(!st.mine.some(m=>m.k===k)) st.mine.push({k}); }
+    else if(!st.mine.some(m=>!m.k&&norm(m.t)===norm(clean))) st.mine.push({t:clean});
+  }
+  st.mine=st.mine.slice(-20);
+}
+function builtinMatches(){
+  const keys=st.mine.filter(m=>m.k).map(m=>m.k); if(!keys.length) return [];
+  return R.map(r=>({x:evalR(r),hit:keys.filter(k=>r.n.includes(k))})).filter(o=>o.hit.length)
+    .sort((a,b)=>b.hit.length-a.hit.length||b.x.match-a.x.match).slice(0,5);
+}
+function aiPrompt(){
+  const lang=st.lang==="pl"?"Polish":"English";
+  const focus=st.mine.map(mineName), pantry=[...st.have].map(k=>baseName(ING[k][1]));
+  const goal={bal:"balanced everyday eating",gym:"gym training, high protein",loss:"weight loss, lighter and filling",gain:"healthy weight gain, more calories with protein"}[st.goal];
+  const meal={b:"breakfast",l:"lunch (the main warm meal)",d:"dinner (a lighter evening meal)"}[st.meal];
+  return `You are the recipe engine of CoZjem, a meal planner for people living in Poland who shop at ${st.store}, Lidl, Aldi, Biedronka and Auchan, and sometimes at African food shops.
+
+Suggest ONE ${meal} recipe that makes good use of these ingredients the person wants to cook with: ${focus.join(", ")}.
+Other things already in their kitchen (use if helpful, not required): ${pantry.join(", ")||"nothing listed"}.
+Assume salt, pepper, cooking oil and water are always available.
+Their goal: ${goal}.
+Prefer a real, well known dish from European or African cuisine (Polish dishes welcome). Keep any extra ingredients easy to buy in a Polish supermarket.
+${st.aiPrev.length?`Do not suggest any of these again: ${st.aiPrev.join("; ")}.`:""}
+Write every text field in ${lang}.
+
+Reply with only a JSON object in exactly this shape:
+{"name":"dish name","origin":"country or region","why":"one short sentence on why it suits these ingredients","time":30,"servings":2,"kcal":550,"protein":35,
+"ingredients":[{"name":"ingredient with amount, e.g. 300 g salmon","have":true,"price_pln":null}],
+"steps":["step 1","step 2"],"color":"#C0392B","vessel":"plate"}
+Rules: "have" is true only for items they already have (from either list above) or the assumed basics. For each item with "have": false give "price_pln" as a typical ${st.store} shelf price in złoty for one pack, otherwise null. "kcal" and "protein" (grams) are per serving. 4 to 8 short steps. "color" is the main colour of the finished dish as a hex code. "vessel" is one of "plate", "bowl", "pan".`;
+}
+function cleanAi(o){
+  const num=(v,lo,hi)=>{v=Number(v);return Number.isFinite(v)?Math.min(hi,Math.max(lo,Math.round(v))):null};
+  const str=(v,n)=>typeof v==="string"?v.trim().slice(0,n):"";
+  if(!o||typeof o!=="object"||!str(o.name,90)||!Array.isArray(o.steps)||!Array.isArray(o.ingredients)) throw {code:"invalid_json"};
+  const ings=o.ingredients.slice(0,18).map(i=>({name:str(i&&i.name,80),have:!!(i&&i.have),price:(()=>{const p=Number(i&&i.price_pln);return Number.isFinite(p)&&p>0&&p<300?Math.round(p*100)/100:null})()})).filter(i=>i.name);
+  const steps=o.steps.slice(0,10).map(x=>str(x,400)).filter(Boolean);
+  if(!ings.length||!steps.length) throw {code:"invalid_json"};
+  const color=/^#[0-9a-f]{6}$/i.test(o.color)?o.color:"#D9A441";
+  const vessel=["plate","bowl","pan"].includes(o.vessel)?o.vessel:"plate";
+  return {id:"ai-"+Date.now(),name:str(o.name,90),origin:str(o.origin,40),why:str(o.why,200),t:num(o.time,5,300)||30,s:num(o.servings,1,12)||2,
+    k:num(o.kcal,50,2500)||500,p:num(o.protein,0,200)??20,ings,steps,vis:[vessel,color,["#4A8C3A","#F5F1E8","#C0392B"]],lang:st.lang,meal:st.meal};
+}
+async function askAi(more){
+  if(!sampleFn) return;
+  if(!st.mine.length){st.aiErr="empty"; renderView(); return;}
+  if(more&&st.aiDish) st.aiPrev=[...st.aiPrev,st.aiDish.name].slice(-6);
+  if(!more) st.aiPrev=[];
+  aiCtl?.abort(); const ctl=new AbortController(); aiCtl=ctl;
+  st.aiState="loading"; st.aiErr=null; renderView();
+  try{
+    const res=await sampleFn.json(aiPrompt(),{signal:ctl.signal,cache:false,onText:()=>{const el=$("aiStatus"); if(el) el.textContent=L().writing;}});
+    if(ctl!==aiCtl) return;
+    st.aiDish=cleanAi(res); st.aiState="done"; save();
+  }catch(e){
+    if(ctl!==aiCtl) return;
+    const c=e&&e.code;
+    if(c==="cancelled"){ st.aiState=st.aiDish?"done":"idle"; }
+    else if(["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"].includes(c)){ sampleFn=false; st.aiState="idle"; st.aiErr="off"; renderMine(); }
+    else { st.aiState="idle"; st.aiErr=c==="rate_limited"?"rate":"fail"; }
+  }
+  if(st.view==="today"&&st.mode==="suggest") renderView();
+}
+const POT=`<svg class="pot" viewBox="0 0 40 40" aria-hidden="true"><rect x="7" y="16" width="26" height="16" rx="4" fill="var(--beet)"/><rect x="3" y="18" width="5" height="3" rx="1.5" fill="var(--beet)"/><rect x="32" y="18" width="5" height="3" rx="1.5" fill="var(--beet)"/><g class="lid"><rect x="6" y="11" width="28" height="4" rx="2" fill="var(--ink)"/><rect x="17" y="7" width="6" height="4" rx="2" fill="var(--ink)"/></g></svg>`;
+function aiDishHtml(a,fromSaved){
+  const t=L(), miss=a.ings.filter(i=>!i.have), cost=miss.reduce((s,i)=>s+(i.price||0),0);
+  const rows=miss.map(i=>`<div class="row"><span>${esc(i.name)}</span><span>${i.price!=null?zl(i.price):t.unk}</span></div>`).join("");
+  const r={id:a.id,vis:a.vis,[st.lang]:a.name};
+  return `<div class="dish-hero"><div class="dish-top">
+     <div class="eyebrow"><span class="tag good">${t.aiTag}</span>${a.origin?`<span class="tag plain">${esc(a.origin)}</span>`:""}<span class="tag plain">${a.t} ${t.min}</span><span class="tag plain">${a.s} ${t.serves}</span>${nutTags(a)}</div>
+     <div class="titlerow"><h2>${esc(a.name)}</h2>${bmBtn(isSavedAi(a),"ai",a.id)}</div>
+     ${a.why?`<p style="margin:0;color:var(--muted)">${esc(a.why)}</p>`:""}
+   </div>${art(r)}</div>
+   <div class="cols">
+     <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+       <div class="have"><p class="label">${t.ingr}</p><p class="hint">${t.tickHint}</p><ul>${a.ings.map((i,n)=>`<li class="${i.have?"":"miss"}"><button type="button" class="hv" data-aiing="${n}" aria-pressed="${i.have}" aria-label="${esc(i.name)}">${i.have?"✓":""}</button><span>${esc(i.name)} <span class="count">· ${i.have?t.ok:t.miss}</span> <a class="img" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(i.name+" "+st.store)}" target="_blank" rel="noopener">${t.see}</a></span></li>`).join("")}</ul></div>
+       <div><p class="label">${t.steps}</p><ol class="steps">${a.steps.map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>
+     </div>
+     <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+       <div class="receipt" aria-label="${t.list}"><div class="rh">${t.list}</div><div class="rs">${t.shop(esc(st.store))}</div><hr>
+         ${miss.length?rows+`<hr><div class="row tot"><span>${t.total}</span><span>${zl(cost)}</span></div>`:`<div class="done">${t.all}</div>`}
+         <div class="note">${t.aiNote}</div></div>
+       <div class="actions">
+         ${fromSaved?`<button type="button" class="btn primary" id="backSaved">${t.backSaved}</button>`:`<button type="button" class="btn primary" id="aiAgain">${t.another}</button>`}
+         ${miss.length?`<button type="button" class="btn" id="copy">${t.copy}</button>`:""}
+       </div>
+     </div>
+   </div>`;
+}
+const isSavedR=id=>st.saved.some(x=>x.type==="r"&&x.id===id);
+const isSavedAi=d=>!!d&&st.saved.some(x=>x.type==="ai"&&x.d.id===d.id);
+const BMI=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h12a.5.5 0 0 1 .5.5v16.2a.3.3 0 0 1-.48.24L12 16l-6.02 4.44a.3.3 0 0 1-.48-.24V4a.5.5 0 0 1 .5-.5z"/></svg>`;
+function bmBtn(on,kind,id){const t=L(); return `<button type="button" class="bm" data-bm="${kind}" data-bmid="${esc(id)}" aria-pressed="${on}" title="${on?t.unsave:t.save}">${BMI}<span>${on?t.savedL:t.save}</span></button>`;}
+function toggleSave(kind,id){
+  if(kind==="r"){ const i=st.saved.findIndex(x=>x.type==="r"&&x.id===id); if(i>=0) st.saved.splice(i,1); else if(RB[id]) st.saved.unshift({type:"r",id,ts:Date.now()}); }
+  else { const d=st.aiDish&&st.aiDish.id===id?st.aiDish:(st.saved.find(x=>x.type==="ai"&&x.d.id===id)||{}).d;
+    const i=st.saved.findIndex(x=>x.type==="ai"&&x.d.id===id);
+    if(i>=0) st.saved.splice(i,1); else if(d) st.saved.unshift({type:"ai",d:JSON.parse(JSON.stringify(d)),ts:Date.now()}); }
+  st.saved=st.saved.slice(0,100); save();
+}
+function renderSaved(){
+  const t=L(), v=$("view");
+  const fmtD=ts=>new Date(ts).toLocaleDateString(st.lang==="pl"?"pl-PL":"en-GB",{day:"numeric",month:"short"});
+  const cards=st.saved.map((x,i)=>{
+    if(x.type==="r"){ const r=RB[x.id], e=evalR(r);
+      return `<div class="scard">${art(r)}<div class="eyebrow"><span class="tag plain">${ORIGIN[r.o][st.lang]}</span><span class="tag plain">${r.t} ${t.min}</span><span class="tag plain">~${r.k} kcal</span><span class="tag plain">${r.p} g</span></div>
+        <h3>${esc(r[st.lang])}</h3><small>${t.have(e.own.length,r.n.length)}${e.miss.length?` · +${zl(e.cost)}`:""} · ${t.savedOn(fmtD(x.ts))}</small>
+        <div class="actions"><button type="button" class="btn primary" data-opensaved="${i}">${t.open}</button><button type="button" class="btn" data-unsave="${i}">${t.unsave}</button></div></div>`; }
+    const d=x.d, miss=d.ings.filter(g=>!g.have).length;
+    return `<div class="scard">${art({id:d.id,vis:d.vis,[st.lang]:d.name})}<div class="eyebrow"><span class="tag good">${t.aiTag}</span><span class="tag plain">${d.t} ${t.min}</span><span class="tag plain">~${d.k} kcal</span><span class="tag plain">${d.p} g</span></div>
+      <h3>${esc(d.name)}</h3><small>${miss?`+${miss} ${t.miss}`:"✓"} · ${t.savedOn(fmtD(x.ts))}</small>
+      <div class="actions"><button type="button" class="btn primary" data-opensaved="${i}">${t.open}</button><button type="button" class="btn" data-unsave="${i}">${t.unsave}</button></div></div>`;
+  }).join("");
+  v.innerHTML=`<div class="sugh"><h2>${t.savedH}</h2><p>${t.savedSub}</p></div>
+    ${cards?`<div class="savedgrid">${cards}</div>`:`<p class="empty" style="margin:0">${t.savedEmpty}</p>`}`;
+  v.dataset.text="";
+}
+function renderSuggest(){
+  const t=L(), v=$("view");
+  const names=st.mine.map(mineName);
+  const ms=builtinMatches();
+  const us=ms.map(o=>`<button type="button" class="alt" data-alt="${o.x.r.id}"><span>${esc(o.x.r[st.lang])}<span class="uses">${t.uses(o.hit.map(k=>baseName(nm(k))).join(", "))}</span></span><small>${Math.round(o.x.match*100)}%${o.x.miss.length?" · +"+zl(o.x.cost):""}</small></button>`).join("");
+  let ai="";
+  if(st.aiState==="loading") ai=`<div class="thinking">${POT}<span id="aiStatus">${t.thinking}</span><button type="button" class="btn" id="aiStop">${t.stop}</button></div>`;
+  else if(st.aiErr==="empty") ai=`<div class="notice">${t.emptyMine}</div>`;
+  else if(st.aiErr==="off") ai=`<div class="notice">${t.aiOff}</div>`;
+  else if(st.aiErr) ai=`<div class="notice"><span>${st.aiErr==="rate"?t.aiRate:t.aiFail}</span><button type="button" class="btn" id="aiRetry">${t.tryAgain}</button></div>`;
+  if(st.aiDish&&st.aiState!=="loading") ai+=aiDishHtml(st.aiDish);
+  else if(!ai&&sampleFn&&st.mine.length) ai=`<div class="actions"><button type="button" class="btn primary" id="aiRetry">${t.askAi}</button></div>`;
+  v.innerHTML=`<div class="sugh"><h2>${t.sugH}</h2>${names.length?`<p>${esc(t.sugSub(names.join(", ")))}</p>`:`<p>${t.emptyMine}</p>`}</div>
+   ${ai}
+   <div><p class="label">${t.fromUs}</p>${us?`<div class="alts">${us}</div>`:`<p class="empty" style="margin:0">${t.noneUs}</p>`}</div>
+   <div class="actions"><button type="button" class="btn" id="backPick">${t.backPick}</button></div>`;
+  const a=st.aiDish;
+  v.dataset.text=a?`CoZjem · ${a.name}\n${t.list} (${st.store})\n`+a.ings.filter(i=>!i.have).map(i=>`- ${i.name}${i.price!=null?"  ~"+zl(i.price):""}`).join("\n"):"";
+}
+function renderToday(quiet){
+  const t=L(), v=$("view"); v.classList.toggle("still",!!quiet);
+  if(st.mode==="suggest") return renderSuggest();
+  if(st.mode==="ai"&&st.aiDish){ v.innerHTML=aiDishHtml(st.aiDish,true); const a=st.aiDish;
+    v.dataset.text=`CoZjem · ${a.name}\n${t.list} (${st.store})\n`+a.ings.filter(i=>!i.have).map(i=>`- ${i.name}${i.price!=null?"  ~"+zl(i.price):""}`).join("\n"); return; }
+  let x, i=0, list=ranked();
+  if(st.forced&&RB[st.forced]){x=evalR(RB[st.forced]);}
+  else{ if(!list.length){v.innerHTML=`<p class="empty">${t.none}</p>`;return;} i=st.pick%list.length; x=list[i]; }
+  const r=x.r, pct=Math.round(x.match*100); st.cur=r.id;
+  const alts=list.filter(a=>a.r.id!==r.id).slice(0,3).map(a=>`<button type="button" class="alt" data-alt="${a.r.id}"><span>${esc(a.r[st.lang])}</span><small>${Math.round(a.match*100)}% · ${a.r.p} g${a.miss.length?" · +"+zl(a.cost):""}</small></button>`).join("");
+  const mealKey=r.m.includes(st.meal)?st.meal:r.m[0];
+  v.innerHTML=`
+   <div class="dish-hero"><div class="dish-top">
+     <div class="eyebrow"><span class="tag">${t.today[mealKey]}</span><span class="tag plain">${ORIGIN[r.o][st.lang]}</span><span class="tag plain">${r.t} ${t.min}</span><span class="tag plain">${r.s} ${t.serves}</span>${nutTags(r)}${r.bk?`<span class="tag plain">${t.keeps}</span>`:""}</div>
+     <div class="titlerow"><h2>${esc(r[st.lang])}</h2>${bmBtn(isSavedR(r.id),"r",r.id)}</div>
+     <div class="meter"><span>${t.have(x.own.length,r.n.length)}</span><div class="bar" aria-hidden="true"><i style="width:${pct}%"></i></div><b>${pct}%</b></div>
+   </div>${art(r)}</div>
+   <div class="cols">
+     <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+       <div class="have"><p class="label">${t.ingr}</p><p class="hint">${t.tickHint}</p><ul>${r.n.map(k=>`<li class="${st.have.has(k)?"":"miss"}"><button type="button" class="hv" data-ing="${k}" aria-pressed="${st.have.has(k)}" aria-label="${esc(nm(k))}">${st.have.has(k)?"✓":""}</button><span>${esc(nm(k))} <span class="count">· ${st.have.has(k)?t.ok:t.miss}</span> <a class="img" href="${imgUrl(k)}" target="_blank" rel="noopener">${t.see}</a></span></li>`).join("")}</ul></div>
+       <div><p class="label">${t.steps}</p><ol class="steps">${(st.lang==="pl"?r.sp:r.se).map(s=>`<li>${esc(s)}</li>`).join("")}</ol></div>
+     </div>
+     <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+       ${alertHtml(x.miss)}
+       ${receipt(t.list,x.miss,x.cost)}
+       ${compareHtml(x.miss)}
+       <div class="actions">
+         <button type="button" class="btn primary" id="another">${t.another}</button>
+         ${x.miss.length?`<button type="button" class="btn" id="copy">${t.copy}</button>`:""}
+       </div>
+     </div>
+   </div>
+   ${alts?`<div><p class="label">${t.alts}</p><div class="alts">${alts}</div></div>`:""}`;
+  v.dataset.text=`CoZjem · ${r[st.lang]}\n${t.list} (${st.store})\n`+x.miss.map(k=>`- ${nmS(k)}  ~${zl(pr(k))}`).join("\n")+`\n${t.total} ${zl(x.cost)}`;
+}
+function renderWeek(){
+  const t=L(), v=$("view");
+  if(!st.plan) genWeek();
+  let sk=0,sp=0;
+  const rows=st.plan.map((row,d)=>{
+    const k=RB[row.b].k+RB[row.l].k+RB[row.d].k, p=RB[row.b].p+RB[row.l].p+RB[row.d].p; sk+=k; sp+=p;
+    const cells=["b","l","d"].map(m=>{const r=RB[row[m]], mi=r.n.filter(x=>!st.have.has(x)).length;
+      return `<div class="cell" data-m="${t.meals[m]}"><button type="button" class="open" data-open="${r.id}" data-om="${m}">${esc(r[st.lang])}</button>
+        <small>~${r.k} kcal · ${r.p} g${mi?` · <span class="miss">+${mi}</span>`:" · ✓"}</small>
+        ${m==="l"&&row.lo?`<span class="badge lo">${t.leftover}</span>`:""}${m==="l"&&st.plan[d+1]&&st.plan[d+1].lo?`<span class="badge cook">${t.cook2}</span>`:""}
+        <button type="button" class="swap" data-swap="${d}:${m}" aria-label="${t.swap}: ${esc(r[st.lang])}" title="${t.swap}">↻</button></div>`;}).join("");
+    return `<div class="wrow"><div class="wday">${DAYS[st.lang][d]}<small>~${fmt(k,0)} kcal · ${p} g</small></div>${cells}</div>`;
+  }).join("");
+  const sh=weekShop();
+  const saved=st.plan.filter(r=>r.lo).length;
+  v.innerHTML=`<div class="wtop"><p style="margin:0;color:var(--muted);font-size:.92rem;max-width:52ch">${t.wIntro}${st.batch?" "+t.batchIntro:""}</p>
+     <button type="button" class="toggle" id="batch" aria-pressed="${st.batch}"><span class="knob" aria-hidden="true"></span>${t.batch}</button></div>
+   <div style="overflow-x:auto"><div class="week">
+     <div class="wrow head"><span></span>${["b","l","d"].map(m=>`<span class="whead">${t.meals[m]}</span>`).join("")}</div>
+     ${rows}
+   </div></div>
+   <div class="weekfoot">
+     <div style="display:flex;flex-direction:column;gap:14px">
+       <div class="stat"><b>~${fmt(Math.round(sk/7/10)*10,0)}</b><span>${t.avgK}</span></div>
+       <div class="stat"><b>${Math.round(sp/7)}</b><span>${t.avgP}</span></div>
+       <div class="stat"><b>${sh.ks.length}</b><span>${t.toBuy(sh.ks.length)}</span></div>
+       ${st.batch?`<div class="stat"><b>${saved}</b><span>${t.saved}</span></div>`:""}
+       <div class="actions">
+         <button type="button" class="btn primary" id="regen">${t.regen}</button>
+         ${sh.ks.length?`<button type="button" class="btn" id="copy">${t.copy}</button>`:""}
+       </div>
+     </div>
+     <div style="display:flex;flex-direction:column;gap:12px;min-width:0">${alertHtml(sh.ks)}${receipt(t.wlist,sh.ks,sh.cost,t.wnote)}${compareHtml(sh.ks)}</div>
+   </div>`;
+  v.dataset.text=`CoZjem · ${t.tWeek}\n`+st.plan.map((row,d)=>`${DSHORT[st.lang][d]}: ${RB[row.b][st.lang]} / ${RB[row.l][st.lang]} / ${RB[row.d][st.lang]}`).join("\n")
+    +`\n\n${t.wlist} (${st.store})\n`+sh.ks.map(k=>`- ${nmS(k)}  ~${zl(pr(k))}`).join("\n")+`\n${t.total} ${zl(sh.cost)}`;
+}
+function animateIn(){
+  const v=$("view"); const els=st.view==="week"?[...v.querySelectorAll(".wday,.cell")]:st.view==="shop"?[...v.querySelectorAll(".stat,.shopcols .track li")]:st.view==="saved"?[...v.querySelectorAll(".scard")]:[...v.children];
+  els.forEach((c,i)=>{c.style.setProperty("--i",i);c.classList.remove("rise");void c.offsetWidth;c.classList.add("rise");});
+}
+function renderShop(){
+  const t=L(), v=$("view"), now=Date.now(), D=864e5;
+  if(!st.plan) genWeek();
+  const sh=weekShop();
+  const spent=Object.entries(st.bought).filter(([k,ts])=>now-ts<7*D).reduce((a,[k])=>a+pr(k),0);
+  const buy=sh.ks.map(k=>`<li><button type="button" class="tick" data-buy="${k}" aria-label="${t.markBought}: ${esc(nm(k))}"></button>
+     <span class="nm">${esc(nm(k))}${ING[k][3]==="afr"?` <span class="tag plain">${t.afrShop}</span>`:""} <a class="img" href="${imgUrl(k)}" target="_blank" rel="noopener">${t.see}</a></span><span class="pr">${(q=>q.src==="promo"?`<span class="pill check">${t.promo}</span> `:q.src==="mine"?"* ":"")(priceAt(k,st.store))}${zl(pr(k))}</span></li>`).join("");
+  const kit=[...st.have].map(k=>{const ts=st.bought[k], life=shelf(k), left=ts?life-(now-ts)/D:null;
+      const stt=left===null?"none":left<0?"check":left<=1.5?"soon":"fresh"; return {k,ts,left,stt};})
+    .sort((a,b)=>(a.left??1e9)-(b.left??1e9));
+  const kitRows=kit.map(o=>`<li><span class="dot ${o.stt}" aria-hidden="true"></span>
+     <span class="nm">${esc(nm(o.k))}<small>${o.ts?t.boughtAgo(Math.floor((now-o.ts)/D)):t.noDate}</small></span>
+     ${o.stt!=="none"?`<span class="pill ${o.stt}">${t[o.stt]}</span>`:""}
+     <button type="button" class="btn sm" data-used="${o.k}">${t.used}</button></li>`).join("");
+  const t0=day0(), promos=st.promos.map((p,i)=>({...p,i})).filter(p=>p.until>=t0).sort((a,b)=>a.until-b.until);
+  const mine=[]; Object.entries(st.prices).forEach(([k,o])=>Object.entries(o).forEach(([s2,m])=>mine.push({k,s:s2,p:m.p,ts:m.ts})));
+  mine.sort((a,b)=>b.ts-a.ts);
+  const opts=Object.keys(ING).filter(k=>ING[k][3]!=="afr").map(k=>`<option value="${esc(baseName(nm(k)))}"></option>`).join("");
+  const wk=new Date(Date.now()+6*864e5).toISOString().slice(0,10);
+  const pricesBlock=`<div class="pbox"><p class="label">${t.pricesH}</p><p class="hint" style="margin:0">${t.pricesSub}</p>
+     <form id="priceForm" class="pform" autocomplete="off">
+       <input id="pfItem" list="ingList" placeholder="${t.pfItem}" aria-label="${t.pfItem}"><datalist id="ingList">${opts}</datalist>
+       <select id="pfStore" aria-label="${t.store}">${STORES.map(x=>`<option${x===st.store?" selected":""}>${x}</option>`).join("")}</select>
+       <input id="pfPrice" type="text" inputmode="decimal" placeholder="zł" aria-label="zł" maxlength="8">
+       <label class="pfp"><input type="checkbox" id="pfPromo"> ${t.pfPromo}</label>
+       <label class="pfp">${t.pfUntil} <input type="date" id="pfUntil" value="${wk}"></label>
+       <button class="btn primary" type="submit">${t.pfSave}</button>
+       <span class="pferr" id="pfErr" role="alert"></span>
+     </form>
+     <div class="pcols">
+       <div><p class="label">${t.activeH}</p>${promos.length?`<ul class="track">${promos.map(p=>`<li><span class="pill check">${t.promo}</span><span class="nm">${esc(baseName(nm(p.k)))} · ${p.store}<small>${t.until(fmtDay(p.until))}</small></span><span class="pr">${zl(p.p)}</span><button type="button" class="btn sm" data-rmpromo="${p.i}">${t.remove}</button></li>`).join("")}</ul>`:`<p class="empty" style="margin:0">${t.noPromos}</p>`}</div>
+       <div><p class="label">${t.mineH}</p>${mine.length?`<ul class="track">${mine.slice(0,30).map(m=>`<li><span class="nm">${esc(baseName(nm(m.k)))} · ${m.s}<small>${fmtDay(m.ts)}</small></span><span class="pr">${zl(m.p)}</span><button type="button" class="btn sm" data-rmprice="${m.k}|${m.s}">${t.remove}</button></li>`).join("")}</ul>`:`<p class="empty" style="margin:0">${t.noMine}</p>`}</div>
+     </div>
+     <p class="label" style="margin-top:6px">${t.leafH}</p>
+     <div class="actions">${STORES.map(x=>`<a class="btn" href="${LEAF[x]}" target="_blank" rel="noopener">${x} ↗</a>`).join("")}</div>
+   </div>`;
+  v.innerHTML=`<p style="margin:0;color:var(--muted);font-size:.92rem;max-width:56ch">${t.shopIntro}</p>
+   ${alertHtml(sh.ks)}
+   <div class="shopstats">
+     <div class="stat"><b>${sh.ks.length}</b><span>${t.toBuyH} · ~${zl(sh.cost)}</span></div>
+     <div class="stat"><b>${zl(spent)}</b><span>${t.spent}</span></div>
+     <div class="stat"><b>${st.have.size}</b><span>${t.inKitchen}</span></div>
+   </div>
+   <div class="shopcols">
+     <div><p class="label">${t.toBuyH} (${esc(st.store)})</p>
+       ${buy?`<ul class="track">${buy}</ul><div class="actions" style="margin-top:10px"><button type="button" class="btn primary" id="buyall">${t.buyAll}</button><button type="button" class="btn" id="copy">${t.copy}</button></div>`:`<p class="empty">${t.nothingToBuy}</p>`}
+     </div>
+     <div><p class="label">${t.kitchenH}</p>${kitRows?`<ul class="track">${kitRows}</ul>`:`<p class="empty">${t.emptyKitchen}</p>`}</div>
+   </div>
+   ${compareHtml(sh.ks)}
+   ${pricesBlock}`;
+  v.dataset.text=`CoZjem · ${t.list} (${st.store})\n`+sh.ks.map(k=>`- ${nmS(k)}  ~${zl(pr(k))}`).join("\n")+`\n${t.total} ${zl(sh.cost)}`;
+}
+function renderView(){ st.view==="week"?renderWeek():st.view==="shop"?renderShop():st.view==="saved"?renderSaved():renderToday(); animateIn(); }
+function all(){renderStatic();renderView();}
+function flash(){const el=$("result"); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+  const top=el.getBoundingClientRect().top; if(top<0||top>window.innerHeight*0.6) el.scrollIntoView({behavior:"smooth",block:"start"});}
+
+document.addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  if(b.dataset.alt||b.dataset.open||b.dataset.meal||b.dataset.goal||b.id==="another"||b.id==="backPick"||(b.id==="go"&&st.view!=="week")){ if(st.mode!=="pick"){st.mode="pick"; save();} }
+  if(b.dataset.rm!==undefined){st.mine.splice(+b.dataset.rm,1); save(); renderMine(); if(st.view==="today"&&st.mode==="suggest") renderView(); return;}
+  if(b.id==="suggest"){
+    if($("mineIn").value.trim()){addMine($("mineIn").value); $("mineIn").value=""; renderMine(); renderChips();}
+    st.view="today"; st.mode="suggest"; st.aiErr=null; save(); renderStatic();
+    if(!st.mine.length){st.aiErr="empty"; renderView(); flash(); return;}
+    if(sampleFn){ askAi(false); } else renderView();
+    flash(); return;}
+  if(b.dataset.bm){ toggleSave(b.dataset.bm,b.dataset.bmid); const on=b.dataset.bm==="r"?isSavedR(b.dataset.bmid):st.saved.some(x=>x.type==="ai"&&x.d.id===b.dataset.bmid);
+    b.setAttribute("aria-pressed",on); b.title=on?L().unsave:L().save; b.querySelector("span").textContent=on?L().savedL:L().save;
+    b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); renderStatic(); return;}
+  if(b.dataset.setstore){st.store=b.dataset.setstore; save(); all(); flash(); return;}
+  if(b.dataset.rmpromo!==undefined){st.promos.splice(+b.dataset.rmpromo,1); save(); renderView(); return;}
+  if(b.dataset.rmprice){const [k,sx]=b.dataset.rmprice.split("|"); if(st.prices[k]){delete st.prices[k][sx]; if(!Object.keys(st.prices[k]).length) delete st.prices[k];} save(); renderView(); return;}
+  if(b.dataset.unsave!==undefined){st.saved.splice(+b.dataset.unsave,1); save(); renderStatic(); renderView(); return;}
+  if(b.dataset.opensaved!==undefined){const x=st.saved[+b.dataset.opensaved]; if(!x) return;
+    st.view="today";
+    if(x.type==="r"){ st.mode="pick"; st.forced=x.id; const r=RB[x.id]; if(!r.m.includes(st.meal)) st.meal=r.m[0]; }
+    else { st.aiDish=JSON.parse(JSON.stringify(x.d)); st.mode="ai"; }
+    save(); all(); flash(); return;}
+  if(b.id==="backSaved"){st.view="saved"; st.mode="pick"; save(); all(); return;}
+  if(b.id==="aiAgain"){askAi(true); return;}
+  if(b.id==="aiRetry"){askAi(false); return;}
+  if(b.id==="aiStop"){aiCtl?.abort(); return;}
+  if(b.id==="backPick"){st.forced=null; renderView(); flash(); return;}
+  if(b.dataset.aiing!==undefined&&st.aiDish){const i=st.aiDish.ings[+b.dataset.aiing]; if(i){i.have=!i.have; save(); renderToday(true);} return;}
+  if(b.dataset.goal){st.goal=b.dataset.goal;st.pick=0;st.forced=null;genWeek();save();all();return;}
+  if(b.dataset.meal){st.meal=b.dataset.meal;st.pick=0;st.forced=null;save();all();return;}
+  if(b.dataset.store){st.store=b.dataset.store;save();all();return;}
+  if(b.dataset.ing){const k=b.dataset.ing;
+    if(st.have.has(k)){st.have.delete(k); delete st.bought[k];} else st.have.add(k);
+    document.querySelectorAll(`#cats [data-ing="${k}"]`).forEach(c=>c.setAttribute("aria-pressed",st.have.has(k)));
+    b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop");
+    $("count").textContent=L().count(st.have.size); save();
+    if(st.view==="today"){ if(st.cur) st.forced=st.cur; renderToday(true); }
+    else if(st.view==="week") renderWeek(); else renderShop();
+    return;}
+  if(b.dataset.alt){st.forced=b.dataset.alt; renderView(); flash(); return;}
+  if(b.dataset.open){st.forced=b.dataset.open; st.meal=b.dataset.om; st.view="today"; save(); all(); flash(); return;}
+  if(b.dataset.buy){const k=b.dataset.buy; st.have.add(k); st.bought[k]=Date.now(); save(); renderChips(); renderView(); return;}
+  if(b.dataset.used){const k=b.dataset.used; st.have.delete(k); delete st.bought[k]; save(); renderChips(); renderView(); return;}
+  if(b.id==="buyall"){const now=Date.now(); weekShop().ks.forEach(k=>{st.have.add(k); st.bought[k]=now}); save(); renderChips(); renderView(); flash(); return;}
+  if(b.id==="batch"){st.batch=!st.batch; genWeek(); save(); renderView(); flash(); return;}
+  if(b.dataset.swap){const [d,m]=b.dataset.swap.split(":"); swapCell(+d,m); renderView(); return;}
+  if(b.id==="lang-pl"||b.id==="lang-en"){st.lang=b.id.slice(5);save();all();return;}
+  if(b.id==="tab-today"||b.id==="tab-week"||b.id==="tab-shop"||b.id==="tab-saved"){st.view=b.id.slice(4);save();all();return;}
+  if(b.id==="clear"){st.have.clear();st.q="";$("q").value="";st.pick=0;st.forced=null;save();all();return;}
+  if(b.id==="another"){
+    if(st.forced){const list=ranked(); const j=list.findIndex(a=>a.r.id===st.forced); st.pick=j<0?0:j+1; st.forced=null;} else st.pick++;
+    renderView(); flash(); return;}
+  if(b.id==="regen"){genWeek(); renderView(); flash(); return;}
+  if(b.id==="go"){
+    if(st.view==="week"){genWeek(); renderView(); flash(); return;}
+    if(st.view==="shop"){st.view="today"; save(); renderStatic();}
+    const list=ranked(); if(!list.length){renderToday();return;}
+    const pool=Math.min(4,list.length); const cur=st.forced?list.findIndex(a=>a.r.id===st.forced):st.pick%list.length;
+    let n=Math.floor(Math.random()*pool); if(pool>1&&n===cur) n=(n+1)%pool;
+    st.pick=n; st.forced=null; renderView(); flash(); return;}
+  if(b.id==="copy"){const txt=$("view").dataset.text||"";
+    const ok=()=>{b.textContent=L().copied;setTimeout(()=>{b.textContent=L().copy},1500)};
+    try{navigator.clipboard.writeText(txt).then(ok).catch(()=>fallback(txt,ok));}catch(err){fallback(txt,ok);} }
+});
+function fallback(txt,ok){const ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");ok();}catch(e){}ta.remove();}
+$("q").addEventListener("input",e=>{st.q=e.target.value;renderChips();});
+document.addEventListener("submit",e=>{
+  if(e.target.id!=="priceForm") return; e.preventDefault(); const t=L();
+  const raw=$("pfItem").value.trim(), k=findKey(raw), p=Math.round(parseFloat(String($("pfPrice").value).replace(",","."))*100)/100, store=$("pfStore").value;
+  const err=m=>{$("pfErr").textContent=m;};
+  if(!k||ING[k][3]==="afr") return err(t.pfErrItem);
+  if(!Number.isFinite(p)||p<=0||p>1000) return err(t.pfErrPrice);
+  if($("pfPromo").checked){ const u=new Date($("pfUntil").value+"T23:59:00").getTime(); if(!Number.isFinite(u)||u<day0()) return err(t.pfErrDate);
+    st.promos.push({k,store,p,until:u,ts:Date.now()}); }
+  else (st.prices[k]=st.prices[k]||{})[store]={p,ts:Date.now()};
+  save(); renderView(); flash();
+});
+$("mineForm").addEventListener("submit",e=>{e.preventDefault(); const v=$("mineIn").value; if(!v.trim()) return;
+  addMine(v); $("mineIn").value=""; save(); renderMine(); renderChips(); $("count").textContent=L().count(st.have.size);
+  const last=$("mine").lastElementChild; if(last){last.classList.add("pop");}
+  if(st.view==="today"&&st.mode==="suggest") renderView(); });
+try{ const p=window.claude?.use?.("sample"); if(p&&p.then) p.then(f=>{sampleFn=f||false; renderMine(); if(st.view==="today"&&st.mode==="suggest") renderView();}).catch(()=>{sampleFn=false; renderMine();}); else sampleFn=false; }catch(e){ sampleFn=false; }
+if(!st.plan) genWeek();
+all();
+</script>
+
+<script>if("serviceWorker" in navigator) addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script>
+</body>
+</html>
