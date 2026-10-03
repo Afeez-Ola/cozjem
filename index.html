@@ -222,6 +222,16 @@ a.img{font-size:.78rem;color:var(--beet);text-decoration:none;border-bottom:1px 
 .scard .eyebrow .tag{font-size:.64rem}
 .scard small{color:var(--muted);font-size:.78rem}
 .scard .actions{margin-top:auto}
+/* sharing */
+.tbtns{display:flex;gap:6px;flex:none;flex-wrap:wrap;justify-content:flex-end}
+.bm.sh svg path{fill:none!important}
+.bm.sh[aria-expanded="true"]{border-color:var(--dill);background:var(--dill-soft);color:var(--dill)}
+.sharebox{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px;border-radius:12px;background:var(--dill-soft);animation:rise .25s ease both}
+.sharebox a.btn{text-decoration:none}
+.sharebox .wa{background:#1F8F4E;border-color:#1F8F4E;color:#fff}
+.shnote{flex-basis:100%;margin:0;font-size:.82rem;color:var(--muted)}
+.sharedin{margin:0;padding:10px 12px;border-radius:10px;background:var(--beet-soft);font-size:.9rem}
+@media (max-width:480px){.titlerow{flex-direction:column}.tbtns{justify-content:flex-start}}
 /* price comparison + promotions */
 .cmp{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface)}
 .cmp .label{margin:0}
@@ -613,6 +623,10 @@ const T = {
   wIntro:"Kliknij danie, aby zobaczyć przepis, albo ↻, żeby je zamienić. Długie dania jak bigos i pierogi trafiają na weekend.",
   avgK:"średnio kcal dziennie", avgP:"średnio g białka dziennie", toBuy:n=>`${n} produktów do kupienia`, perDay:"dziennie",
   disc:"Wartości kalorii i białka są przybliżone. To ogólne wskazówki, nie porada medyczna. Jeśli masz choroby przewlekłe lub specjalną dietę, skonsultuj się z dietetykiem.",
+  share:"Udostępnij", shNative:"Udostępnij…", shLink:"Kopiuj link", shText:"Kopiuj przepis",
+  shNote:"Wyślij danie znajomym. Link otwiera ten przepis w CoZjem.", shCopiedLink:"Link skopiowany. Wklej go w wiadomości.", shCopiedText:"Przepis skopiowany.",
+  shHey:n=>`Ugotujmy dziś: ${n}!`, shOpen:"Przepis i lista zakupów w CoZjem:", madeWith:"Z CoZjem:", protShort:"białka",
+  sharedIn:"Ktoś udostępnił Ci to danie. Zaznacz, co masz w domu, a CoZjem pokaże, co dokupić.",
   cmpH:"Gdzie najtaniej?", cheapest:"Najtaniej", yourShop:"Twój sklep", shopHere:"Kupuj tutaj", promoN:n=>`${n} w promocji`,
   saveAt:(s,v)=>`W ${s} zapłacisz około ${v} mniej za tę listę.`, bestAlready:"Twój sklep jest najtańszy dla tej listy.",
   mixLine:(l,sum,sv)=>`Najtaniej po rozdzieleniu: ${l}, razem ${sum}, czyli jeszcze ${sv} mniej.`,
@@ -654,6 +668,10 @@ const T = {
   wIntro:"Tap a dish to see the recipe, or ↻ to swap it. Long dishes like bigos and pierogi go on the weekend.",
   avgK:"average kcal a day", avgP:"average g protein a day", toBuy:n=>`${n} products to buy`, perDay:"a day",
   disc:"Calorie and protein values are approximate. This is general guidance, not medical advice. If you have a health condition or a special diet, talk to a dietitian.",
+  share:"Share", shNative:"Share…", shLink:"Copy link", shText:"Copy recipe",
+  shNote:"Send this dish to friends. The link opens this recipe in CoZjem.", shCopiedLink:"Link copied. Paste it into a message.", shCopiedText:"Recipe copied.",
+  shHey:n=>`Let's cook ${n} today!`, shOpen:"Recipe and shopping list on CoZjem:", madeWith:"Made with CoZjem:", protShort:"protein",
+  sharedIn:"Someone shared this dish with you. Tick what you have at home and CoZjem shows what to buy.",
   cmpH:"Where is it cheapest?", cheapest:"Cheapest", yourShop:"Your shop", shopHere:"Shop here", promoN:n=>`${n} on promo`,
   saveAt:(s,v)=>`You'd pay about ${v} less for this list at ${s}.`, bestAlready:"Your shop is the cheapest for this list.",
   mixLine:(l,sum,sv)=>`Cheapest if you split it: ${l}, ${sum} in total, a further ${sv} less.`,
@@ -971,7 +989,7 @@ function aiDishHtml(a,fromSaved){
   const r={id:a.id,vis:a.vis,[st.lang]:a.name};
   return `<div class="dish-hero"><div class="dish-top">
      <div class="eyebrow"><span class="tag good">${t.aiTag}</span>${a.origin?`<span class="tag plain">${esc(a.origin)}</span>`:""}<span class="tag plain">${a.t} ${t.min}</span><span class="tag plain">${a.s} ${t.serves}</span>${nutTags(a)}</div>
-     <div class="titlerow"><h2>${esc(a.name)}</h2>${bmBtn(isSavedAi(a),"ai",a.id)}</div>
+     <div class="titlerow"><h2>${esc(a.name)}</h2><div class="tbtns">${bmBtn(isSavedAi(a),"ai",a.id)}${shareBtn("ai",a.id)}</div></div>${shareBox()}
      ${a.why?`<p style="margin:0;color:var(--muted)">${esc(a.why)}</p>`:""}
    </div>${art(r)}</div>
    <div class="cols">
@@ -1000,6 +1018,41 @@ function toggleSave(kind,id){
     const i=st.saved.findIndex(x=>x.type==="ai"&&x.d.id===id);
     if(i>=0) st.saved.splice(i,1); else if(d) st.saved.unshift({type:"ai",d:JSON.parse(JSON.stringify(d)),ts:Date.now()}); }
   st.saved=st.saved.slice(0,100); save();
+}
+const SITE="https://afeez-ola.github.io/cozjem/";
+const SHI=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>`;
+function shareBtn(kind,id){return `<button type="button" class="bm sh" data-share="${kind}" data-shid="${esc(id)}" aria-expanded="false" aria-controls="sharebox">${SHI}<span>${L().share}</span></button>`;}
+function shareBox(){const t=L();return `<div class="sharebox" id="sharebox" hidden>
+  ${navigator.share?`<button type="button" class="btn primary" id="shNative">${t.shNative}</button>`:""}
+  <a class="btn wa" id="shWa" href="#" target="_blank" rel="noopener">WhatsApp</a>
+  <button type="button" class="btn" id="shLink">${t.shLink}</button>
+  <button type="button" class="btn" id="shText">${t.shText}</button>
+  <p class="shnote" id="shNote">${t.shNote}</p></div>`;}
+function shareData(kind,id){
+  const t=L();
+  if(kind==="r"&&RB[id]){ const r=RB[id], url=SITE+"#r-"+id;
+    const ing=r.n.map(k=>baseName(nm(k))).join(", ");
+    const text=`${t.shHey(r[st.lang])}\n\n${t.ingr}: ${ing}\n${r.t} ${t.min} · ~${r.k} kcal · ${r.p} g ${t.protShort}\n\n${t.shOpen}`;
+    const full=`${r[st.lang]}\n\n${t.ingr}:\n${r.n.map(k=>"- "+nm(k)).join("\n")}\n\n${t.steps}:\n${(st.lang==="pl"?r.sp:r.se).map((x,i)=>`${i+1}. ${x}`).join("\n")}\n\n${t.madeWith} ${url}`;
+    return {title:r[st.lang],text,url,full}; }
+  const d=(st.aiDish&&st.aiDish.id===id)?st.aiDish:((st.saved.find(x=>x.type==="ai"&&x.d.id===id)||{}).d);
+  if(!d) return null;
+  const full=`${d.name}\n\n${t.ingr}:\n${d.ings.map(i=>"- "+i.name).join("\n")}\n\n${t.steps}:\n${d.steps.map((x,i)=>`${i+1}. ${x}`).join("\n")}\n\n${t.madeWith} ${SITE}`;
+  return {title:d.name,text:full,url:SITE,full,noLink:true};
+}
+let shareCur=null;
+function openShare(btn){
+  const box=$("sharebox"); if(!box) return;
+  const open=box.hidden; box.hidden=!open; btn.setAttribute("aria-expanded",open);
+  if(!open) return;
+  shareCur=shareData(btn.dataset.share,btn.dataset.shid); if(!shareCur) return;
+  $("shWa").href="https://wa.me/?text="+encodeURIComponent(shareCur.noLink?shareCur.full:shareCur.text+"\n"+shareCur.url);
+  $("shLink").hidden=!!shareCur.noLink;
+  $("shNote").textContent=L().shNote;
+}
+function copyText(txt,el,msg){
+  const done=()=>{ if(el){ el.textContent=msg; } };
+  try{ navigator.clipboard.writeText(txt).then(done).catch(()=>{fallback(txt,done);}); }catch(e){ fallback(txt,done); }
 }
 function renderSaved(){
   const t=L(), v=$("view");
@@ -1051,7 +1104,7 @@ function renderToday(quiet){
   v.innerHTML=`
    <div class="dish-hero"><div class="dish-top">
      <div class="eyebrow"><span class="tag">${t.today[mealKey]}</span><span class="tag plain">${ORIGIN[r.o][st.lang]}</span><span class="tag plain">${r.t} ${t.min}</span><span class="tag plain">${r.s} ${t.serves}</span>${nutTags(r)}${r.bk?`<span class="tag plain">${t.keeps}</span>`:""}</div>
-     <div class="titlerow"><h2>${esc(r[st.lang])}</h2>${bmBtn(isSavedR(r.id),"r",r.id)}</div>
+     <div class="titlerow"><h2>${esc(r[st.lang])}</h2><div class="tbtns">${bmBtn(isSavedR(r.id),"r",r.id)}${shareBtn("r",r.id)}</div></div>${shareBox()}${st.sharedIn===r.id?`<p class="sharedin">${t.sharedIn}</p>`:""}
      <div class="meter"><span>${t.have(x.own.length,r.n.length)}</span><div class="bar" aria-hidden="true"><i style="width:${pct}%"></i></div><b>${pct}%</b></div>
    </div>${art(r)}</div>
    <div class="cols">
@@ -1184,6 +1237,11 @@ document.addEventListener("click",e=>{
   if(b.dataset.bm){ toggleSave(b.dataset.bm,b.dataset.bmid); const on=b.dataset.bm==="r"?isSavedR(b.dataset.bmid):st.saved.some(x=>x.type==="ai"&&x.d.id===b.dataset.bmid);
     b.setAttribute("aria-pressed",on); b.title=on?L().unsave:L().save; b.querySelector("span").textContent=on?L().savedL:L().save;
     b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); renderStatic(); return;}
+  if(b.dataset.share){openShare(b); return;}
+  if(b.id==="shNative"&&shareCur){ const d=shareCur.noLink?{title:shareCur.title,text:shareCur.full}:{title:shareCur.title,text:shareCur.text,url:shareCur.url};
+    try{ navigator.share(d).catch(()=>{}); }catch(e){} return; }
+  if(b.id==="shLink"&&shareCur){copyText(shareCur.url,$("shNote"),L().shCopiedLink); return;}
+  if(b.id==="shText"&&shareCur){copyText(shareCur.full,$("shNote"),L().shCopiedText); return;}
   if(b.dataset.setstore){st.store=b.dataset.setstore; save(); all(); flash(); return;}
   if(b.dataset.rmpromo!==undefined){st.promos.splice(+b.dataset.rmpromo,1); save(); renderView(); return;}
   if(b.dataset.rmprice){const [k,sx]=b.dataset.rmprice.split("|"); if(st.prices[k]){delete st.prices[k][sx]; if(!Object.keys(st.prices[k]).length) delete st.prices[k];} save(); renderView(); return;}
@@ -1254,6 +1312,8 @@ $("mineForm").addEventListener("submit",e=>{e.preventDefault(); const v=$("mineI
   if(st.view==="today"&&st.mode==="suggest") renderView(); });
 try{ const p=window.claude?.use?.("sample"); if(p&&p.then) p.then(f=>{sampleFn=f||false; renderMine(); if(st.view==="today"&&st.mode==="suggest") renderView();}).catch(()=>{sampleFn=false; renderMine();}); else sampleFn=false; }catch(e){ sampleFn=false; }
 if(!st.plan) genWeek();
+(function(){ const m=/^#r-([a-z_]+)$/.exec(location.hash||""); if(m&&RB[m[1]]){ const r=RB[m[1]];
+  st.view="today"; st.mode="pick"; st.forced=r.id; st.sharedIn=r.id; if(!r.m.includes(st.meal)) st.meal=r.m[0]; } })();
 all();
 </script>
 
