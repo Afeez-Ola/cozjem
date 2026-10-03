@@ -668,6 +668,7 @@ const T = {
   signedAs:"Zalogowano jako", syncedAt:x=>`Zsynchronizowano o ${x}`, syncErr:"Nie udało się zsynchronizować. Spróbujemy ponownie przy następnej zmianie.",
   syncNow:"Synchronizuj teraz", signOut:"Wyloguj", delCloud:"Usuń dane z chmury", delConfirm:"Kliknij ponownie, aby usunąć",
   acctNote:"Przechowujemy tylko Twój e-mail i dane z aplikacji (w UE, Frankfurt). Bez konta wszystko zostaje tylko w tej przeglądarce.",
+  saveImg:"Zapisz jako obraz", imgMaking:"Tworzę obraz…", imgSaved:"Gotowe", imgFail:"Nie udało się zapisać obrazu", imgNote:"Ceny orientacyjne. Sprawdź gazetkę sklepu.",
   share:"Udostępnij", shNative:"Udostępnij…", shLink:"Kopiuj link", shText:"Kopiuj przepis",
   shNote:"Wyślij danie znajomym. Link otwiera ten przepis w CoZjem.", shCopiedLink:"Link skopiowany. Wklej go w wiadomości.", shCopiedText:"Przepis skopiowany.",
   shHey:n=>`Ugotujmy dziś: ${n}!`, shOpen:"Przepis i lista zakupów w CoZjem:",
@@ -722,6 +723,7 @@ const T = {
   signedAs:"Signed in as", syncedAt:x=>`Synced at ${x}`, syncErr:"Couldn't sync. We'll try again on your next change.",
   syncNow:"Sync now", signOut:"Sign out", delCloud:"Delete my cloud data", delConfirm:"Tap again to delete",
   acctNote:"We store only your email and your app data (in the EU, Frankfurt). Without an account everything stays in this browser only.",
+  saveImg:"Save as image", imgMaking:"Making image…", imgSaved:"Done", imgFail:"Couldn't save the image", imgNote:"Approximate prices. Check the store leaflet.",
   share:"Share", shNative:"Share…", shLink:"Copy link", shText:"Copy recipe",
   shNote:"Send this dish to friends. The link opens this recipe in CoZjem.", shCopiedLink:"Link copied. Paste it into a message.", shCopiedText:"Recipe copied.",
   shHey:n=>`Let's cook ${n} today!`, shOpen:"Recipe and shopping list on CoZjem:",
@@ -1145,7 +1147,7 @@ function aiDishHtml(a,fromSaved){
          <div class="note">${t.aiNote}</div></div>
        <div class="actions">
          ${fromSaved?`<button type="button" class="btn primary" id="backSaved">${t.backSaved}</button>`:`<button type="button" class="btn primary" id="aiAgain">${t.another}</button>`}
-         ${miss.length?`<button type="button" class="btn" id="copy">${t.copy}</button>`:""}
+         ${miss.length?`<button type="button" class="btn" id="copy">${t.copy}</button><button type="button" class="btn" id="saveImg">${t.saveImg}</button>`:""}
        </div>
      </div>
    </div>`;
@@ -1217,6 +1219,73 @@ function closeLanding(toRecipe){
 }
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&$("landing")) closeLanding(false); });
 document.addEventListener("click",e=>{ if(e.target.classList&&e.target.classList.contains("lback")) closeLanding(false); });
+let expo=null, dlFn=null;
+const expItem=k=>{const q=priceAt(k,st.store); return {name:nm(k),price:q.p,src:ING[k][3]==="afr"?"afr":q.src};};
+function wrapText(ctx,text,maxW){ const words=String(text).split(" "); const out=[]; let line="";
+  for(const w of words){ const tst=line?line+" "+w:w; if(ctx.measureText(tst).width>maxW&&line){out.push(line); line=w;} else line=tst; }
+  if(line) out.push(line); return out; }
+async function makeListImage(){
+  const t=L(); if(!expo||!expo.items.length) return null;
+  try{ await Promise.all([document.fonts.load('600 30px "JetBrains Mono"'),document.fonts.load('400 30px "JetBrains Mono"'),document.fonts.load('800 60px "Bricolage Grotesque"')]); }catch(e){}
+  const W=1080, P=72, mono='"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace', disp='"Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif';
+  const loc=expo.items.filter(i=>i.src!=="afr"), afr=expo.items.filter(i=>i.src==="afr");
+  const meas=document.createElement("canvas").getContext("2d"); meas.font=`400 32px ${mono}`;
+  const rowsOf=list=>list.map(i=>({i,lines:wrapText(meas,i.name+(i.src==="promo"?" [PROMO]":""),W-2*P-240)}));
+  const R1=rowsOf(loc), R2=rowsOf(afr), LH=46;
+  const lineCount=[...R1,...R2].reduce((a,r)=>a+r.lines.length,0);
+  const H=Math.round(420+lineCount*LH+(R1.length+R2.length)*16+(R2.length?90:0)+190);
+  const c=document.createElement("canvas"); c.width=W; c.height=H; const g=c.getContext("2d");
+  g.fillStyle="#EDF1EB"; g.fillRect(0,0,W,H);
+  // paper with zigzag bottom
+  const top=48, bottom=H-48;
+  g.save(); g.shadowColor="rgba(0,0,0,.18)"; g.shadowBlur=30; g.shadowOffsetY=10; g.fillStyle="#FFFFFF";
+  g.beginPath(); g.moveTo(40,top); g.lineTo(W-40,top); g.lineTo(W-40,bottom);
+  for(let x=W-40;x>40;x-=24){ g.lineTo(x-12,bottom-14); g.lineTo(Math.max(40,x-24),bottom); }
+  g.closePath(); g.fill(); g.restore();
+  // logo
+  g.fillStyle="#8A1E4C"; const lx=P, ly=top+40; g.beginPath(); g.roundRect?g.roundRect(lx,ly,64,64,18):g.rect(lx,ly,64,64); g.fill();
+  g.fillStyle="#FBFCFA"; g.beginPath(); g.moveTo(lx+12,ly+32); g.lineTo(lx+52,ly+32); g.arc(lx+32,ly+32,20,0,Math.PI,false); g.closePath(); g.fill();
+  g.fillRect(lx+9,ly+29,46,5); g.fillStyle="#3D7A3A"; g.beginPath(); g.ellipse(lx+50,ly+26,7,3.5,-0.5,0,Math.PI*2); g.fill();
+  g.fillStyle="#1E2420"; g.font=`800 52px ${disp}`; g.textBaseline="alphabetic"; g.fillText("Co",lx+84,ly+50); const cw=g.measureText("Co").width;
+  g.fillStyle="#8A1E4C"; g.fillText("Zjem",lx+84+cw,ly+50); const zw=g.measureText("Zjem").width; g.fillStyle="#1E2420"; g.fillText("?",lx+84+cw+zw,ly+50);
+  let y=ly+120;
+  g.fillStyle="#2A2A2A"; g.font=`600 30px ${mono}`; g.textAlign="center";
+  g.fillText(t.list.toUpperCase(),W/2,y); y+=44;
+  g.font=`400 28px ${mono}`; g.fillStyle="#555";
+  for(const ln of wrapText(g,expo.title,W-2*P)) { g.fillText(ln,W/2,y); y+=38; }
+  const dstr=new Date().toLocaleDateString(st.lang==="pl"?"pl-PL":"en-GB",{weekday:"long",day:"numeric",month:"long"});
+  g.fillText(`${st.store} · ${dstr}`,W/2,y); y+=34;
+  const dash=yy=>{ g.save(); g.strokeStyle="#9A9A9A"; g.setLineDash([10,8]); g.lineWidth=2; g.beginPath(); g.moveTo(P,yy); g.lineTo(W-P,yy); g.stroke(); g.restore(); };
+  dash(y); y+=56; g.textAlign="left";
+  const drawRows=rows=>{ for(const r of rows){ g.strokeStyle="#2A2A2A"; g.lineWidth=2.5; g.strokeRect(P,y-28,28,28);
+      g.font=`400 32px ${mono}`; g.fillStyle=r.i.src==="promo"?"#8A1E4C":"#2A2A2A";
+      r.lines.forEach((ln,j)=>g.fillText(ln,P+48,y+j*LH));
+      g.textAlign="right"; g.fillStyle="#2A2A2A"; g.fillText(r.i.price!=null?zl(r.i.price):"?",W-P,y); g.textAlign="left";
+      y+=r.lines.length*LH+16; } };
+  drawRows(R1);
+  if(R2.length){ y+=10; g.textAlign="center"; g.font=`600 24px ${mono}`; g.fillStyle="#666"; g.fillText(t.afrShop.toUpperCase(),W/2,y); g.textAlign="left"; y+=56; drawRows(R2); }
+  y+=4; dash(y); y+=58;
+  const total=expo.items.reduce((a,i)=>a+(i.price||0),0);
+  g.font=`600 36px ${mono}`; g.fillStyle="#1E2420"; g.fillText(t.total,P,y); g.textAlign="right"; g.fillText(zl(total),W-P,y); g.textAlign="center";
+  y+=60; g.font=`400 24px ${mono}`; g.fillStyle="#777"; g.fillText(t.imgNote,W/2,y); y+=40;
+  g.fillStyle="#8A1E4C"; g.fillText("afeez-ola.github.io/cozjem",W/2,y);
+  return await new Promise(res=>c.toBlob(b=>res(b),"image/png"));
+}
+async function exportListImage(btn){
+  const t=L(), orig=btn.textContent; btn.disabled=true; btn.textContent=t.imgMaking;
+  const done=msg=>{btn.textContent=msg; btn.disabled=false; setTimeout(()=>{btn.textContent=orig;},2200);};
+  try{
+    const blob=await makeListImage(); if(!blob) return done(orig);
+    const safe=String(expo.title).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"").toLowerCase().slice(0,40)||"list";
+    const name=`cozjem-${safe}.png`;
+    if(window.claude&&window.claude.use){ if(dlFn===null) dlFn=await window.claude.use("downloads").catch(()=>false)||false;
+      if(dlFn){ try{ await dlFn.save({filename:name,data:blob}); return done(t.imgSaved);}catch(e){ return done(e&&e.code==="declined"?orig:t.imgFail);} } }
+    const file=new File([blob],name,{type:"image/png"});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){ try{ await navigator.share({files:[file],title:expo.title}); return done(t.imgSaved);}catch(e){ if(e&&e.name==="AbortError") return done(orig); } }
+    const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),4000); done(t.imgSaved);
+  }catch(e){ done(t.imgFail); }
+}
 function renderSaved(){
   const t=L(), v=$("view");
   const fmtD=ts=>new Date(ts).toLocaleDateString(st.lang==="pl"?"pl-PL":"en-GB",{day:"numeric",month:"short"});
@@ -1252,12 +1321,13 @@ function renderSuggest(){
    <div class="actions"><button type="button" class="btn" id="backPick">${t.backPick}</button></div>`;
   const a=st.aiDish;
   v.dataset.text=a?`CoZjem · ${a.name}\n${t.list} (${st.store})\n`+a.ings.filter(i=>!i.have).map(i=>`- ${i.name}${i.price!=null?"  ~"+zl(i.price):""}`).join("\n"):"";
+  expo=a?{title:a.name,items:a.ings.filter(i=>!i.have).map(i=>({name:i.name,price:i.price,src:"ai"}))}:null;
 }
 function renderToday(quiet){
   const t=L(), v=$("view"); v.classList.toggle("still",!!quiet);
   if(st.mode==="suggest") return renderSuggest();
   if(st.mode==="ai"&&st.aiDish){ v.innerHTML=aiDishHtml(st.aiDish,true); const a=st.aiDish;
-    v.dataset.text=`CoZjem · ${a.name}\n${t.list} (${st.store})\n`+a.ings.filter(i=>!i.have).map(i=>`- ${i.name}${i.price!=null?"  ~"+zl(i.price):""}`).join("\n"); return; }
+    v.dataset.text=`CoZjem · ${a.name}\n${t.list} (${st.store})\n`+a.ings.filter(i=>!i.have).map(i=>`- ${i.name}${i.price!=null?"  ~"+zl(i.price):""}`).join("\n"); expo={title:a.name,items:a.ings.filter(i=>!i.have).map(i=>({name:i.name,price:i.price,src:"ai"}))}; return; }
   let x, i=0, list=ranked();
   if(st.forced&&RB[st.forced]){x=evalR(RB[st.forced]);}
   else{ if(!list.length){v.innerHTML=`<p class="empty">${t.none}</p>`;return;} i=st.pick%list.length; x=list[i]; }
@@ -1281,12 +1351,13 @@ function renderToday(quiet){
        ${compareHtml(x.miss)}
        <div class="actions">
          <button type="button" class="btn primary" id="another">${t.another}</button>
-         ${x.miss.length?`<button type="button" class="btn" id="copy">${t.copy}</button>`:""}
+         ${x.miss.length?`<button type="button" class="btn" id="copy">${t.copy}</button><button type="button" class="btn" id="saveImg">${t.saveImg}</button>`:""}
        </div>
      </div>
    </div>
    ${alts?`<div><p class="label">${t.alts}</p><div class="alts">${alts}</div></div>`:""}`;
   v.dataset.text=`CoZjem · ${r[st.lang]}\n${t.list} (${st.store})\n`+x.miss.map(k=>`- ${nmS(k)}  ~${zl(pr(k))}`).join("\n")+`\n${t.total} ${zl(x.cost)}`;
+  expo={title:r[st.lang],items:x.miss.map(expItem)};
 }
 function renderWeek(){
   const t=L(), v=$("view");
@@ -1317,12 +1388,13 @@ function renderWeek(){
        ${st.batch?`<div class="stat"><b>${saved}</b><span>${t.saved}</span></div>`:""}
        <div class="actions">
          <button type="button" class="btn primary" id="regen">${t.regen}</button>
-         ${sh.ks.length?`<button type="button" class="btn" id="copy">${t.copy}</button>`:""}
+         ${sh.ks.length?`<button type="button" class="btn" id="copy">${t.copy}</button><button type="button" class="btn" id="saveImg">${t.saveImg}</button>`:""}
        </div>
      </div>
      <div style="display:flex;flex-direction:column;gap:12px;min-width:0">${alertHtml(sh.ks)}${receipt(t.wlist,sh.ks,sh.cost,t.wnote)}${compareHtml(sh.ks)}</div>
    </div>`;
   v.dataset.text=`CoZjem · ${t.tWeek}\n`+st.plan.map((row,d)=>`${DSHORT[st.lang][d]}: ${RB[row.b][st.lang]} / ${RB[row.l][st.lang]} / ${RB[row.d][st.lang]}`).join("\n")
+  expo={title:t.tWeek,items:sh.ks.map(expItem)};
     +`\n\n${t.wlist} (${st.store})\n`+sh.ks.map(k=>`- ${nmS(k)}  ~${zl(pr(k))}`).join("\n")+`\n${t.total} ${zl(sh.cost)}`;
 }
 function animateIn(){
@@ -1374,13 +1446,14 @@ function renderShop(){
    </div>
    <div class="shopcols">
      <div><p class="label">${t.toBuyH} (${esc(st.store)})</p>
-       ${buy?`<ul class="track">${buy}</ul><div class="actions" style="margin-top:10px"><button type="button" class="btn primary" id="buyall">${t.buyAll}</button><button type="button" class="btn" id="copy">${t.copy}</button></div>`:`<p class="empty">${t.nothingToBuy}</p>`}
+       ${buy?`<ul class="track">${buy}</ul><div class="actions" style="margin-top:10px"><button type="button" class="btn primary" id="buyall">${t.buyAll}</button><button type="button" class="btn" id="copy">${t.copy}</button><button type="button" class="btn" id="saveImg">${t.saveImg}</button></div>`:`<p class="empty">${t.nothingToBuy}</p>`}
      </div>
      <div><p class="label">${t.kitchenH}</p>${kitRows?`<ul class="track">${kitRows}</ul>`:`<p class="empty">${t.emptyKitchen}</p>`}</div>
    </div>
    ${compareHtml(sh.ks)}
    ${pricesBlock}`;
   v.dataset.text=`CoZjem · ${t.list} (${st.store})\n`+sh.ks.map(k=>`- ${nmS(k)}  ~${zl(pr(k))}`).join("\n")+`\n${t.total} ${zl(sh.cost)}`;
+  expo={title:t.list,items:sh.ks.map(expItem)};
 }
 function renderView(){ st.view==="week"?renderWeek():st.view==="shop"?renderShop():st.view==="saved"?renderSaved():renderToday(); animateIn(); }
 function all(){renderStatic();renderView();}
@@ -1400,6 +1473,7 @@ document.addEventListener("click",e=>{
   if(b.dataset.bm){ toggleSave(b.dataset.bm,b.dataset.bmid); const on=b.dataset.bm==="r"?isSavedR(b.dataset.bmid):st.saved.some(x=>x.type==="ai"&&x.d.id===b.dataset.bmid);
     b.setAttribute("aria-pressed",on); b.title=on?L().unsave:L().save; b.querySelector("span").textContent=on?L().savedL:L().save;
     b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); renderStatic(); return;}
+  if(b.id==="saveImg"){exportListImage(b); return;}
   if(b.id==="landGo"){closeLanding(true); return;}
   if(b.dataset.lclose){closeLanding(false); return;}
   if(b.id==="acctBtn"){const box=$("acct"); box.hidden=!box.hidden; b.setAttribute("aria-expanded",!box.hidden); cloud.confirmDel=false; renderAcct(); if(!box.hidden){const i=$("acctEmail"); if(i) i.focus();} return;}
