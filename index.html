@@ -241,6 +241,22 @@ a.img{font-size:.78rem;color:var(--beet);text-decoration:none;border-bottom:1px 
 @keyframes carddown{to{opacity:0;transform:translateY(30px) scale(.97)}}
 @keyframes fadein{from{opacity:0}}
 @keyframes fadeout{to{opacity:0}}
+/* photo cards + diary */
+.bm.cam svg path,.bm.cam svg circle{fill:none!important}
+.bm.cam{border-color:var(--beet);color:var(--beet)}
+.cardm{gap:12px}
+.cardprev{width:min(300px,72vw);height:auto;aspect-ratio:4/5;border-radius:12px;box-shadow:0 10px 30px -12px rgba(0,0,0,.45);background:var(--bg)}
+.cardm #cardCap{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:.55rem .75rem;font:inherit}
+.diary{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.dph{margin:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.dopen{border:0;padding:0;background:none;cursor:pointer;border-radius:12px;overflow:hidden;aspect-ratio:4/5}
+.dopen img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s ease}
+.dopen:hover img{transform:scale(1.03)}
+.dph figcaption{display:flex;flex-direction:column;font-size:.85rem;min-width:0}
+.dph figcaption b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dph figcaption small{color:var(--muted)}
+.dph .linkbtn{align-self:flex-start;padding:0;font-size:.78rem}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:80;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:.9rem;animation:rise .25s ease both;max-width:calc(100% - 32px)}
 /* shopping mode */
 html.noscroll,html.noscroll body{overflow:hidden}
 .shopmode{position:fixed;inset:0;z-index:60;background:var(--surface);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);animation:cardup .3s ease both}
@@ -412,6 +428,7 @@ main .panel:nth-child(2){animation-delay:.08s}.habits{animation-delay:.16s}
   </header>
 
   <section class="panel acct" id="acct" hidden aria-live="polite"></section>
+  <input type="file" id="photoIn" accept="image/*" hidden>
   <main>
     <section class="panel">
       <div class="cookwith">
@@ -694,6 +711,10 @@ const T = {
   signedAs:"Zalogowano jako", syncedAt:x=>`Zsynchronizowano o ${x}`, syncErr:"Nie udało się zsynchronizować. Spróbujemy ponownie przy następnej zmianie.",
   syncNow:"Synchronizuj teraz", signOut:"Wyloguj", delCloud:"Usuń dane z chmury", delConfirm:"Kliknij ponownie, aby usunąć",
   acctNote:"Przechowujemy tylko Twój e-mail i dane z aplikacji (w UE, Frankfurt). Bez konta wszystko zostaje tylko w tej przeglądarce.",
+  iMade:"Ugotowane!", cardH:"Twoje danie", cardKick:"Ugotowane z CoZjem", capPh:"Dodaj podpis (opcjonalnie)", cardShare:"Udostępnij zdjęcie",
+  cardShareText:n=>`Ugotowane z CoZjem: ${n}!`, cardNote:"Zdjęcie trafia do Twojego dziennika gotowania w zakładce Zapisane. Zostaje tylko na tym urządzeniu.",
+  savedShareTip:"Zapisano. Wyślij je z galerii.", photoBad:"Nie udało się otworzyć tego zdjęcia. Spróbuj inne.", photoFull:"Brak miejsca w pamięci przeglądarki. Usuń starsze zdjęcia.",
+  diaryH:"Mój dziennik gotowania", diarySub:n=>`${n} ${n===1?"ugotowane danie":(n%10>=2&&n%10<=4&&(n%100<12||n%100>14))?"ugotowane dania":"ugotowanych dań"}. Stuknij zdjęcie, aby je ponownie udostępnić.`, diaryEmpty:"Coś ugotowane? Stuknij „Ugotowane!” przy daniu i dodaj zdjęcie.", diaryOne:"Z dziennika",
   shopMode:"Tryb zakupów", shareList:"Udostępnij listę", close:"Zamknij", otherCat:"Inne", shopProg:(d,n)=>`${d} z ${n} w koszyku`,
   inBasket:n=>`W koszyku (${n})`, leftToBuy:"Zostało do kupienia:", doneShop:"Zakończ zakupy", allDone:"Wszystko kupione. Smacznego!",
   sharedLive:"Wspólna lista: odhaczenia widzą wszyscy z linkiem, na żywo.", sharedOff:"Brak połączenia. Odhaczenia zsynchronizują się po powrocie internetu.",
@@ -754,6 +775,10 @@ const T = {
   signedAs:"Signed in as", syncedAt:x=>`Synced at ${x}`, syncErr:"Couldn't sync. We'll try again on your next change.",
   syncNow:"Sync now", signOut:"Sign out", delCloud:"Delete my cloud data", delConfirm:"Tap again to delete",
   acctNote:"We store only your email and your app data (in the EU, Frankfurt). Without an account everything stays in this browser only.",
+  iMade:"I made this", cardH:"Your dish", cardKick:"Cooked with CoZjem", capPh:"Add a caption (optional)", cardShare:"Share photo",
+  cardShareText:n=>`I cooked ${n} with CoZjem!`, cardNote:"The photo goes into your cooking diary in the Saved tab. It stays on this device only.",
+  savedShareTip:"Saved. Send it from your gallery.", photoBad:"Couldn't open that photo. Try another one.", photoFull:"Your browser storage is full. Remove some older photos.",
+  diaryH:"My cooking diary", diarySub:n=>`${n} ${n===1?"dish":"dishes"} cooked. Tap a photo to share it again.`, diaryEmpty:"Cooked something? Tap “I made this” on a dish and add a photo.", diaryOne:"From your diary",
   shopMode:"Shopping mode", shareList:"Share list", close:"Close", otherCat:"Other", shopProg:(d,n)=>`${d} of ${n} in the basket`,
   inBasket:n=>`In the basket (${n})`, leftToBuy:"Left to buy:", doneShop:"Done shopping", allDone:"Everything's in the basket. Enjoy your meal!",
   sharedLive:"Shared list: everyone with the link sees ticks live.", sharedOff:"Offline. Ticks will sync when you're back online.",
@@ -1170,7 +1195,7 @@ function aiDishHtml(a,fromSaved){
   const r={id:a.id,vis:a.vis,[st.lang]:a.name};
   return `<div class="dish-hero"><div class="dish-top">
      <div class="eyebrow"><span class="tag good">${t.aiTag}</span>${a.origin?`<span class="tag plain">${esc(a.origin)}</span>`:""}<span class="tag plain">${a.t} ${t.min}</span><span class="tag plain">${a.s} ${t.serves}</span>${nutTags(a)}</div>
-     <div class="titlerow"><h2>${esc(a.name)}</h2><div class="tbtns">${bmBtn(isSavedAi(a),"ai",a.id)}${shareBtn("ai",a.id)}</div></div>${shareBox()}
+     <div class="titlerow"><h2>${esc(a.name)}</h2><div class="tbtns">${bmBtn(isSavedAi(a),"ai",a.id)}${shareBtn("ai",a.id)}${cookBtn("ai",a.id)}</div></div>${shareBox()}
      ${a.why?`<p style="margin:0;color:var(--muted)">${esc(a.why)}</p>`:""}
    </div>${art(r)}</div>
    <div class="cols">
@@ -1254,8 +1279,8 @@ function closeLanding(toRecipe){
   const el=$("landing"); if(!el) return; el.classList.add("out");
   setTimeout(()=>{el.remove(); if(toRecipe) $("result").scrollIntoView({behavior:"smooth",block:"start"});},220);
 }
-document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&$("landing")) closeLanding(false); else if(e.key==="Escape"&&shop) closeShop(false); });
-document.addEventListener("click",e=>{ if(e.target.classList&&e.target.classList.contains("lback")) closeLanding(false); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&$("cardmodal")) closeCard(); else if(e.key==="Escape"&&$("landing")) closeLanding(false); else if(e.key==="Escape"&&shop) closeShop(false); });
+document.addEventListener("click",e=>{ if(e.target.classList&&e.target.classList.contains("lback")){ if(e.target.dataset.cardclose) closeCard(); else closeLanding(false); } });
 let expo=null, dlFn=null;
 const expItem=k=>{const q=priceAt(k,st.store); return {k,cat:ING[k][3],name:nm(k),price:q.p,src:ING[k][3]==="afr"?"afr":q.src};};
 function wrapText(ctx,text,maxW){ const words=String(text).split(" "); const out=[]; let line="";
@@ -1323,6 +1348,97 @@ async function exportListImage(btn){
     setTimeout(()=>URL.revokeObjectURL(url),4000); done(t.imgSaved);
   }catch(e){ done(t.imgFail); }
 }
+// ---------- "I made this" photo cards + cooking diary ----------
+const CAMI=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>`;
+function cookBtn(kind,id){return `<button type="button" class="bm cam" data-cooked="${kind}" data-cid="${esc(id)}">${CAMI}<span>${L().iMade}</span></button>`;}
+let photos=[]; try{ photos=JSON.parse(localStorage.getItem("cozjem-photos")||"[]"); if(!Array.isArray(photos)) photos=[]; }catch(e){ photos=[]; }
+photos=photos.filter(p=>p&&typeof p.img==="string"&&p.img.startsWith("data:image/jpeg")&&typeof p.name==="string");
+function savePhotos(){ for(;;){ try{ localStorage.setItem("cozjem-photos",JSON.stringify(photos)); return true; }catch(e){ if(photos.length<=1) return false; photos.pop(); } } }
+let pend=null, card=null;
+function dishInfo(kind,id){
+  if(kind==="r"&&RB[id]){const r=RB[id]; return {kind,id,name:r[st.lang],t:r.t,k:r.k,p:r.p,vis:VIS[r.id]};}
+  const d=(st.aiDish&&st.aiDish.id===id)?st.aiDish:((st.saved.find(x=>x.type==="ai"&&x.d.id===id)||{}).d);
+  return d?{kind,id,name:d.name,t:d.t,k:d.k,p:d.p,vis:d.vis}:null;
+}
+function loadImg(src){ return new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=rej; im.src=src; }); }
+async function composeCard(img,info,caption,W=1080){
+  const t=L(), H=Math.round(W*1.25), band=Math.round(W*0.25), c=document.createElement("canvas"); c.width=W; c.height=H; const g=c.getContext("2d");
+  try{ await Promise.all([document.fonts.load(`800 ${W/14}px "Bricolage Grotesque"`),document.fonts.load(`500 ${W/30}px "Familjen Grotesk"`)]); }catch(e){}
+  const disp='"Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif', body='"Familjen Grotesk", "Segoe UI", system-ui, sans-serif';
+  const ph=H-band, sw=img.naturalWidth||img.width, sh=img.naturalHeight||img.height, sc=Math.max(W/sw,ph/sh);
+  g.fillStyle="#1E2420"; g.fillRect(0,0,W,H);
+  g.drawImage(img,(W-sw*sc)/2,(ph-sh*sc)/2,sw*sc,sh*sc);
+  const grad=g.createLinearGradient(0,ph-W*0.22,0,ph); grad.addColorStop(0,"rgba(0,0,0,0)"); grad.addColorStop(1,"rgba(0,0,0,.45)"); g.fillStyle=grad; g.fillRect(0,ph-W*0.22,W,W*0.22);
+  if(caption){ g.font=`500 ${Math.round(W/26)}px ${body}`; g.fillStyle="#FFFFFF"; g.textBaseline="alphabetic";
+    const lines=wrapText(g,"“"+caption+"”",W-W*0.12).slice(0,2); lines.forEach((ln,i)=>g.fillText(ln,W*0.06,ph-W*0.045-(lines.length-1-i)*W*0.05)); }
+  g.fillStyle="#8A1E4C"; g.fillRect(0,ph,W,band);
+  const u=W/1080, lx=60*u, ly=ph+48*u;
+  g.fillStyle="#FBFCFA"; g.globalAlpha=.85; g.font=`600 ${Math.round(24*u)}px ${body}`; g.fillText(t.cardKick.toUpperCase(),lx,ly+14*u); g.globalAlpha=1;
+  let fs=Math.round(68*u); g.font=`800 ${fs}px ${disp}`; while(g.measureText(info.name).width>W-lx-200*u&&fs>34*u){fs-=3; g.font=`800 ${fs}px ${disp}`;}
+  const nl=wrapText(g,info.name,W-lx-200*u).slice(0,2); nl.forEach((ln,i)=>g.fillText(ln,lx,ly+70*u+i*fs*1.02));
+  g.font=`500 ${Math.round(26*u)}px ${body}`; g.globalAlpha=.85; g.fillText(`${info.t} ${t.min} · ~${info.k} kcal · CoZjem`,lx,ph+band-40*u); g.globalAlpha=1;
+  // logo badge
+  const bx=W-150*u, by=ph+band/2-50*u, bs=100*u; g.fillStyle="#FBFCFA"; g.beginPath(); g.roundRect?g.roundRect(bx,by,bs,bs,26*u):g.rect(bx,by,bs,bs); g.fill();
+  g.fillStyle="#8A1E4C"; g.beginPath(); g.moveTo(bx+20*u,by+50*u); g.lineTo(bx+80*u,by+50*u); g.arc(bx+50*u,by+50*u,30*u,0,Math.PI,false); g.closePath(); g.fill();
+  g.fillRect(bx+16*u,by+45*u,68*u,7*u); g.fillStyle="#3D7A3A"; g.beginPath(); g.ellipse(bx+76*u,by+38*u,10*u,5*u,-0.5,0,Math.PI*2); g.fill();
+  g.strokeStyle="#8A1E4C"; g.lineWidth=3.5*u; g.lineCap="round"; [36,50,64].forEach(x=>{g.beginPath(); g.moveTo(bx+x*u,by+18*u); g.quadraticCurveTo(bx+(x-5)*u,by+26*u,bx+x*u,by+33*u); g.stroke();});
+  return c;
+}
+async function startCooked(kind,id){ pend=dishInfo(kind,id); if(!pend) return; const inp=$("photoIn"); inp.value=""; inp.click(); }
+async function onPhoto(file){
+  if(!file||!pend) return; const t=L();
+  if(!/^image\//.test(file.type)&&!/\.(jpe?g|png|heic|webp)$/i.test(file.name)) return;
+  const url=URL.createObjectURL(file); let img;
+  try{ img=await loadImg(url); }catch(e){ URL.revokeObjectURL(url); alertBox(t.photoBad); return; }
+  card={info:pend,img,url,caption:""}; pend=null; openCardModal();
+}
+function alertBox(msg){ const el=document.createElement("div"); el.className="toast"; el.textContent=msg; document.body.appendChild(el); setTimeout(()=>el.remove(),3200); }
+async function openCardModal(fromDiary){
+  const t=L(); let el=$("cardmodal"); if(el) el.remove();
+  el=document.createElement("div"); el.className="landing"; el.id="cardmodal";
+  el.innerHTML=`<div class="lback" data-cardclose="1"></div><div class="lcard cardm" role="dialog" aria-modal="true" aria-label="${t.cardH}">
+    <p class="lkick">${fromDiary?t.diaryOne:t.cardH}</p>
+    <canvas id="cardPrev" class="cardprev" width="540" height="675" aria-label="${esc(card.info.name)}"></canvas>
+    ${fromDiary?"":`<input id="cardCap" type="text" maxlength="80" placeholder="${t.capPh}" aria-label="${t.capPh}">`}
+    <div class="lbtns"><button type="button" class="go" id="cardShare">${t.cardShare}</button>
+      <div class="lrow"><button type="button" class="btn" id="cardSave">${t.saveImg}</button><button type="button" class="btn" data-cardclose="1">${t.close}</button></div></div>
+    ${fromDiary?"":`<p class="hint" style="margin:0">${t.cardNote}</p>`}</div>`;
+  document.body.appendChild(el); await drawPreview();
+  const cap=$("cardCap"); if(cap){ let tm; cap.addEventListener("input",()=>{ clearTimeout(tm); tm=setTimeout(()=>{ card.caption=cap.value.trim(); drawPreview(); },250); }); }
+  if(!fromDiary) addToDiary();
+}
+async function drawPreview(){ const cv=$("cardPrev"); if(!cv||!card) return; const src=card.fromDiary?card.img:await composeCard(card.img,card.info,card.caption,540); const g=cv.getContext("2d"); g.clearRect(0,0,540,675); g.drawImage(src,0,0,540,675); }
+async function cardBlob(){ if(card.fromDiary){ const r=await fetch(card.img.src); return await r.blob(); } const c=await composeCard(card.img,card.info,card.caption,1080); return await new Promise(res=>c.toBlob(b=>res(b),"image/jpeg",0.9)); }
+async function addToDiary(){
+  if(!card||card.fromDiary) return;
+  const c=await composeCard(card.img,card.info,card.caption,720); const img=c.toDataURL("image/jpeg",0.78);
+  const entry={id:card.diaryId||("p"+Date.now()),name:card.info.name,kind:card.info.kind,rid:card.info.id,ts:Date.now(),img};
+  card.diaryId=entry.id; photos=[entry,...photos.filter(p=>p.id!==entry.id)].slice(0,30);
+  if(!savePhotos()) alertBox(L().photoFull);
+  if(st.view==="saved") renderView();
+}
+async function saveOrShareBlob(blob,name,title,btn,preferShare){
+  const t=L(), orig=btn.textContent; btn.disabled=true;
+  const done=msg=>{btn.textContent=msg; btn.disabled=false; setTimeout(()=>{btn.textContent=orig;},2200);};
+  try{
+    const file=new File([blob],name,{type:blob.type||"image/jpeg"});
+    if(preferShare&&navigator.canShare&&navigator.canShare({files:[file]})){ try{ await navigator.share({files:[file],title,text:t.cardShareText(title)}); return done(t.imgSaved);}catch(e){ if(e&&e.name==="AbortError") return done(orig);} }
+    if(window.claude&&window.claude.use){ if(dlFn===null) dlFn=await window.claude.use("downloads").catch(()=>false)||false;
+      if(dlFn){ try{ await dlFn.save({filename:name,data:blob}); return done(t.imgSaved);}catch(e){ return done(e&&e.code==="declined"?orig:t.imgFail);} } }
+    const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),4000);
+    done(preferShare?t.savedShareTip:t.imgSaved);
+  }catch(e){ done(t.imgFail); }
+}
+function cardFileName(){ const safe=String(card.info.name).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"").toLowerCase().slice(0,40)||"meal"; return `cozjem-${safe}.jpg`; }
+function closeCard(){ const el=$("cardmodal"); if(!el) return; el.classList.add("out"); setTimeout(()=>{el.remove(); if(card&&card.url) URL.revokeObjectURL(card.url); card=null;},220); }
+async function openDiary(id){ const p=photos.find(x=>x.id===id); if(!p) return; const img=await loadImg(p.img); card={info:{name:p.name},img,fromDiary:true,diaryId:p.id}; openCardModal(true); }
+function diaryHtml(){
+  const t=L(); const fmtD=ts=>new Date(ts).toLocaleDateString(st.lang==="pl"?"pl-PL":"en-GB",{day:"numeric",month:"short"});
+  return `<div class="sugh"><h2>${t.diaryH}</h2><p>${photos.length?t.diarySub(photos.length):t.diaryEmpty}</p></div>
+   ${photos.length?`<div class="diary">${photos.map(p=>`<figure class="dph"><button type="button" class="dopen" data-diary="${esc(p.id)}" aria-label="${esc(p.name)}"><img src="${p.img}" alt="${esc(p.name)}" loading="lazy"></button>
+      <figcaption><b>${esc(p.name)}</b><small>${fmtD(p.ts)}</small><button type="button" class="linkbtn" data-undiary="${esc(p.id)}">${t.remove}</button></figcaption></figure>`).join("")}</div>`:""}`;
+}
+
 // ---------- Shopping mode + shared checklists ----------
 const SHOP_ORDER=["veg","dairy","meat","pantry","afr","other"];
 let shop=null, wake=null;
@@ -1444,7 +1560,7 @@ function renderSaved(){
       <h3>${esc(d.name)}</h3><small>${miss?`+${miss} ${t.miss}`:"✓"} · ${t.savedOn(fmtD(x.ts))}</small>
       <div class="actions"><button type="button" class="btn primary" data-opensaved="${i}">${t.open}</button><button type="button" class="btn" data-unsave="${i}">${t.unsave}</button></div></div>`;
   }).join("");
-  v.innerHTML=`<div class="sugh"><h2>${t.savedH}</h2><p>${t.savedSub}</p></div>
+  v.innerHTML=`${diaryHtml()}<div class="sugh" style="margin-top:8px"><h2>${t.savedH}</h2><p>${t.savedSub}</p></div>
     ${cards?`<div class="savedgrid">${cards}</div>`:`<p class="empty" style="margin:0">${t.savedEmpty}</p>`}`;
   v.dataset.text="";
 }
@@ -1482,7 +1598,7 @@ function renderToday(quiet){
   v.innerHTML=`
    <div class="dish-hero"><div class="dish-top">
      <div class="eyebrow"><span class="tag">${t.today[mealKey]}</span><span class="tag plain">${ORIGIN[r.o][st.lang]}</span><span class="tag plain">${r.t} ${t.min}</span><span class="tag plain">${r.s} ${t.serves}</span>${nutTags(r)}${r.bk?`<span class="tag plain">${t.keeps}</span>`:""}</div>
-     <div class="titlerow"><h2>${esc(r[st.lang])}</h2><div class="tbtns">${bmBtn(isSavedR(r.id),"r",r.id)}${shareBtn("r",r.id)}</div></div>${shareBox()}${st.sharedIn===r.id?`<p class="sharedin">${t.sharedIn}</p>`:""}
+     <div class="titlerow"><h2>${esc(r[st.lang])}</h2><div class="tbtns">${bmBtn(isSavedR(r.id),"r",r.id)}${shareBtn("r",r.id)}${cookBtn("r",r.id)}</div></div>${shareBox()}${st.sharedIn===r.id?`<p class="sharedin">${t.sharedIn}</p>`:""}
      <div class="meter"><span>${t.have(x.own.length,r.n.length)}</span><div class="bar" aria-hidden="true"><i style="width:${pct}%"></i></div><b>${pct}%</b></div>
    </div>${art(r)}</div>
    <div class="cols">
@@ -1543,7 +1659,7 @@ function renderWeek(){
     +`\n\n${t.wlist} (${st.store})\n`+sh.ks.map(k=>`- ${nmS(k)}  ~${zl(pr(k))}`).join("\n")+`\n${t.total} ${zl(sh.cost)}`;
 }
 function animateIn(){
-  const v=$("view"); const els=st.view==="week"?[...v.querySelectorAll(".wday,.cell")]:st.view==="shop"?[...v.querySelectorAll(".stat,.shopcols .track li")]:st.view==="saved"?[...v.querySelectorAll(".scard")]:[...v.children];
+  const v=$("view"); const els=st.view==="week"?[...v.querySelectorAll(".wday,.cell")]:st.view==="shop"?[...v.querySelectorAll(".stat,.shopcols .track li")]:st.view==="saved"?[...v.querySelectorAll(".scard,.dph")]:[...v.children];
   els.forEach((c,i)=>{c.style.setProperty("--i",i);c.classList.remove("rise");void c.offsetWidth;c.classList.add("rise");});
 }
 function renderShop(){
@@ -1618,6 +1734,12 @@ document.addEventListener("click",e=>{
   if(b.dataset.bm){ toggleSave(b.dataset.bm,b.dataset.bmid); const on=b.dataset.bm==="r"?isSavedR(b.dataset.bmid):st.saved.some(x=>x.type==="ai"&&x.d.id===b.dataset.bmid);
     b.setAttribute("aria-pressed",on); b.title=on?L().unsave:L().save; b.querySelector("span").textContent=on?L().savedL:L().save;
     b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); renderStatic(); return;}
+  if(b.dataset.cooked){startCooked(b.dataset.cooked,b.dataset.cid); return;}
+  if(b.dataset.cardclose){closeCard(); return;}
+  if(b.id==="cardShare"&&card){cardBlob().then(bl=>saveOrShareBlob(bl,cardFileName(),card.info.name,b,true)); return;}
+  if(b.id==="cardSave"&&card){cardBlob().then(bl=>saveOrShareBlob(bl,cardFileName(),card.info.name,b,false)); return;}
+  if(b.dataset.diary){openDiary(b.dataset.diary); return;}
+  if(b.dataset.undiary){photos=photos.filter(p=>p.id!==b.dataset.undiary); savePhotos(); renderView(); return;}
   if(b.id==="saveImg"){exportListImage(b); return;}
   if(b.id==="shopMode"){openShop(listFromExpo()); return;}
   if(b.id==="shareList"||b.id==="shareList2"){shareCurrentList(b); return;}
@@ -1689,6 +1811,7 @@ document.addEventListener("click",e=>{
 });
 function fallback(txt,ok){const ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");ok();}catch(e){}ta.remove();}
 $("q").addEventListener("input",e=>{st.q=e.target.value;renderChips();});
+$("photoIn").addEventListener("change",e=>{ const f=e.target.files&&e.target.files[0]; onPhoto(f); });
 document.addEventListener("submit",e=>{
   if(e.target.id==="emailForm"){e.preventDefault(); sendLink(($("acctEmail").value||"").trim()); return;}
   if(e.target.id==="codeForm"){e.preventDefault(); const c=($("acctCode").value||"").replace(/\D/g,""); if(c.length===6) verifyCode(c); return;}
