@@ -12,6 +12,7 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CoZjem">
@@ -222,6 +223,20 @@ a.img{font-size:.78rem;color:var(--beet);text-decoration:none;border-bottom:1px 
 .scard .eyebrow .tag{font-size:.64rem}
 .scard small{color:var(--muted);font-size:.78rem}
 .scard .actions{margin-top:auto}
+/* account */
+.hdr-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.acctbtn{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:.45rem .85rem .45rem .6rem;font:600 .9rem var(--f-body);cursor:pointer}
+.acctbtn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
+.acctbtn.on{border-color:var(--dill);color:var(--dill);background:var(--dill-soft)}
+.acct{animation:rise .3s ease both}
+.acctin{display:flex;flex-direction:column;gap:10px;max-width:640px}
+.acctin .label{margin:0}
+.acctin #acctEmail{flex:1 1 14rem}
+.acctin #acctCode{width:8rem;letter-spacing:.2em;font-variant-numeric:tabular-nums}
+.acctst{margin:0;font-size:.88rem;color:var(--muted)}
+.acctst.ok{color:var(--dill)}
+.acctst.error{color:var(--beet)}
+.btn.danger{color:var(--beet);border-color:var(--beet)}
 /* sharing */
 .tbtns{display:flex;gap:6px;flex:none;flex-wrap:wrap;justify-content:flex-end}
 .bm.sh svg path{fill:none!important}
@@ -343,12 +358,16 @@ main .panel:nth-child(2){animation-delay:.08s}.habits{animation-delay:.16s}
         <p id="tagline"></p>
       </div>
     </div>
+    <div class="hdr-r">
+    <button type="button" class="acctbtn" id="acctBtn" aria-controls="acct" aria-expanded="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span></span></button>
     <div class="lang" role="group" aria-label="Language">
       <button id="lang-pl" type="button" aria-pressed="true">Polski</button>
       <button id="lang-en" type="button" aria-pressed="false">English</button>
     </div>
+    </div>
   </header>
 
+  <section class="panel acct" id="acct" hidden aria-live="polite"></section>
   <main>
     <section class="panel">
       <div class="cookwith">
@@ -623,6 +642,14 @@ const T = {
   wIntro:"Kliknij danie, aby zobaczyć przepis, albo ↻, żeby je zamienić. Długie dania jak bigos i pierogi trafiają na weekend.",
   avgK:"średnio kcal dziennie", avgP:"średnio g białka dziennie", toBuy:n=>`${n} produktów do kupienia`, perDay:"dziennie",
   disc:"Wartości kalorii i białka są przybliżone. To ogólne wskazówki, nie porada medyczna. Jeśli masz choroby przewlekłe lub specjalną dietę, skonsultuj się z dietetykiem.",
+  signIn:"Zaloguj", synced:"Zsynchronizowano", syncing:"Synchronizuję…", acctH:"Konto i synchronizacja",
+  acctWhy:"Zaloguj się e-mailem, a Twoje zapisane dania, ceny, promocje i listy będą dostępne na telefonie i komputerze. Bez hasła.",
+  emailPh:"Twój e-mail", sendLink:"Wyślij link logowania", linkSent:e=>`Wysłaliśmy link na ${e}. Otwórz go na tym urządzeniu. Jeśli e-mail zawiera 6-cyfrowy kod, wpisz go poniżej.`,
+  codeL:"Kod z e-maila", verify:"Potwierdź", badEmail:"Wpisz poprawny adres e-mail.", sendFail:"Nie udało się wysłać linku. Spróbuj ponownie za chwilę.",
+  tooMany:"Za dużo prób. Odczekaj kilka minut i spróbuj ponownie.", badCode:"Kod jest nieprawidłowy lub wygasł.",
+  signedAs:"Zalogowano jako", syncedAt:x=>`Zsynchronizowano o ${x}`, syncErr:"Nie udało się zsynchronizować. Spróbujemy ponownie przy następnej zmianie.",
+  syncNow:"Synchronizuj teraz", signOut:"Wyloguj", delCloud:"Usuń dane z chmury", delConfirm:"Kliknij ponownie, aby usunąć",
+  acctNote:"Przechowujemy tylko Twój e-mail i dane z aplikacji (w UE, Frankfurt). Bez konta wszystko zostaje tylko w tej przeglądarce.",
   share:"Udostępnij", shNative:"Udostępnij…", shLink:"Kopiuj link", shText:"Kopiuj przepis",
   shNote:"Wyślij danie znajomym. Link otwiera ten przepis w CoZjem.", shCopiedLink:"Link skopiowany. Wklej go w wiadomości.", shCopiedText:"Przepis skopiowany.",
   shHey:n=>`Ugotujmy dziś: ${n}!`, shOpen:"Przepis i lista zakupów w CoZjem:", madeWith:"Z CoZjem:", protShort:"białka",
@@ -668,6 +695,14 @@ const T = {
   wIntro:"Tap a dish to see the recipe, or ↻ to swap it. Long dishes like bigos and pierogi go on the weekend.",
   avgK:"average kcal a day", avgP:"average g protein a day", toBuy:n=>`${n} products to buy`, perDay:"a day",
   disc:"Calorie and protein values are approximate. This is general guidance, not medical advice. If you have a health condition or a special diet, talk to a dietitian.",
+  signIn:"Sign in", synced:"Synced", syncing:"Syncing…", acctH:"Account and sync",
+  acctWhy:"Sign in with your email and your saved meals, prices, promotions and lists follow you to your phone and laptop. No password.",
+  emailPh:"Your email", sendLink:"Email me a sign-in link", linkSent:e=>`We sent a link to ${e}. Open it on this device. If the email shows a 6-digit code, enter it below.`,
+  codeL:"Code from the email", verify:"Verify", badEmail:"Enter a valid email address.", sendFail:"Couldn't send the link. Try again in a moment.",
+  tooMany:"Too many attempts. Wait a few minutes and try again.", badCode:"That code is wrong or has expired.",
+  signedAs:"Signed in as", syncedAt:x=>`Synced at ${x}`, syncErr:"Couldn't sync. We'll try again on your next change.",
+  syncNow:"Sync now", signOut:"Sign out", delCloud:"Delete my cloud data", delConfirm:"Tap again to delete",
+  acctNote:"We store only your email and your app data (in the EU, Frankfurt). Without an account everything stays in this browser only.",
   share:"Share", shNative:"Share…", shLink:"Copy link", shText:"Copy recipe",
   shNote:"Send this dish to friends. The link opens this recipe in CoZjem.", shCopiedLink:"Link copied. Paste it into a message.", shCopiedText:"Recipe copied.",
   shHey:n=>`Let's cook ${n} today!`, shOpen:"Recipe and shopping list on CoZjem:", madeWith:"Made with CoZjem:", protShort:"protein",
@@ -702,7 +737,7 @@ const T = {
 };
 const DEFAULT = ["jajka","maslo","mleko","ziemniaki","cebula","maka","chleb","szczypiorek","twarog","kurczak"];
 let st = {lang:/^pl\b/i.test(navigator.language||"")?"pl":"en", goal:"bal", meal:"l", store:"Biedronka", have:new Set(DEFAULT), q:"", pick:0, forced:null, view:"today", plan:null, batch:false, bought:{}, mine:[], saved:[], prices:{}, promos:[], mode:"pick", aiDish:null, aiState:"idle", aiErr:null, aiPrev:[]};
-try{const s=JSON.parse(localStorage.getItem("cozjem")||"null"); if(s){
+function applyState(s){
   ["lang","meal","store","goal","view"].forEach(k=>{if(s[k])st[k]=s[k]});
   if(Array.isArray(s.mine)) st.mine=s.mine.filter(m=>m&&((m.k&&ING[m.k])||(typeof m.t==="string"&&m.t.trim()))).slice(0,20);
   if(s.aiDish&&typeof s.aiDish==="object"&&typeof s.aiDish.name==="string") st.aiDish=s.aiDish;
@@ -713,10 +748,16 @@ try{const s=JSON.parse(localStorage.getItem("cozjem")||"null"); if(s){
   st.batch=!!s.batch; if(s.bought&&typeof s.bought==="object") Object.entries(s.bought).forEach(([k,v])=>{if(ING[k]&&typeof v==="number")st.bought[k]=v});
   if(Array.isArray(s.have)) st.have=new Set(s.have.filter(k=>ING[k]));
   if(Array.isArray(s.plan)&&s.plan.length===7&&s.plan.every(d=>d&&RB[d.b]&&RB[d.l]&&RB[d.d])) st.plan=s.plan;
-}}catch(e){}
+
+  if(Number.isFinite(s.ts)) st.ts=s.ts;
+}
+try{const s=JSON.parse(localStorage.getItem("cozjem")||"null"); if(s) applyState(s);}catch(e){}
 if(!TIPS[st.goal]) st.goal="bal";
 if(!["today","week","shop","saved"].includes(st.view)) st.view="today";
-const save=()=>{try{localStorage.setItem("cozjem",JSON.stringify({lang:st.lang,meal:st.meal,store:st.store,goal:st.goal,view:st.view,have:[...st.have],plan:st.plan,batch:st.batch,bought:st.bought,mine:st.mine,aiDish:st.aiDish,mode:st.mode,saved:st.saved,prices:st.prices,promos:st.promos}))}catch(e){}};
+const cloud={on:false,sb:null,user:null,status:"",last:null,timer:null,sent:null,err:"",confirmDel:false,pulled:0};
+const snapshot=()=>({lang:st.lang,meal:st.meal,store:st.store,goal:st.goal,view:st.view,have:[...st.have],plan:st.plan,batch:st.batch,bought:st.bought,mine:st.mine,aiDish:st.aiDish,mode:st.mode,saved:st.saved,prices:st.prices,promos:st.promos,ts:st.ts||0});
+const saveLocal=()=>{try{localStorage.setItem("cozjem",JSON.stringify(snapshot()))}catch(e){}};
+const save=()=>{st.ts=Date.now(); saveLocal(); if(cloud.user) schedulePush();};
 const $=id=>document.getElementById(id);
 const L=()=>T[st.lang];
 const fmt=(v,d=2)=>v.toLocaleString(st.lang==="pl"?"pl-PL":"en-GB",{minimumFractionDigits:d,maximumFractionDigits:d});
@@ -852,6 +893,87 @@ function weekShop(){
   return {ks,cost:ks.reduce((a,k)=>a+pr(k),0)};
 }
 
+// ---------- Accounts and cloud sync (Supabase) ----------
+const SB_URL="https://zgsznfyoxlgrnbxjylyr.supabase.co", SB_KEY="sb_publishable_JI28d1IkXz1R8l4JNVbe3Q_io7WGnzF";
+const CLOUD_HOST=/(^|\.)github\.io$|cozjem|^localhost$|^127\./;
+function mergeStates(L,Rm){
+  const newer=(Rm.ts||0)>(L.ts||0)?Rm:L;
+  const m={...newer};
+  const sk=x=>x.type==="r"?"r:"+x.id:"ai:"+(x.d&&x.d.id);
+  const sv=new Map(); [...(L.saved||[]),...(Rm.saved||[])].forEach(x=>{const k=sk(x),o=sv.get(k); if(!o||(x.ts||0)>(o.ts||0)) sv.set(k,x);});
+  m.saved=[...sv.values()].sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,100);
+  const pr={}; [L.prices||{},Rm.prices||{}].forEach(P=>Object.entries(P).forEach(([k,o])=>Object.entries(o||{}).forEach(([sx,v])=>{ const cur=pr[k]&&pr[k][sx]; if(!cur||(v.ts||0)>(cur.ts||0)) (pr[k]=pr[k]||{})[sx]=v; })));
+  m.prices=pr;
+  const pm=new Map(); [...(L.promos||[]),...(Rm.promos||[])].forEach(p=>pm.set([p.k,p.store,p.p,p.until].join("|"),p)); m.promos=[...pm.values()];
+  m.ts=Math.max(L.ts||0,Rm.ts||0);
+  return m;
+}
+function applyMerged(m){
+  const view=st.view, mode=st.mode;
+  st.prices={}; st.bought={}; st.promos=[]; st.saved=[]; st.mine=[];
+  applyState(m); st.view=view; st.mode=mode; saveLocal(); all();
+}
+async function pushNow(){
+  if(!cloud.user) return; clearTimeout(cloud.timer);
+  cloud.status="syncing"; renderAcct();
+  const {error}=await cloud.sb.from("user_state").upsert({user_id:cloud.user.id,data:snapshot(),updated_at:new Date().toISOString()});
+  cloud.status=error?"error":"ok"; if(!error) cloud.last=Date.now(); renderAcct();
+}
+function schedulePush(){ if(!cloud.user) return; clearTimeout(cloud.timer); cloud.timer=setTimeout(pushNow,1500); }
+async function pullMerge(){
+  if(!cloud.user) return; cloud.pulled=Date.now(); cloud.status="syncing"; renderAcct();
+  const {data,error}=await cloud.sb.from("user_state").select("data").eq("user_id",cloud.user.id).maybeSingle();
+  if(error){cloud.status="error"; renderAcct(); return;}
+  if(data&&data.data&&typeof data.data==="object") applyMerged(mergeStates(snapshot(),data.data));
+  await pushNow();
+}
+function cloudInit(){
+  if(!CLOUD_HOST.test(location.hostname)||!window.supabase||!window.supabase.createClient) return;
+  cloud.on=true;
+  cloud.sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{flowType:"implicit",persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:"cozjem-auth"}});
+  cloud.sb.auth.onAuthStateChange((ev,session)=>{ const u=session&&session.user||null, was=cloud.user&&cloud.user.id; cloud.user=u;
+    if(u&&u.id!==was){ cloud.sent=null; setTimeout(pullMerge,0); }
+    if(!u){ cloud.status=""; }
+    renderAcct(); });
+  document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&cloud.user&&Date.now()-cloud.pulled>60000) pullMerge(); });
+  renderAcct();
+}
+function renderAcct(){
+  const btn=$("acctBtn"), box=$("acct"); if(!btn||!box) return;
+  btn.hidden=!cloud.on; if(!cloud.on){box.hidden=true; return;}
+  const t=L(), u=cloud.user;
+  btn.classList.toggle("on",!!u);
+  btn.querySelector("span").textContent=u?(cloud.status==="syncing"?t.syncing:t.synced):t.signIn;
+  if(box.hidden) return;
+  const time=cloud.last?new Date(cloud.last).toLocaleTimeString(st.lang==="pl"?"pl-PL":"en-GB",{hour:"2-digit",minute:"2-digit"}):"";
+  if(u){
+    box.innerHTML=`<div class="acctin"><p class="label">${t.acctH}</p><p style="margin:0">${t.signedAs} <b>${esc(u.email||"")}</b></p>
+      <p class="acctst ${cloud.status}">${cloud.status==="syncing"?t.syncing:cloud.status==="error"?t.syncErr:time?t.syncedAt(time):t.synced}</p>
+      <div class="actions"><button type="button" class="btn primary" id="syncNow">${t.syncNow}</button><button type="button" class="btn" id="signOut">${t.signOut}</button>
+      <button type="button" class="btn danger" id="delCloud">${cloud.confirmDel?t.delConfirm:t.delCloud}</button></div>
+      <p class="hint" style="margin:0">${t.acctNote}</p></div>`;
+  } else {
+    box.innerHTML=`<div class="acctin"><p class="label">${t.acctH}</p><p style="margin:0">${t.acctWhy}</p>
+      <form id="emailForm" class="pform" autocomplete="on"><input id="acctEmail" type="email" inputmode="email" autocomplete="email" placeholder="${t.emailPh}" aria-label="${t.emailPh}" value="${esc(cloud.sent||"")}">
+        <button class="btn primary" type="submit">${t.sendLink}</button></form>
+      ${cloud.sent?`<p class="acctst ok" style="margin:0">${t.linkSent(esc(cloud.sent))}</p>
+      <form id="codeForm" class="pform" autocomplete="one-time-code"><input id="acctCode" inputmode="numeric" maxlength="6" placeholder="123456" aria-label="${t.codeL}"><button class="btn" type="submit">${t.verify}</button></form>`:""}
+      <p class="pferr" role="alert">${esc(cloud.err)}</p>
+      <p class="hint" style="margin:0">${t.acctNote}</p></div>`;
+  }
+}
+async function sendLink(email){
+  const t=L(); cloud.err="";
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){cloud.err=t.badEmail; renderAcct(); return;}
+  const {error}=await cloud.sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin+location.pathname}});
+  if(error){cloud.err=/rate|limit|seconds/i.test(error.message)?t.tooMany:t.sendFail; renderAcct(); return;}
+  cloud.sent=email; renderAcct();
+}
+async function verifyCode(code){
+  const t=L(); cloud.err="";
+  const {error}=await cloud.sb.auth.verifyOtp({email:cloud.sent,token:code,type:"email"});
+  if(error){cloud.err=t.badCode; renderAcct();}
+}
 function renderMine(){
   const t=L();
   $("mine").innerHTML=st.mine.map((m,i)=>`<button type="button" class="chip mine${m.k?"":" free"}" data-rm="${i}" aria-label="${t.remove}: ${esc(mineName(m))}">${esc(mineName(m))}<span class="x" aria-hidden="true">×</span></button>`).join("");
@@ -859,7 +981,7 @@ function renderMine(){
 }
 function renderStatic(){
   const t=L(); document.documentElement.lang=st.lang;
-  $("l-mine").textContent=t.mineL; $("mineIn").placeholder=t.minePh; $("mineAdd").textContent=t.mineAdd; $("suggest").textContent=t.suggest; renderMine();
+  $("l-mine").textContent=t.mineL; $("mineIn").placeholder=t.minePh; $("mineAdd").textContent=t.mineAdd; $("suggest").textContent=t.suggest; renderMine(); renderAcct();
   $("tagline").textContent=t.tag; $("l-goal").textContent=t.goal; $("l-meal").textContent=t.meal; $("l-store").textContent=t.store; $("l-fridge").textContent=t.fridge;
   $("q").placeholder=t.search; $("clear").textContent=t.clear; $("basics").textContent=t.basics; $("go").textContent=st.view==="week"?t.regen:t.go; $("foot").textContent=t.foot;
   $("tab-today").textContent=t.tToday; $("tab-week").textContent=t.tWeek; $("tab-shop").textContent=t.tShop; $("tab-shop").setAttribute("aria-selected",st.view==="shop");
@@ -1237,6 +1359,11 @@ document.addEventListener("click",e=>{
   if(b.dataset.bm){ toggleSave(b.dataset.bm,b.dataset.bmid); const on=b.dataset.bm==="r"?isSavedR(b.dataset.bmid):st.saved.some(x=>x.type==="ai"&&x.d.id===b.dataset.bmid);
     b.setAttribute("aria-pressed",on); b.title=on?L().unsave:L().save; b.querySelector("span").textContent=on?L().savedL:L().save;
     b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); renderStatic(); return;}
+  if(b.id==="acctBtn"){const box=$("acct"); box.hidden=!box.hidden; b.setAttribute("aria-expanded",!box.hidden); cloud.confirmDel=false; renderAcct(); if(!box.hidden){const i=$("acctEmail"); if(i) i.focus();} return;}
+  if(b.id==="syncNow"){pullMerge(); return;}
+  if(b.id==="signOut"){cloud.sb.auth.signOut().then(()=>{cloud.last=null; renderAcct();}); return;}
+  if(b.id==="delCloud"){ if(!cloud.confirmDel){cloud.confirmDel=true; renderAcct(); return;}
+    cloud.confirmDel=false; cloud.sb.from("user_state").delete().eq("user_id",cloud.user.id).then(({error})=>{ if(error){cloud.status="error"; renderAcct(); return;} cloud.sb.auth.signOut().then(()=>{cloud.last=null; renderAcct();}); }); return;}
   if(b.dataset.share){openShare(b); return;}
   if(b.id==="shNative"&&shareCur){ const d=shareCur.noLink?{title:shareCur.title,text:shareCur.full}:{title:shareCur.title,text:shareCur.text,url:shareCur.url};
     try{ navigator.share(d).catch(()=>{}); }catch(e){} return; }
@@ -1296,6 +1423,8 @@ document.addEventListener("click",e=>{
 function fallback(txt,ok){const ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");ok();}catch(e){}ta.remove();}
 $("q").addEventListener("input",e=>{st.q=e.target.value;renderChips();});
 document.addEventListener("submit",e=>{
+  if(e.target.id==="emailForm"){e.preventDefault(); sendLink(($("acctEmail").value||"").trim()); return;}
+  if(e.target.id==="codeForm"){e.preventDefault(); const c=($("acctCode").value||"").replace(/\D/g,""); if(c.length===6) verifyCode(c); return;}
   if(e.target.id!=="priceForm") return; e.preventDefault(); const t=L();
   const raw=$("pfItem").value.trim(), k=findKey(raw), p=Math.round(parseFloat(String($("pfPrice").value).replace(",","."))*100)/100, store=$("pfStore").value;
   const err=m=>{$("pfErr").textContent=m;};
@@ -1312,6 +1441,7 @@ $("mineForm").addEventListener("submit",e=>{e.preventDefault(); const v=$("mineI
   if(st.view==="today"&&st.mode==="suggest") renderView(); });
 try{ const p=window.claude?.use?.("sample"); if(p&&p.then) p.then(f=>{sampleFn=f||false; renderMine(); if(st.view==="today"&&st.mode==="suggest") renderView();}).catch(()=>{sampleFn=false; renderMine();}); else sampleFn=false; }catch(e){ sampleFn=false; }
 if(!st.plan) genWeek();
+cloudInit();
 (function(){ const m=/^#r-([a-z_]+)$/.exec(location.hash||""); if(m&&RB[m[1]]){ const r=RB[m[1]];
   st.view="today"; st.mode="pick"; st.forced=r.id; st.sharedIn=r.id; if(!r.m.includes(st.meal)) st.meal=r.m[0]; } })();
 all();
