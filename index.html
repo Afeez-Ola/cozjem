@@ -241,6 +241,32 @@ a.img{font-size:.78rem;color:var(--beet);text-decoration:none;border-bottom:1px 
 @keyframes carddown{to{opacity:0;transform:translateY(30px) scale(.97)}}
 @keyframes fadein{from{opacity:0}}
 @keyframes fadeout{to{opacity:0}}
+/* shopping mode */
+html.noscroll,html.noscroll body{overflow:hidden}
+.shopmode{position:fixed;inset:0;z-index:60;background:var(--surface);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);animation:cardup .3s ease both}
+.shopmode.out{animation:carddown .2s ease both}
+.shead{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.sclose{flex:none;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:1.5rem;line-height:1;cursor:pointer}
+.stitle{flex:1;min-width:0;display:flex;flex-direction:column}
+.stitle b{font:800 1.25rem/1.15 var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stitle small{color:var(--muted);font-size:.85rem}
+.sbar{height:5px;background:var(--bg)}
+.sbar i{display:block;height:100%;background:var(--dill);transition:width .3s ease}
+.sshared{margin:0;padding:8px 16px;font-size:.85rem;background:var(--dill-soft);color:var(--ink)}
+.sshared.error{background:var(--beet-soft)}
+.slist{list-style:none;margin:0;padding:4px 16px 120px;overflow:auto;flex:1;max-width:720px;width:100%;align-self:center}
+.slist .sgrp{font:600 .75rem var(--f-body);text-transform:uppercase;letter-spacing:.09em;color:var(--muted);padding:18px 0 6px}
+.slist li:not(.sgrp){display:flex;align-items:center;gap:14px;padding:8px 0;border-bottom:1px solid var(--line);transition:opacity .2s ease}
+.sbox{flex:none;width:44px;height:44px;border-radius:12px;border:2.5px solid var(--muted);background:var(--surface);display:grid;place-items:center;cursor:pointer;padding:0}
+.sbox svg{width:26px;height:26px;fill:none;stroke:var(--surface);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.sbox[aria-pressed="true"]{background:var(--dill);border-color:var(--dill);animation:pop .25s ease}
+.snm{flex:1;min-width:0;font-size:1.08rem}
+.spr{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.slist li.done{opacity:.55}
+.slist li.done .snm{text-decoration:line-through}
+.sall{margin:0 auto;padding:0 16px 120px;font:700 1.2rem var(--f-display);color:var(--dill);text-align:center}
+.sfoot{position:fixed;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line)}
+.sfoot .go{padding:.75rem 1.2rem}
 /* account */
 .hdr-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .acctbtn{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:.45rem .85rem .45rem .6rem;font:600 .9rem var(--f-body);cursor:pointer}
@@ -668,6 +694,11 @@ const T = {
   signedAs:"Zalogowano jako", syncedAt:x=>`Zsynchronizowano o ${x}`, syncErr:"Nie udało się zsynchronizować. Spróbujemy ponownie przy następnej zmianie.",
   syncNow:"Synchronizuj teraz", signOut:"Wyloguj", delCloud:"Usuń dane z chmury", delConfirm:"Kliknij ponownie, aby usunąć",
   acctNote:"Przechowujemy tylko Twój e-mail i dane z aplikacji (w UE, Frankfurt). Bez konta wszystko zostaje tylko w tej przeglądarce.",
+  shopMode:"Tryb zakupów", shareList:"Udostępnij listę", close:"Zamknij", otherCat:"Inne", shopProg:(d,n)=>`${d} z ${n} w koszyku`,
+  inBasket:n=>`W koszyku (${n})`, leftToBuy:"Zostało do kupienia:", doneShop:"Zakończ zakupy", allDone:"Wszystko kupione. Smacznego!",
+  sharedLive:"Wspólna lista: odhaczenia widzą wszyscy z linkiem, na żywo.", sharedOff:"Brak połączenia. Odhaczenia zsynchronizują się po powrocie internetu.",
+  sharedStatic:"Lista od znajomego. Odhaczenia zapisują się na tym telefonie.", linkMaking:"Tworzę link…", linkFail:"Nie udało się utworzyć linku",
+  linkShared:"Udostępniono", listShareText:n=>`Lista zakupów: ${n}. Otwórz i odhaczaj na bieżąco:`,
   saveImg:"Zapisz jako obraz", imgMaking:"Tworzę obraz…", imgSaved:"Gotowe", imgFail:"Nie udało się zapisać obrazu", imgNote:"Ceny orientacyjne. Sprawdź gazetkę sklepu.",
   share:"Udostępnij", shNative:"Udostępnij…", shLink:"Kopiuj link", shText:"Kopiuj przepis",
   shNote:"Wyślij danie znajomym. Link otwiera ten przepis w CoZjem.", shCopiedLink:"Link skopiowany. Wklej go w wiadomości.", shCopiedText:"Przepis skopiowany.",
@@ -723,6 +754,11 @@ const T = {
   signedAs:"Signed in as", syncedAt:x=>`Synced at ${x}`, syncErr:"Couldn't sync. We'll try again on your next change.",
   syncNow:"Sync now", signOut:"Sign out", delCloud:"Delete my cloud data", delConfirm:"Tap again to delete",
   acctNote:"We store only your email and your app data (in the EU, Frankfurt). Without an account everything stays in this browser only.",
+  shopMode:"Shopping mode", shareList:"Share list", close:"Close", otherCat:"Other", shopProg:(d,n)=>`${d} of ${n} in the basket`,
+  inBasket:n=>`In the basket (${n})`, leftToBuy:"Left to buy:", doneShop:"Done shopping", allDone:"Everything's in the basket. Enjoy your meal!",
+  sharedLive:"Shared list: everyone with the link sees ticks live.", sharedOff:"Offline. Ticks will sync when you're back online.",
+  sharedStatic:"List from a friend. Ticks are saved on this phone.", linkMaking:"Making link…", linkFail:"Couldn't create the link",
+  linkShared:"Shared", listShareText:n=>`Shopping list: ${n}. Open it and tick things off as you shop:`,
   saveImg:"Save as image", imgMaking:"Making image…", imgSaved:"Done", imgFail:"Couldn't save the image", imgNote:"Approximate prices. Check the store leaflet.",
   share:"Share", shNative:"Share…", shLink:"Copy link", shText:"Copy recipe",
   shNote:"Send this dish to friends. The link opens this recipe in CoZjem.", shCopiedLink:"Link copied. Paste it into a message.", shCopiedText:"Recipe copied.",
@@ -758,7 +794,7 @@ const T = {
   foot:"Recipes are simplified. Prices are estimates for typical products sold at Lidl, Aldi, Biedronka and Auchan, and items marked African shop come from African food shops in Poland. These are not store offers. The photos links open an image search so you can see what the product looks like. CoZjem is not affiliated with any of these chains."}
 };
 const DEFAULT = ["jajka","maslo","mleko","ziemniaki","cebula","maka","chleb","szczypiorek","twarog","kurczak"];
-let st = {lang:/^pl\b/i.test(navigator.language||"")?"pl":"en", goal:"bal", meal:"l", store:"Biedronka", have:new Set(DEFAULT), q:"", pick:0, forced:null, view:"today", plan:null, batch:false, bought:{}, mine:[], saved:[], prices:{}, promos:[], mode:"pick", aiDish:null, aiState:"idle", aiErr:null, aiPrev:[]};
+let st = {lang:/^pl\b/i.test(navigator.language||"")?"pl":"en", goal:"bal", meal:"l", store:"Biedronka", have:new Set(DEFAULT), q:"", pick:0, forced:null, view:"today", plan:null, batch:false, bought:{}, mine:[], saved:[], prices:{}, promos:[], shopTicks:{}, mode:"pick", aiDish:null, aiState:"idle", aiErr:null, aiPrev:[]};
 function applyState(s){
   ["lang","meal","store","goal","view"].forEach(k=>{if(s[k])st[k]=s[k]});
   if(Array.isArray(s.mine)) st.mine=s.mine.filter(m=>m&&((m.k&&ING[m.k])||(typeof m.t==="string"&&m.t.trim()))).slice(0,20);
@@ -767,6 +803,7 @@ function applyState(s){
   if(s.prices&&typeof s.prices==="object") Object.entries(s.prices).forEach(([k,o])=>{ if(ING[k]&&o&&typeof o==="object") Object.entries(o).forEach(([sx,m])=>{ if(STORES.includes(sx)&&m&&Number.isFinite(m.p)) (st.prices[k]=st.prices[k]||{})[sx]={p:m.p,ts:m.ts||Date.now()}; }); });
   if(Array.isArray(s.promos)) st.promos=s.promos.filter(p=>p&&ING[p.k]&&STORES.includes(p.store)&&Number.isFinite(p.p)&&Number.isFinite(p.until)).filter(p=>p.until>=day0()-30*864e5).slice(-100);
   if(s.mode==="suggest"||(s.mode==="ai"&&st.aiDish)) st.mode=s.mode;
+  if(s.shopTicks&&typeof s.shopTicks==="object") st.shopTicks=s.shopTicks;
   st.batch=!!s.batch; if(s.bought&&typeof s.bought==="object") Object.entries(s.bought).forEach(([k,v])=>{if(ING[k]&&typeof v==="number")st.bought[k]=v});
   if(Array.isArray(s.have)) st.have=new Set(s.have.filter(k=>ING[k]));
   if(Array.isArray(s.plan)&&s.plan.length===7&&s.plan.every(d=>d&&RB[d.b]&&RB[d.l]&&RB[d.d])) st.plan=s.plan;
@@ -777,7 +814,7 @@ try{const s=JSON.parse(localStorage.getItem("cozjem")||"null"); if(s) applyState
 if(!TIPS[st.goal]) st.goal="bal";
 if(!["today","week","shop","saved"].includes(st.view)) st.view="today";
 const cloud={on:false,sb:null,user:null,status:"",last:null,timer:null,sent:null,err:"",confirmDel:false,pulled:0};
-const snapshot=()=>({lang:st.lang,meal:st.meal,store:st.store,goal:st.goal,view:st.view,have:[...st.have],plan:st.plan,batch:st.batch,bought:st.bought,mine:st.mine,aiDish:st.aiDish,mode:st.mode,saved:st.saved,prices:st.prices,promos:st.promos,ts:st.ts||0});
+const snapshot=()=>({lang:st.lang,meal:st.meal,store:st.store,goal:st.goal,view:st.view,have:[...st.have],plan:st.plan,batch:st.batch,bought:st.bought,mine:st.mine,aiDish:st.aiDish,mode:st.mode,saved:st.saved,prices:st.prices,promos:st.promos,shopTicks:st.shopTicks,ts:st.ts||0});
 const saveLocal=()=>{try{localStorage.setItem("cozjem",JSON.stringify(snapshot()))}catch(e){}};
 const save=()=>{st.ts=Date.now(); saveLocal(); if(cloud.user) schedulePush();};
 const $=id=>document.getElementById(id);
@@ -1147,7 +1184,7 @@ function aiDishHtml(a,fromSaved){
          <div class="note">${t.aiNote}</div></div>
        <div class="actions">
          ${fromSaved?`<button type="button" class="btn primary" id="backSaved">${t.backSaved}</button>`:`<button type="button" class="btn primary" id="aiAgain">${t.another}</button>`}
-         ${miss.length?`<button type="button" class="btn" id="copy">${t.copy}</button><button type="button" class="btn" id="saveImg">${t.saveImg}</button>`:""}
+         ${miss.length?`<button type="button" class="btn" id="copy">${t.copy}</button><button type="button" class="btn" id="saveImg">${t.saveImg}</button><button type="button" class="btn" id="shopMode">${t.shopMode}</button><button type="button" class="btn" id="shareList">${t.shareList}</button>`:""}
        </div>
      </div>
    </div>`;
@@ -1217,10 +1254,10 @@ function closeLanding(toRecipe){
   const el=$("landing"); if(!el) return; el.classList.add("out");
   setTimeout(()=>{el.remove(); if(toRecipe) $("result").scrollIntoView({behavior:"smooth",block:"start"});},220);
 }
-document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&$("landing")) closeLanding(false); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&$("landing")) closeLanding(false); else if(e.key==="Escape"&&shop) closeShop(false); });
 document.addEventListener("click",e=>{ if(e.target.classList&&e.target.classList.contains("lback")) closeLanding(false); });
 let expo=null, dlFn=null;
-const expItem=k=>{const q=priceAt(k,st.store); return {name:nm(k),price:q.p,src:ING[k][3]==="afr"?"afr":q.src};};
+const expItem=k=>{const q=priceAt(k,st.store); return {k,cat:ING[k][3],name:nm(k),price:q.p,src:ING[k][3]==="afr"?"afr":q.src};};
 function wrapText(ctx,text,maxW){ const words=String(text).split(" "); const out=[]; let line="";
   for(const w of words){ const tst=line?line+" "+w:w; if(ctx.measureText(tst).width>maxW&&line){out.push(line); line=w;} else line=tst; }
   if(line) out.push(line); return out; }
@@ -1285,6 +1322,114 @@ async function exportListImage(btn){
     const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(url),4000); done(t.imgSaved);
   }catch(e){ done(t.imgFail); }
+}
+// ---------- Shopping mode + shared checklists ----------
+const SHOP_ORDER=["veg","dairy","meat","pantry","afr","other"];
+let shop=null, wake=null;
+const b64u={enc:o=>{const b=new TextEncoder().encode(JSON.stringify(o)); let s2=""; b.forEach(x=>s2+=String.fromCharCode(x)); return btoa(s2).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");},
+  dec:x=>{const s2=atob(x.replace(/-/g,"+").replace(/_/g,"/")); const b=new Uint8Array([...s2].map(ch=>ch.charCodeAt(0))); return JSON.parse(new TextDecoder().decode(b));}};
+const newId=()=>{const a=new Uint8Array(16); crypto.getRandomValues(a); let s2=""; a.forEach(x=>s2+=String.fromCharCode(x)); return btoa(s2).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");};
+function listFromExpo(){
+  if(!expo||!expo.items.length) return null;
+  return {title:expo.title, store:st.store, items:expo.items.map((i,n)=>({id:i.k?"k-"+i.k:"n"+n, k:i.k||null, name:i.name, price:i.price, cat:i.k?i.cat:"other", promo:i.src==="promo"}))};
+}
+function cleanList(o){
+  if(!o||typeof o!=="object"||!Array.isArray(o.items)) return null;
+  const items=o.items.slice(0,120).map((i,n)=>{ const k=i&&typeof i.k==="string"&&ING[i.k]?i.k:null;
+    return {id:typeof i.id==="string"&&/^[A-Za-z0-9_-]{1,40}$/.test(i.id)?i.id:"n"+n, k, name:k?nm(k):String(i&&i.name||"").slice(0,80), price:Number.isFinite(+i.price)&&+i.price>=0&&+i.price<1000?+i.price:null, cat:k?ING[k][3]:"other", promo:!!(i&&i.promo)}; }).filter(i=>i.name);
+  if(!items.length) return null;
+  return {title:String(o.title||"").slice(0,90), store:STORES.includes(o.store)?o.store:"", items};
+}
+async function keepAwake(on){
+  try{ if(on&&"wakeLock" in navigator&&document.visibilityState==="visible"){ wake=await navigator.wakeLock.request("screen"); }
+       else if(!on&&wake){ await wake.release(); wake=null; } }catch(e){ wake=null; }
+}
+document.addEventListener("visibilitychange",()=>{ if(shop&&document.visibilityState==="visible") keepAwake(true); });
+function openShop(list,opts={}){
+  if(!list) return;
+  closeShop(true);
+  shop={list, ticks:opts.ticks||{}, shared:opts.shared||null, staticShared:!!opts.staticShared, sync:"", poll:null};
+  if(!shop.shared&&!shop.staticShared){ shop.ticks={...(st.shopTicks||{})}; }
+  const el=document.createElement("div"); el.className="shopmode"; el.id="shopmode"; el.setAttribute("role","dialog"); el.setAttribute("aria-modal","true"); el.setAttribute("aria-label",L().shopMode);
+  document.body.appendChild(el); document.documentElement.classList.add("noscroll");
+  renderShopMode(); keepAwake(true);
+  if(shop.shared){ shop.poll=setInterval(pollShared,4000); }
+}
+function closeShop(silent){
+  const el=$("shopmode"); if(shop&&shop.poll) clearInterval(shop.poll);
+  shop=null; keepAwake(false); document.documentElement.classList.remove("noscroll");
+  if(el){ if(silent) el.remove(); else { el.classList.add("out"); setTimeout(()=>el.remove(),200); } }
+}
+function renderShopMode(){
+  const el=$("shopmode"); if(!el||!shop) return; const t=L(), lst=shop.list;
+  const done=lst.items.filter(i=>shop.ticks[i.id]), left=lst.items.filter(i=>!shop.ticks[i.id]);
+  const leftCost=left.reduce((a,i)=>a+(i.price||0),0);
+  const catName=c=>c==="other"?t.otherCat:CAT[c][st.lang];
+  const row=(i,on)=>`<li class="${on?"done":""}"><button type="button" class="sbox" data-stick="${esc(i.id)}" aria-pressed="${on}" aria-label="${esc(i.name)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
+     <span class="snm">${esc(i.name)}${i.promo?` <span class="pill check">${t.promo}</span>`:""}</span><span class="spr">${i.price!=null?zl(i.price):""}</span></li>`;
+  const groups=SHOP_ORDER.map(c=>{const its=left.filter(i=>i.cat===c); return its.length?`<li class="sgrp">${catName(c)}</li>${its.map(i=>row(i,false)).join("")}`:"";}).join("");
+  const pct=lst.items.length?Math.round(done.length/lst.items.length*100):0;
+  el.innerHTML=`<div class="shead">
+      <button type="button" class="sclose" id="shopClose" aria-label="${t.close}">×</button>
+      <div class="stitle"><b>${esc(lst.title||t.list)}</b><small>${lst.store?esc(lst.store)+" · ":""}${t.shopProg(done.length,lst.items.length)}</small></div>
+      ${shop.staticShared?"":`<button type="button" class="btn sm" id="shareList2">${t.shareList}</button>`}
+    </div>
+    <div class="sbar" aria-hidden="true"><i style="width:${pct}%"></i></div>
+    ${shop.shared?`<p class="sshared ${shop.sync}">${shop.sync==="error"?t.sharedOff:t.sharedLive}</p>`:shop.staticShared?`<p class="sshared">${t.sharedStatic}</p>`:""}
+    <ul class="slist">${groups}${done.length?`<li class="sgrp">${t.inBasket(done.length)}</li>${done.map(i=>row(i,true)).join("")}`:""}</ul>
+    ${left.length?"":`<p class="sall">${t.allDone}</p>`}
+    <div class="sfoot"><span>${t.leftToBuy} <b>${zl(leftCost)}</b></span><button type="button" class="go" id="shopDone">${t.doneShop}</button></div>`;
+}
+function tickItem(id){
+  if(!shop) return; const on=!shop.ticks[id];
+  if(on) shop.ticks[id]=true; else delete shop.ticks[id];
+  if(!shop.shared&&!shop.staticShared){ st.shopTicks={...shop.ticks}; save(); }
+  if(shop.staticShared){ try{ localStorage.setItem("cozjem-list-"+shop.staticKey,JSON.stringify(shop.ticks)); }catch(e){} }
+  if(shop.shared&&cloud.sb){ const sid=shop.shared; cloud.sb.rpc("set_shared_tick",{p_id:sid,p_item:id,p_on:on}).then(({error})=>{ if(shop&&shop.shared===sid){ shop.sync=error?"error":"ok"; renderShopMode(); } }); }
+  renderShopMode();
+}
+async function pollShared(){
+  if(!shop||!shop.shared||!cloud.sb||document.visibilityState!=="visible") return;
+  const sid=shop.shared; const {data,error}=await cloud.sb.rpc("get_shared_list",{p_id:sid});
+  if(!shop||shop.shared!==sid) return;
+  if(error||!data){ shop.sync="error"; renderShopMode(); return; }
+  shop.sync="ok"; const tk=data.ticks||{};
+  if(JSON.stringify(tk)!==JSON.stringify(shop.ticks)){ shop.ticks=tk; renderShopMode(); }
+}
+function finishShop(){
+  if(!shop) return; const now=Date.now(); let n=0;
+  shop.list.items.forEach(i=>{ if(shop.ticks[i.id]&&i.k){ st.have.add(i.k); st.bought[i.k]=now; n++; } });
+  if(!shop.shared&&!shop.staticShared) st.shopTicks={};
+  save(); closeShop(false); renderChips(); renderView();
+}
+async function shareCurrentList(btn){
+  const t=L(); const lst=shop?shop.list:listFromExpo(); if(!lst) return;
+  const orig=btn.textContent; btn.disabled=true; btn.textContent=t.linkMaking;
+  const done=msg=>{btn.textContent=msg; btn.disabled=false; setTimeout(()=>{btn.textContent=orig;},2400);};
+  let url;
+  const payload={title:lst.title,store:lst.store,items:lst.items.map(i=>i.k?{id:i.id,k:i.k,price:i.price,promo:i.promo}:{id:i.id,name:i.name,price:i.price,promo:i.promo})};
+  if(cloud.on&&cloud.sb){
+    const id=(shop&&shop.shared)||newId();
+    if(!(shop&&shop.shared)){ const {error}=await cloud.sb.rpc("create_shared_list",{p_id:id,p_data:payload}); if(error) return done(t.linkFail);
+      const mine=shop&&!shop.staticShared?Object.keys(shop.ticks).filter(k=>shop.ticks[k]):[];
+      for(const it of mine) await cloud.sb.rpc("set_shared_tick",{p_id:id,p_item:it,p_on:true});
+      if(shop&&!shop.staticShared){ shop.shared=id; st.shopTicks={}; save(); shop.poll=setInterval(pollShared,4000); renderShopMode(); } }
+    url=SITE+"#l-"+id;
+  } else url=SITE+"#list-"+b64u.enc(payload);
+  const text=t.listShareText(lst.title||t.list);
+  try{ if(navigator.share){ await navigator.share({title:lst.title||t.list,text,url}); return done(t.linkShared);} }catch(e){ if(e&&e.name==="AbortError") return done(orig); }
+  copyText(text+"\n"+url,null,""); done(t.shCopiedLink);
+}
+async function openFromHash(){
+  const h=location.hash||"";
+  let m=/^#l-([A-Za-z0-9_-]{20,32})$/.exec(h);
+  if(m){ if(!cloud.sb){ return; }
+    const {data,error}=await cloud.sb.rpc("get_shared_list",{p_id:m[1]});
+    const lst=!error&&data?cleanList(data.data):null;
+    if(lst) openShop(lst,{shared:m[1],ticks:data.ticks||{}}); return; }
+  m=/^#list-([A-Za-z0-9_-]+)$/.exec(h);
+  if(m){ try{ const lst=cleanList(b64u.dec(m[1])); if(!lst) return; const key=m[1].slice(0,40); let tk={}; try{tk=JSON.parse(localStorage.getItem("cozjem-list-"+key)||"{}")||{};}catch(e){}
+      openShop(lst,{staticShared:true,ticks:tk}); if(shop) shop.staticKey=key; }catch(e){} }
 }
 function renderSaved(){
   const t=L(), v=$("view");
@@ -1351,7 +1496,7 @@ function renderToday(quiet){
        ${compareHtml(x.miss)}
        <div class="actions">
          <button type="button" class="btn primary" id="another">${t.another}</button>
-         ${x.miss.length?`<button type="button" class="btn" id="copy">${t.copy}</button><button type="button" class="btn" id="saveImg">${t.saveImg}</button>`:""}
+         ${x.miss.length?`<button type="button" class="btn" id="copy">${t.copy}</button><button type="button" class="btn" id="saveImg">${t.saveImg}</button><button type="button" class="btn" id="shopMode">${t.shopMode}</button><button type="button" class="btn" id="shareList">${t.shareList}</button>`:""}
        </div>
      </div>
    </div>
@@ -1388,7 +1533,7 @@ function renderWeek(){
        ${st.batch?`<div class="stat"><b>${saved}</b><span>${t.saved}</span></div>`:""}
        <div class="actions">
          <button type="button" class="btn primary" id="regen">${t.regen}</button>
-         ${sh.ks.length?`<button type="button" class="btn" id="copy">${t.copy}</button><button type="button" class="btn" id="saveImg">${t.saveImg}</button>`:""}
+         ${sh.ks.length?`<button type="button" class="btn" id="copy">${t.copy}</button><button type="button" class="btn" id="saveImg">${t.saveImg}</button><button type="button" class="btn" id="shopMode">${t.shopMode}</button><button type="button" class="btn" id="shareList">${t.shareList}</button>`:""}
        </div>
      </div>
      <div style="display:flex;flex-direction:column;gap:12px;min-width:0">${alertHtml(sh.ks)}${receipt(t.wlist,sh.ks,sh.cost,t.wnote)}${compareHtml(sh.ks)}</div>
@@ -1446,7 +1591,7 @@ function renderShop(){
    </div>
    <div class="shopcols">
      <div><p class="label">${t.toBuyH} (${esc(st.store)})</p>
-       ${buy?`<ul class="track">${buy}</ul><div class="actions" style="margin-top:10px"><button type="button" class="btn primary" id="buyall">${t.buyAll}</button><button type="button" class="btn" id="copy">${t.copy}</button><button type="button" class="btn" id="saveImg">${t.saveImg}</button></div>`:`<p class="empty">${t.nothingToBuy}</p>`}
+       ${buy?`<ul class="track">${buy}</ul><div class="actions" style="margin-top:10px"><button type="button" class="btn primary" id="shopMode">${t.shopMode}</button><button type="button" class="btn" id="buyall">${t.buyAll}</button><button type="button" class="btn" id="copy">${t.copy}</button><button type="button" class="btn" id="saveImg">${t.saveImg}</button><button type="button" class="btn" id="shareList">${t.shareList}</button></div>`:`<p class="empty">${t.nothingToBuy}</p>`}
      </div>
      <div><p class="label">${t.kitchenH}</p>${kitRows?`<ul class="track">${kitRows}</ul>`:`<p class="empty">${t.emptyKitchen}</p>`}</div>
    </div>
@@ -1474,6 +1619,11 @@ document.addEventListener("click",e=>{
     b.setAttribute("aria-pressed",on); b.title=on?L().unsave:L().save; b.querySelector("span").textContent=on?L().savedL:L().save;
     b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); renderStatic(); return;}
   if(b.id==="saveImg"){exportListImage(b); return;}
+  if(b.id==="shopMode"){openShop(listFromExpo()); return;}
+  if(b.id==="shareList"||b.id==="shareList2"){shareCurrentList(b); return;}
+  if(b.dataset.stick){tickItem(b.dataset.stick); return;}
+  if(b.id==="shopClose"){closeShop(false); return;}
+  if(b.id==="shopDone"){finishShop(); return;}
   if(b.id==="landGo"){closeLanding(true); return;}
   if(b.dataset.lclose){closeLanding(false); return;}
   if(b.id==="acctBtn"){const box=$("acct"); box.hidden=!box.hidden; b.setAttribute("aria-expanded",!box.hidden); cloud.confirmDel=false; renderAcct(); if(!box.hidden){const i=$("acctEmail"); if(i) i.focus();} return;}
@@ -1563,6 +1713,7 @@ cloudInit();
   st.view="today"; st.mode="pick"; st.forced=r.id; st.sharedIn=r.id; if(!r.m.includes(st.meal)) st.meal=r.m[0]; } })();
 all();
 if(st.sharedIn) showLanding(st.sharedIn);
+openFromHash();
 </script>
 
 <script>if("serviceWorker" in navigator) addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script>
