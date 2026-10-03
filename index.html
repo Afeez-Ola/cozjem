@@ -223,6 +223,24 @@ a.img{font-size:.78rem;color:var(--beet);text-decoration:none;border-bottom:1px 
 .scard .eyebrow .tag{font-size:.64rem}
 .scard small{color:var(--muted);font-size:.78rem}
 .scard .actions{margin-top:auto}
+/* shared-meal landing card */
+.landing{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.lback{position:absolute;inset:0;background:var(--ink);opacity:.55;animation:fadein .25s ease both}
+.lcard{position:relative;width:min(440px,100%);max-height:100%;overflow:auto;background:var(--surface);border-radius:20px;padding:22px 22px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;box-shadow:0 24px 60px -20px rgba(0,0,0,.5);animation:cardup .45s cubic-bezier(.2,.9,.3,1.15) both}
+.lkick{margin:0;font:600 .75rem var(--f-body);text-transform:uppercase;letter-spacing:.09em;color:var(--beet)}
+.lart{width:min(300px,80%);margin:-4px 0 -6px}
+.lcard h2{font-family:var(--f-display);font-weight:800;font-size:clamp(1.7rem,7vw,2.2rem);line-height:1.05;margin:0;text-wrap:balance}
+.lmeta{justify-content:center}
+.lhave{margin:0;color:var(--muted);font-size:.92rem}
+.lbtns{display:flex;flex-direction:column;gap:8px;width:100%;margin-top:6px}
+.lbtns .go{width:100%}
+.lrow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.landing.out .lcard{animation:carddown .22s ease both}
+.landing.out .lback{animation:fadeout .22s ease both}
+@keyframes cardup{from{opacity:0;transform:translateY(40px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes carddown{to{opacity:0;transform:translateY(30px) scale(.97)}}
+@keyframes fadein{from{opacity:0}}
+@keyframes fadeout{to{opacity:0}}
 /* account */
 .hdr-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .acctbtn{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:.45rem .85rem .45rem .6rem;font:600 .9rem var(--f-body);cursor:pointer}
@@ -652,7 +670,8 @@ const T = {
   acctNote:"Przechowujemy tylko Twój e-mail i dane z aplikacji (w UE, Frankfurt). Bez konta wszystko zostaje tylko w tej przeglądarce.",
   share:"Udostępnij", shNative:"Udostępnij…", shLink:"Kopiuj link", shText:"Kopiuj przepis",
   shNote:"Wyślij danie znajomym. Link otwiera ten przepis w CoZjem.", shCopiedLink:"Link skopiowany. Wklej go w wiadomości.", shCopiedText:"Przepis skopiowany.",
-  shHey:n=>`Ugotujmy dziś: ${n}!`, shOpen:"Przepis i lista zakupów w CoZjem:", madeWith:"Z CoZjem:", protShort:"białka",
+  shHey:n=>`Ugotujmy dziś: ${n}!`, shOpen:"Przepis i lista zakupów w CoZjem:",
+  landKicker:"Ktoś udostępnił Ci to danie", landGo:"Zobacz przepis", landOwn:"Poznaj CoZjem", landIng:(n,h)=>`${n} składników, masz już ${h}`, madeWith:"Z CoZjem:", protShort:"białka",
   sharedIn:"Ktoś udostępnił Ci to danie. Zaznacz, co masz w domu, a CoZjem pokaże, co dokupić.",
   cmpH:"Gdzie najtaniej?", cheapest:"Najtaniej", yourShop:"Twój sklep", shopHere:"Kupuj tutaj", promoN:n=>`${n} w promocji`,
   saveAt:(s,v)=>`W ${s} zapłacisz około ${v} mniej za tę listę.`, bestAlready:"Twój sklep jest najtańszy dla tej listy.",
@@ -705,7 +724,8 @@ const T = {
   acctNote:"We store only your email and your app data (in the EU, Frankfurt). Without an account everything stays in this browser only.",
   share:"Share", shNative:"Share…", shLink:"Copy link", shText:"Copy recipe",
   shNote:"Send this dish to friends. The link opens this recipe in CoZjem.", shCopiedLink:"Link copied. Paste it into a message.", shCopiedText:"Recipe copied.",
-  shHey:n=>`Let's cook ${n} today!`, shOpen:"Recipe and shopping list on CoZjem:", madeWith:"Made with CoZjem:", protShort:"protein",
+  shHey:n=>`Let's cook ${n} today!`, shOpen:"Recipe and shopping list on CoZjem:",
+  landKicker:"Someone shared this meal with you", landGo:"See the recipe", landOwn:"Explore CoZjem", landIng:(n,h)=>`${n} ingredients, you already have ${h}`, madeWith:"Made with CoZjem:", protShort:"protein",
   sharedIn:"Someone shared this dish with you. Tick what you have at home and CoZjem shows what to buy.",
   cmpH:"Where is it cheapest?", cheapest:"Cheapest", yourShop:"Your shop", shopHere:"Shop here", promoN:n=>`${n} on promo`,
   saveAt:(s,v)=>`You'd pay about ${v} less for this list at ${s}.`, bestAlready:"Your shop is the cheapest for this list.",
@@ -1152,9 +1172,8 @@ function shareBox(){const t=L();return `<div class="sharebox" id="sharebox" hidd
   <p class="shnote" id="shNote">${t.shNote}</p></div>`;}
 function shareData(kind,id){
   const t=L();
-  if(kind==="r"&&RB[id]){ const r=RB[id], url=SITE+"#r-"+id;
-    const ing=r.n.map(k=>baseName(nm(k))).join(", ");
-    const text=`${t.shHey(r[st.lang])}\n\n${t.ingr}: ${ing}\n${r.t} ${t.min} · ~${r.k} kcal · ${r.p} g ${t.protShort}\n\n${t.shOpen}`;
+  if(kind==="r"&&RB[id]){ const r=RB[id], url=SITE+"r/"+id+"/";
+    const text=`${t.shHey(r[st.lang])}\n${r.t} ${t.min} · ~${r.k} kcal\n${t.shOpen}`;
     const full=`${r[st.lang]}\n\n${t.ingr}:\n${r.n.map(k=>"- "+nm(k)).join("\n")}\n\n${t.steps}:\n${(st.lang==="pl"?r.sp:r.se).map((x,i)=>`${i+1}. ${x}`).join("\n")}\n\n${t.madeWith} ${url}`;
     return {title:r[st.lang],text,url,full}; }
   const d=(st.aiDish&&st.aiDish.id===id)?st.aiDish:((st.saved.find(x=>x.type==="ai"&&x.d.id===id)||{}).d);
@@ -1176,6 +1195,28 @@ function copyText(txt,el,msg){
   const done=()=>{ if(el){ el.textContent=msg; } };
   try{ navigator.clipboard.writeText(txt).then(done).catch(()=>{fallback(txt,done);}); }catch(e){ fallback(txt,done); }
 }
+function showLanding(id){
+  const r=RB[id]; if(!r) return; const t=L(), e=evalR(r);
+  const el=document.createElement("div"); el.className="landing"; el.id="landing";
+  el.innerHTML=`<div class="lback" data-lclose="1"></div>
+   <div class="lcard" role="dialog" aria-modal="true" aria-labelledby="landT">
+     <p class="lkick">${t.landKicker}</p>
+     <div class="lart">${art(r)}</div>
+     <h2 id="landT">${esc(r[st.lang])}</h2>
+     <div class="eyebrow lmeta"><span class="tag plain">${ORIGIN[r.o][st.lang]}</span><span class="tag plain">${r.t} ${t.min}</span><span class="tag plain">~${r.k} kcal</span><span class="tag plain">${r.p} g ${t.protShort}</span></div>
+     <p class="lhave">${t.landIng(r.n.length,e.own.length)}</p>
+     <div class="lbtns"><button type="button" class="go" id="landGo">${t.landGo}</button>
+       <div class="lrow">${bmBtn(isSavedR(r.id),"r",r.id)}<button type="button" class="btn" data-lclose="1">${t.landOwn}</button></div></div>
+   </div>`;
+  document.body.appendChild(el);
+  const go=$("landGo"); try{go.focus({preventScroll:true});}catch(err){}
+}
+function closeLanding(toRecipe){
+  const el=$("landing"); if(!el) return; el.classList.add("out");
+  setTimeout(()=>{el.remove(); if(toRecipe) $("result").scrollIntoView({behavior:"smooth",block:"start"});},220);
+}
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&$("landing")) closeLanding(false); });
+document.addEventListener("click",e=>{ if(e.target.classList&&e.target.classList.contains("lback")) closeLanding(false); });
 function renderSaved(){
   const t=L(), v=$("view");
   const fmtD=ts=>new Date(ts).toLocaleDateString(st.lang==="pl"?"pl-PL":"en-GB",{day:"numeric",month:"short"});
@@ -1359,6 +1400,8 @@ document.addEventListener("click",e=>{
   if(b.dataset.bm){ toggleSave(b.dataset.bm,b.dataset.bmid); const on=b.dataset.bm==="r"?isSavedR(b.dataset.bmid):st.saved.some(x=>x.type==="ai"&&x.d.id===b.dataset.bmid);
     b.setAttribute("aria-pressed",on); b.title=on?L().unsave:L().save; b.querySelector("span").textContent=on?L().savedL:L().save;
     b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); renderStatic(); return;}
+  if(b.id==="landGo"){closeLanding(true); return;}
+  if(b.dataset.lclose){closeLanding(false); return;}
   if(b.id==="acctBtn"){const box=$("acct"); box.hidden=!box.hidden; b.setAttribute("aria-expanded",!box.hidden); cloud.confirmDel=false; renderAcct(); if(!box.hidden){const i=$("acctEmail"); if(i) i.focus();} return;}
   if(b.id==="syncNow"){pullMerge(); return;}
   if(b.id==="signOut"){cloud.sb.auth.signOut().then(()=>{cloud.last=null; renderAcct();}); return;}
@@ -1445,6 +1488,7 @@ cloudInit();
 (function(){ const m=/^#r-([a-z_]+)$/.exec(location.hash||""); if(m&&RB[m[1]]){ const r=RB[m[1]];
   st.view="today"; st.mode="pick"; st.forced=r.id; st.sharedIn=r.id; if(!r.m.includes(st.meal)) st.meal=r.m[0]; } })();
 all();
+if(st.sharedIn) showLanding(st.sharedIn);
 </script>
 
 <script>if("serviceWorker" in navigator) addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script>
