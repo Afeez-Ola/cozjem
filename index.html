@@ -241,6 +241,16 @@ a.img{font-size:.78rem;color:var(--beet);text-decoration:none;border-bottom:1px 
 @keyframes carddown{to{opacity:0;transform:translateY(30px) scale(.97)}}
 @keyframes fadein{from{opacity:0}}
 @keyframes fadeout{to{opacity:0}}
+/* search */
+.ticon{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;vertical-align:-2px;margin-right:4px}
+.srchbox input{font-size:1.05rem;padding:.7rem .9rem}
+.sfilters{display:flex;flex-direction:column;gap:8px}
+.schip::before{display:none}
+.schip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.scount{margin:0;color:var(--muted);font-size:.88rem}
+.srchai{display:flex;flex-direction:column;gap:8px;align-items:flex-start;padding:14px;border:1px dashed var(--line);border-radius:12px}
+.srchai p{margin:0}
+#srchRes{display:flex;flex-direction:column;gap:14px}
 /* photo cards + diary */
 .bm.cam svg path,.bm.cam svg circle{fill:none!important}
 .bm.cam{border-color:var(--beet);color:var(--beet)}
@@ -472,6 +482,7 @@ main .panel:nth-child(2){animation-delay:.08s}.habits{animation-delay:.16s}
         <button type="button" role="tab" id="tab-week"></button>
         <button type="button" role="tab" id="tab-shop"></button>
         <button type="button" role="tab" id="tab-saved"></button>
+        <button type="button" role="tab" id="tab-search"></button>
       </div>
       <div id="view" aria-live="polite" style="display:flex;flex-direction:column;gap:18px"></div>
     </section>
@@ -711,6 +722,11 @@ const T = {
   signedAs:"Zalogowano jako", syncedAt:x=>`Zsynchronizowano o ${x}`, syncErr:"Nie udało się zsynchronizować. Spróbujemy ponownie przy następnej zmianie.",
   syncNow:"Synchronizuj teraz", signOut:"Wyloguj", delCloud:"Usuń dane z chmury", delConfirm:"Kliknij ponownie, aby usunąć",
   acctNote:"Przechowujemy tylko Twój e-mail i dane z aplikacji (w UE, Frankfurt). Bez konta wszystko zostaje tylko w tej przeglądarce.",
+  tSearch:"Szukaj", srchH:"Znajdź danie", srchSub:"Szukaj po nazwie, składniku lub kuchni, np. „żurek”, „kurczak”, „Nigeria”.", srchPh:"Czego szukasz?",
+  all:"Wszystkie", allCui:"Każda kuchnia", cuiPl:"Polska", cuiEu:"Europejska", cuiAfr:"Afrykańska", fQuick:"Do 25 min", fHave:"Mam większość",
+  srchCount:n=>n===1?"1 danie":`${n} ${(n%10>=2&&n%10<=4&&(n%100<12||n%100>14))?"dania":"dań"}`, srchNoFilter:"Nic nie pasuje do tych filtrów. Odznacz któryś z nich.",
+  srchNone:q=>`Nie mamy jeszcze przepisu na „${q}”.`, srchNoneNoAi:q=>`Brak wyników dla „${q}”. Spróbuj innego słowa lub składnika.`,
+  srchAiMore:q=>`Nie widzisz tego, czego szukasz?`, srchAiBtn:q=>`Poproś Claude o przepis: ${q}`, srchAiWait:q=>`Claude przygotowuje przepis: ${q}…`,
   iMade:"Ugotowane!", cardH:"Twoje danie", cardKick:"Ugotowane z CoZjem", capPh:"Dodaj podpis (opcjonalnie)", cardShare:"Udostępnij zdjęcie",
   cardShareText:n=>`Ugotowane z CoZjem: ${n}!`, cardNote:"Zdjęcie trafia do Twojego dziennika gotowania w zakładce Zapisane. Zostaje tylko na tym urządzeniu.",
   savedShareTip:"Zapisano. Wyślij je z galerii.", photoBad:"Nie udało się otworzyć tego zdjęcia. Spróbuj inne.", photoFull:"Brak miejsca w pamięci przeglądarki. Usuń starsze zdjęcia.",
@@ -775,6 +791,11 @@ const T = {
   signedAs:"Signed in as", syncedAt:x=>`Synced at ${x}`, syncErr:"Couldn't sync. We'll try again on your next change.",
   syncNow:"Sync now", signOut:"Sign out", delCloud:"Delete my cloud data", delConfirm:"Tap again to delete",
   acctNote:"We store only your email and your app data (in the EU, Frankfurt). Without an account everything stays in this browser only.",
+  tSearch:"Search", srchH:"Find a dish", srchSub:"Search by name, ingredient or cuisine, for example “żurek”, “chicken” or “Nigeria”.", srchPh:"What are you looking for?",
+  all:"All", allCui:"Any cuisine", cuiPl:"Polish", cuiEu:"European", cuiAfr:"African", fQuick:"Under 25 min", fHave:"I have most",
+  srchCount:n=>n===1?"1 dish":`${n} dishes`, srchNoFilter:"Nothing matches these filters. Try turning one off.",
+  srchNone:q=>`We don't have a recipe for “${q}” yet.`, srchNoneNoAi:q=>`No results for “${q}”. Try another word or ingredient.`,
+  srchAiMore:q=>`Not what you're looking for?`, srchAiBtn:q=>`Ask Claude for a ${q} recipe`, srchAiWait:q=>`Claude is writing a recipe for ${q}…`,
   iMade:"I made this", cardH:"Your dish", cardKick:"Cooked with CoZjem", capPh:"Add a caption (optional)", cardShare:"Share photo",
   cardShareText:n=>`I cooked ${n} with CoZjem!`, cardNote:"The photo goes into your cooking diary in the Saved tab. It stays on this device only.",
   savedShareTip:"Saved. Send it from your gallery.", photoBad:"Couldn't open that photo. Try another one.", photoFull:"Your browser storage is full. Remove some older photos.",
@@ -837,7 +858,7 @@ function applyState(s){
 }
 try{const s=JSON.parse(localStorage.getItem("cozjem")||"null"); if(s) applyState(s);}catch(e){}
 if(!TIPS[st.goal]) st.goal="bal";
-if(!["today","week","shop","saved"].includes(st.view)) st.view="today";
+if(!["today","week","shop","saved","search"].includes(st.view)) st.view="today";
 const cloud={on:false,sb:null,user:null,status:"",last:null,timer:null,sent:null,err:"",confirmDel:false,pulled:0};
 const snapshot=()=>({lang:st.lang,meal:st.meal,store:st.store,goal:st.goal,view:st.view,have:[...st.have],plan:st.plan,batch:st.batch,bought:st.bought,mine:st.mine,aiDish:st.aiDish,mode:st.mode,saved:st.saved,prices:st.prices,promos:st.promos,shopTicks:st.shopTicks,ts:st.ts||0});
 const saveLocal=()=>{try{localStorage.setItem("cozjem",JSON.stringify(snapshot()))}catch(e){}};
@@ -1069,6 +1090,7 @@ function renderStatic(){
   $("tagline").textContent=t.tag; $("l-goal").textContent=t.goal; $("l-meal").textContent=t.meal; $("l-store").textContent=t.store; $("l-fridge").textContent=t.fridge;
   $("q").placeholder=t.search; $("clear").textContent=t.clear; $("basics").textContent=t.basics; $("go").textContent=st.view==="week"?t.regen:t.go; $("foot").textContent=t.foot;
   $("tab-today").textContent=t.tToday; $("tab-week").textContent=t.tWeek; $("tab-shop").textContent=t.tShop; $("tab-shop").setAttribute("aria-selected",st.view==="shop");
+  $("tab-search").innerHTML=`<svg class="ticon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>${t.tSearch}`; $("tab-search").setAttribute("aria-selected",st.view==="search");
   $("tab-saved").innerHTML=`${t.tSaved}${st.saved.length?` <span class="tcount">${st.saved.length}</span>`:""}`; $("tab-saved").setAttribute("aria-selected",st.view==="saved");
   $("tab-today").setAttribute("aria-selected",st.view==="today"); $("tab-week").setAttribute("aria-selected",st.view==="week");
   $("lang-pl").setAttribute("aria-pressed",st.lang==="pl"); $("lang-en").setAttribute("aria-pressed",st.lang==="en");
@@ -1547,6 +1569,73 @@ async function openFromHash(){
   if(m){ try{ const lst=cleanList(b64u.dec(m[1])); if(!lst) return; const key=m[1].slice(0,40); let tk={}; try{tk=JSON.parse(localStorage.getItem("cozjem-list-"+key)||"{}")||{};}catch(e){}
       openShop(lst,{staticShared:true,ticks:tk}); if(shop) shop.staticKey=key; }catch(e){} }
 }
+// ---------- Search ----------
+const AFR_O=new Set(["ng","gh","sn","ma","et","ke","wa"]);
+const srch={q:"",meal:"",cui:"",fl:new Set(),ai:"idle",err:""};
+function recipeText(r){ return norm([r.pl,r.en,ORIGIN[r.o].pl,ORIGIN[r.o].en,...r.n.flatMap(k=>[ING[k][0],ING[k][1]])].join(" ")); }
+const RTXT={}; R.forEach(r=>RTXT[r.id]=recipeText(r));
+function searchResults(){
+  const words=norm(srch.q).split(/\s+/).filter(w=>w.length>=2);
+  return R.map(r=>{
+    let score=0; const nameTxt=norm(r.pl+" "+r.en);
+    for(const w of words){ if(nameTxt.includes(w)) score+=3; else if(RTXT[r.id].includes(w)) score+=1; else return null; }
+    if(srch.meal&&!r.m.includes(srch.meal)) return null;
+    if(srch.cui==="pl"&&r.o!=="pl") return null;
+    if(srch.cui==="afr"&&!AFR_O.has(r.o)) return null;
+    if(srch.cui==="eu"&&(r.o==="pl"||AFR_O.has(r.o))) return null;
+    if(srch.fl.has("quick")&&r.t>25) return null;
+    if(srch.fl.has("prot")&&r.p<28) return null;
+    if(srch.fl.has("light")&&r.k>400) return null;
+    if(srch.fl.has("keeps")&&!r.bk) return null;
+    const e=evalR(r); if(srch.fl.has("have")&&e.match<0.6) return null;
+    return {r,e,score:score+e.match};
+  }).filter(Boolean).sort((a,b)=>b.score-a.score||b.e.match-a.e.match);
+}
+function renderSearch(onlyResults){
+  const t=L(), v=$("view"), res=searchResults();
+  const chip=(grp,val,label)=>{const on=grp==="fl"?srch.fl.has(val):srch[grp]===val; return `<button type="button" class="chip schip" data-sf="${grp}" data-sv="${val}" aria-pressed="${on}">${label}</button>`;};
+  const cards=res.map(({r,e})=>`<div class="scard">${art(r)}<div class="eyebrow"><span class="tag plain">${ORIGIN[r.o][st.lang]}</span><span class="tag plain">${r.t} ${t.min}</span><span class="tag plain">~${r.k} kcal</span><span class="tag plain">${r.p} g</span></div>
+      <h3>${esc(r[st.lang])}</h3><small>${t.have(e.own.length,r.n.length)}${e.miss.length?` · +${zl(e.cost)}`:""}</small>
+      <div class="actions"><button type="button" class="btn primary" data-sopen="${r.id}">${t.open}</button>${bmBtn(isSavedR(r.id),"r",r.id)}</div></div>`).join("");
+  const q=srch.q.trim();
+  const aiBlock=q&&sampleFn?(srch.ai==="loading"?`<div class="thinking">${POT}<span>${t.srchAiWait(esc(q))}</span><button type="button" class="btn" id="srchStop">${t.stop}</button></div>`
+      :`<div class="srchai"><p>${res.length?t.srchAiMore(esc(q)):t.srchNone(esc(q))}</p><button type="button" class="btn primary" id="srchAi">${t.srchAiBtn(esc(q))}</button>${srch.err?`<p class="pferr">${srch.err}</p>`:""}</div>`)
+      :(!res.length?`<p class="empty" style="margin:0">${q?t.srchNoneNoAi(esc(q)):t.srchNoFilter}</p>`:"");
+  const resultsHtml=`<p class="scount" aria-live="polite">${t.srchCount(res.length)}</p>${cards?`<div class="savedgrid">${cards}</div>`:""}${aiBlock}`;
+  if(onlyResults&&$("srchRes")){ $("srchRes").innerHTML=resultsHtml; return; }
+  v.innerHTML=`<div class="sugh"><h2>${t.srchH}</h2><p>${t.srchSub}</p></div>
+    <div class="search srchbox"><input id="srchQ" type="search" enterkeyhint="search" autocomplete="off" placeholder="${t.srchPh}" aria-label="${t.srchPh}" value="${esc(srch.q)}"></div>
+    <div class="sfilters">
+      <div class="chips">${chip("meal","",t.all)}${chip("meal","b",t.meals.b)}${chip("meal","l",t.meals.l)}${chip("meal","d",t.meals.d)}</div>
+      <div class="chips">${chip("cui","",t.allCui)}${chip("cui","pl",t.cuiPl)}${chip("cui","eu",t.cuiEu)}${chip("cui","afr",t.cuiAfr)}</div>
+      <div class="chips">${chip("fl","quick",t.fQuick)}${chip("fl","prot",t.hiP)}${chip("fl","light",t.light)}${chip("fl","keeps",t.keeps)}${chip("fl","have",t.fHave)}</div>
+    </div>
+    <div id="srchRes">${resultsHtml}</div>`;
+  v.dataset.text="";
+  const inp=$("srchQ"); inp.addEventListener("input",()=>{ srch.q=inp.value; srch.err=""; renderSearch(true); });
+}
+async function askAiDish(q){
+  if(!sampleFn||!q) return; const t=L();
+  aiCtl?.abort(); const ctl=new AbortController(); aiCtl=ctl; srch.ai="loading"; srch.err=""; renderSearch(true);
+  const lang=st.lang==="pl"?"Polish":"English", pantry=[...st.have].map(k=>baseName(ING[k][1]));
+  const prompt=`You are the recipe engine of CoZjem, a meal planner for people in Poland who shop at ${st.store}, Lidl, Aldi, Biedronka and Auchan, and sometimes at African food shops.
+The user searched for: "${q.slice(0,80)}". Give ONE recipe for the dish that best matches this search (if it names an ingredient rather than a dish, pick a well known European or African dish built around it).
+Things already in their kitchen: ${pantry.join(", ")||"nothing listed"}. Assume salt, pepper, oil and water are available.
+Write every text field in ${lang}.
+Reply with only a JSON object in exactly this shape:
+{"name":"dish name","origin":"country or region","why":"one short sentence","time":30,"servings":2,"kcal":550,"protein":35,"ingredients":[{"name":"ingredient with amount","have":true,"price_pln":null}],"steps":["step 1","step 2"],"color":"#C0392B","vessel":"plate"}
+Rules: "have" is true only for items in their kitchen list or the basics. For "have": false give "price_pln" as a typical ${st.store} price in złoty for one pack, otherwise null. "kcal" and "protein" are per serving. 4 to 8 short steps. "vessel" is "plate", "bowl" or "pan".`;
+  try{
+    const res=await sampleFn.json(prompt,{signal:ctl.signal,cache:false});
+    if(ctl!==aiCtl) return;
+    st.aiDish=cleanAi(res); srch.ai="idle"; st.view="today"; st.mode="ai"; save(); all(); flash();
+  }catch(e){
+    if(ctl!==aiCtl) return; srch.ai="idle"; const c=e&&e.code;
+    if(c==="cancelled"){} else if(["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"].includes(c)){ sampleFn=false; }
+    else srch.err=c==="rate_limited"?t.aiRate:t.aiFail;
+    if(st.view==="search") renderSearch(true);
+  }
+}
 function renderSaved(){
   const t=L(), v=$("view");
   const fmtD=ts=>new Date(ts).toLocaleDateString(st.lang==="pl"?"pl-PL":"en-GB",{day:"numeric",month:"short"});
@@ -1716,7 +1805,7 @@ function renderShop(){
   v.dataset.text=`CoZjem · ${t.list} (${st.store})\n`+sh.ks.map(k=>`- ${nmS(k)}  ~${zl(pr(k))}`).join("\n")+`\n${t.total} ${zl(sh.cost)}`;
   expo={title:t.list,items:sh.ks.map(expItem)};
 }
-function renderView(){ st.view==="week"?renderWeek():st.view==="shop"?renderShop():st.view==="saved"?renderSaved():renderToday(); animateIn(); }
+function renderView(){ if(st.view==="search"){ renderSearch(); return; } st.view==="week"?renderWeek():st.view==="shop"?renderShop():st.view==="saved"?renderSaved():renderToday(); animateIn(); }
 function all(){renderStatic();renderView();}
 function flash(){const el=$("result"); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
   const top=el.getBoundingClientRect().top; if(top<0||top>window.innerHeight*0.6) el.scrollIntoView({behavior:"smooth",block:"start"});}
@@ -1740,6 +1829,10 @@ document.addEventListener("click",e=>{
   if(b.id==="cardSave"&&card){cardBlob().then(bl=>saveOrShareBlob(bl,cardFileName(),card.info.name,b,false)); return;}
   if(b.dataset.diary){openDiary(b.dataset.diary); return;}
   if(b.dataset.undiary){photos=photos.filter(p=>p.id!==b.dataset.undiary); savePhotos(); renderView(); return;}
+  if(b.dataset.sf!==undefined){ const g=b.dataset.sf, val=b.dataset.sv; if(g==="fl"){ srch.fl.has(val)?srch.fl.delete(val):srch.fl.add(val); } else srch[g]=srch[g]===val?"":val; renderSearch(); return; }
+  if(b.dataset.sopen){ const r=RB[b.dataset.sopen]; if(!r) return; st.view="today"; st.mode="pick"; st.forced=r.id; if(!r.m.includes(st.meal)) st.meal=r.m[0]; save(); all(); flash(); return; }
+  if(b.id==="srchAi"){ askAiDish(srch.q.trim()); return; }
+  if(b.id==="srchStop"){ aiCtl?.abort(); return; }
   if(b.id==="saveImg"){exportListImage(b); return;}
   if(b.id==="shopMode"){openShop(listFromExpo()); return;}
   if(b.id==="shareList"||b.id==="shareList2"){shareCurrentList(b); return;}
@@ -1792,7 +1885,11 @@ document.addEventListener("click",e=>{
   if(b.id==="batch"){st.batch=!st.batch; genWeek(); save(); renderView(); flash(); return;}
   if(b.dataset.swap){const [d,m]=b.dataset.swap.split(":"); swapCell(+d,m); renderView(); return;}
   if(b.id==="lang-pl"||b.id==="lang-en"){st.lang=b.id.slice(5);save();all();return;}
-  if(b.id==="tab-today"||b.id==="tab-week"||b.id==="tab-shop"||b.id==="tab-saved"){st.view=b.id.slice(4);save();all();return;}
+  if(b.id==="tab-today"||b.id==="tab-week"||b.id==="tab-shop"||b.id==="tab-saved"||b.id==="tab-search"){st.view=b.id.slice(4);save();all();
+    if(window.matchMedia("(max-width:900px)").matches){ $("result").scrollIntoView({behavior:"smooth",block:"start"}); }
+    try{ $(b.id).scrollIntoView({block:"nearest",inline:"center"}); }catch(e){}
+    if(st.view==="search"&&window.matchMedia("(min-width:901px)").matches){ const i=$("srchQ"); if(i) i.focus({preventScroll:true}); }
+    return;}
   if(b.id==="clear"){st.have.clear();st.q="";$("q").value="";st.pick=0;st.forced=null;save();all();return;}
   if(b.id==="another"){
     if(st.forced){const list=ranked(); const j=list.findIndex(a=>a.r.id===st.forced); st.pick=j<0?0:j+1; st.forced=null;} else st.pick++;
