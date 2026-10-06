@@ -241,6 +241,23 @@ a.img{font-size:.78rem;color:var(--beet);text-decoration:none;border-bottom:1px 
 @keyframes carddown{to{opacity:0;transform:translateY(30px) scale(.97)}}
 @keyframes fadein{from{opacity:0}}
 @keyframes fadeout{to{opacity:0}}
+/* nearest stores */
+.storesc{max-width:640px;text-align:left;align-items:stretch;gap:10px}
+.sthead{display:flex;justify-content:space-between;align-items:center}
+.sthead .lkick{margin:0}
+.storesc .sclose{width:34px;height:34px;font-size:1.3rem}
+.storesc #addrIn{flex:1 1 12rem}
+.stgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.stc{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;background:var(--bg)}
+.stc.cur{border-color:var(--dill);box-shadow:inset 0 0 0 1px var(--dill)}
+.stc p{margin:0;font-size:.88rem}
+.sth{display:flex;align-items:center;gap:8px}
+.sth b{flex:1;min-width:0}
+.std{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.85rem;white-space:nowrap}
+.sthr{color:var(--muted);font-size:.78rem!important}
+.stc a.btn{text-decoration:none}
+a.where{display:block;font-size:.76rem;color:var(--dill);text-decoration:none;margin-top:1px}
+a.where::before{content:"";display:inline-block;width:.5rem;height:.5rem;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--dill);margin-right:6px}
 /* real dish photos */
 .pic{margin:0;display:flex;flex-direction:column;gap:4px;min-width:0}
 .pic img{width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;border-radius:14px;display:block;background:var(--bg);animation:rise .4s ease both}
@@ -839,6 +856,14 @@ const T = {
   signedAs:"Zalogowano jako", syncedAt:x=>`Zsynchronizowano o ${x}`, syncErr:"Nie udało się zsynchronizować. Spróbujemy ponownie przy następnej zmianie.",
   syncNow:"Synchronizuj teraz", signOut:"Wyloguj", delCloud:"Usuń dane z chmury", delConfirm:"Kliknij ponownie, aby usunąć",
   acctNote:"Przechowujemy tylko Twój e-mail i dane z aplikacji (w UE, Frankfurt). Bez konta wszystko zostaje tylko w tej przeglądarce.",
+  nearStoresBtn:"Znajdź najbliższe sklepy", nearStoresBtn2:"Najbliższe sklepy", storesH:"Sklepy w pobliżu",
+  storesSub:"Pokaż najbliższy Lidl, Aldi, Biedronkę, Auchan i sklepy afrykańskie. Adresy zostaną dopisane do składników na liście.",
+  storesNear:l=>`Najbliższe sklepy dla: ${l}`, useLoc:"Użyj mojej lokalizacji", addrPh:"Albo wpisz adres lub miasto", find:"Szukaj",
+  storesBusy:"Szukam sklepów…", storesErr:"Nie udało się pobrać sklepów. Sprawdź internet albo użyj przycisków mapy.", geoNo:"Ta przeglądarka nie udostępnia lokalizacji. Wpisz adres.",
+  geoDenied:"Brak dostępu do lokalizacji. Wpisz adres lub miasto.", addrNone:"Nie znaleziono tego adresu. Spróbuj z nazwą miasta.", myLoc:"Twoja lokalizacja",
+  addrUnknown:"Adres niepodany na mapie", noneNear:"Brak w promieniu 15 km.", searchMap:"Wyszukaj na mapie najbliższy sklep.", directions:"Trasa", website:"Strona", onMap:"Na mapie",
+  afrShopsH:"Sklepy afrykańskie", afrNone:"Na mapie nie ma sklepów afrykańskich w pobliżu. Spróbuj wyszukiwania w Mapach Google.", afrMap:"Szukaj sklepów afrykańskich w Mapach Google",
+  storesNote:"Dane sklepów z OpenStreetMap, mogą być niepełne. Lokalizacja zostaje tylko na tym urządzeniu.",
   photoBy:"Zdjęcie:", credits:"Autorzy zdjęć", creditsSub:"Zdjęcia dań pochodzą z Wikimedia Commons, na wolnych licencjach. Zostały przycięte. Stuknij autora, aby zobaczyć oryginał i licencję.",
   tSearch:"Szukaj", srchH:"Znajdź danie", srchSub:"Szukaj po nazwie, składniku lub kuchni, np. „żurek”, „kurczak”, „Nigeria”.", srchPh:"Czego szukasz?",
   all:"Wszystkie", allCui:"Każda kuchnia", cuiPl:"Polska", cuiEu:"Europejska", cuiAfr:"Afrykańska", fQuick:"Do 25 min", fHave:"Mam większość",
@@ -909,6 +934,14 @@ const T = {
   signedAs:"Signed in as", syncedAt:x=>`Synced at ${x}`, syncErr:"Couldn't sync. We'll try again on your next change.",
   syncNow:"Sync now", signOut:"Sign out", delCloud:"Delete my cloud data", delConfirm:"Tap again to delete",
   acctNote:"We store only your email and your app data (in the EU, Frankfurt). Without an account everything stays in this browser only.",
+  nearStoresBtn:"Find nearest stores", nearStoresBtn2:"Nearest stores", storesH:"Stores near you",
+  storesSub:"Show the nearest Lidl, Aldi, Biedronka, Auchan and African shops. Their addresses are added to the ingredients on your list.",
+  storesNear:l=>`Nearest stores to: ${l}`, useLoc:"Use my location", addrPh:"Or type an address or city", find:"Find",
+  storesBusy:"Looking for stores…", storesErr:"Couldn't load stores. Check your connection or use the map buttons.", geoNo:"This browser doesn't share location. Type an address instead.",
+  geoDenied:"Location access was refused. Type an address or city.", addrNone:"Couldn't find that address. Try a city name.", myLoc:"Your location",
+  addrUnknown:"Address not listed on the map", noneNear:"None within 15 km.", searchMap:"Find the nearest one on the map.", directions:"Directions", website:"Website", onMap:"On the map",
+  afrShopsH:"African shops", afrNone:"No African shops are on the map near you. Try a Google Maps search.", afrMap:"Search African shops on Google Maps",
+  storesNote:"Store data from OpenStreetMap and may be incomplete. Your location stays on this device only.",
   photoBy:"Photo:", credits:"Photo credits", creditsSub:"Dish photos come from Wikimedia Commons under free licences and have been cropped. Tap an author to see the original and its licence.",
   tSearch:"Search", srchH:"Find a dish", srchSub:"Search by name, ingredient or cuisine, for example “żurek”, “chicken” or “Nigeria”.", srchPh:"What are you looking for?",
   all:"All", allCui:"Any cuisine", cuiPl:"Polish", cuiEu:"European", cuiAfr:"African", fQuick:"Under 25 min", fHave:"I have most",
@@ -1071,6 +1104,7 @@ function compareHtml(ks){
   return `<div class="cmp"><p class="label">${t.cmpH}</p>
     ${save>=0.5?`<p class="cmpsave">${t.saveAt(best.s,zl(save))}</p>`:`<p class="cmpsave ok">${t.bestAlready}</p>`}
     <div class="cmprows">${rows}</div>${mixLine}
+    <button type="button" class="btn sm" id="findStoresBtn">${near?t.nearStoresBtn2:t.nearStoresBtn}</button>
     <p class="cmpnote">${t.cmpNote} <a href="https://wiadomoscispozywcze.pl/artykuly/16316/koszyk-zakupowy-w-czerwcu-ceny-spady-ale-wciaz-jest-drozej-niz-rok-temu-auchan-nadal-liderem/" target="_blank" rel="noopener">${t.cmpSrc}</a></p></div>`;
 }
 function alertHtml(ks){
@@ -1426,7 +1460,7 @@ function closeLanding(toRecipe){
   setTimeout(()=>{el.remove(); if(toRecipe) $("result").scrollIntoView({behavior:"smooth",block:"start"});},220);
 }
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&$("cardmodal")) closeCard(); else if(e.key==="Escape"&&$("landing")) closeLanding(false); else if(e.key==="Escape"&&shop) closeShop(false); });
-document.addEventListener("click",e=>{ if(e.target.dataset&&e.target.dataset.ccl){ const el=$("credits"); if(el) el.remove(); return; } if(e.target.classList&&e.target.classList.contains("lback")){ if(e.target.dataset.cardclose) closeCard(); else closeLanding(false); } });
+document.addEventListener("click",e=>{ if(e.target.dataset&&e.target.dataset.stclose){ const el=$("storesm"); if(el) el.remove(); return; } if(e.target.dataset&&e.target.dataset.ccl){ const el=$("credits"); if(el) el.remove(); return; } if(e.target.classList&&e.target.classList.contains("lback")){ if(e.target.dataset.cardclose) closeCard(); else closeLanding(false); } });
 let expo=null, dlFn=null;
 const expItem=k=>{const q=priceAt(k,st.store); return {k,cat:ING[k][3],name:nm(k),price:q.p,src:ING[k][3]==="afr"?"afr":q.src};};
 function wrapText(ctx,text,maxW){ const words=String(text).split(" "); const out=[]; let line="";
@@ -1693,6 +1727,89 @@ async function openFromHash(){
   if(m){ try{ const lst=cleanList(b64u.dec(m[1])); if(!lst) return; const key=m[1].slice(0,40); let tk={}; try{tk=JSON.parse(localStorage.getItem("cozjem-list-"+key)||"{}")||{};}catch(e){}
       openShop(lst,{staticShared:true,ticks:tk}); if(shop) shop.staticKey=key; }catch(e){} }
 }
+// ---------- Nearest stores (OpenStreetMap) ----------
+const STORE_WEB={Lidl:"https://www.lidl.pl",Aldi:"https://www.aldi.pl",Biedronka:"https://www.biedronka.pl",Auchan:"https://www.auchan.pl"};
+const OVERPASS=["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter"];
+let near=null; try{ near=JSON.parse(localStorage.getItem("cozjem-stores")||"null"); }catch(e){ near=null; }
+const nearState={busy:false,err:"",q:""};
+function km(a,b){ const R6=6371, toR=x=>x*Math.PI/180, dLa=toR(b.lat-a.lat), dLo=toR(b.lon-a.lon);
+  const h=Math.sin(dLa/2)**2+Math.cos(toR(a.lat))*Math.cos(toR(b.lat))*Math.sin(dLo/2)**2; return 2*R6*Math.asin(Math.sqrt(h)); }
+const fmtKm=d=>d<1?`${Math.round(d*1000/10)*10} m`:`${fmt(d,1)} km`;
+function chainOf(t){ const s2=((t.brand||"")+" "+(t.name||"")).toLowerCase();
+  if(/lidl/.test(s2)) return "Lidl"; if(/aldi/.test(s2)) return "Aldi"; if(/biedronka/.test(s2)) return "Biedronka"; if(/auchan/.test(s2)) return "Auchan"; return null; }
+function addrOf(t){ const st2=[t["addr:street"]||t["addr:place"],t["addr:housenumber"]].filter(Boolean).join(" "); const c=t["addr:city"]||"";
+  return [st2,c].filter(Boolean).join(", "); }
+async function overpass(q){
+  let lastErr;
+  for(const ep of OVERPASS){ try{ const ctl=new AbortController(); const tm=setTimeout(()=>ctl.abort(),25000);
+      const r=await fetch(ep,{method:"POST",body:"data="+encodeURIComponent(q),headers:{"Content-Type":"application/x-www-form-urlencoded"},signal:ctl.signal});
+      clearTimeout(tm); if(r.ok) return await r.json(); lastErr=new Error("HTTP "+r.status);
+    }catch(e){ lastErr=e; } }
+  throw lastErr||new Error("failed");
+}
+async function findStores(loc){
+  const t=L(); nearState.busy=true; nearState.err=""; renderStoresModal();
+  try{
+    const {lat,lon}=loc;
+    const q=`[out:json][timeout:25];(nwr["shop"]["brand"~"Lidl|Aldi|ALDI|Biedronka|Auchan"](around:15000,${lat},${lon});nwr["shop"]["name"~"Lidl|Aldi|ALDI|Biedronka|Auchan"](around:15000,${lat},${lon});nwr["shop"]["name"~"afro|afryk|africa|african",i](around:40000,${lat},${lon});nwr["shop"]["cuisine"~"african",i](around:40000,${lat},${lon}););out center tags 400;`;
+    const d=await overpass(q);
+    const chains={}, afr=[];
+    for(const e of d.elements||[]){ const tg=e.tags||{}; const p={lat:e.lat??(e.center&&e.center.lat),lon:e.lon??(e.center&&e.center.lon)}; if(p.lat==null) continue;
+      const dist=km(loc,p), item={name:tg.name||tg.brand||"",addr:addrOf(tg),dist,lat:p.lat,lon:p.lon,hours:tg.opening_hours||"",web:tg.website||tg["contact:website"]||""};
+      const ch=chainOf(tg);
+      if(ch){ if(!chains[ch]||dist<chains[ch].dist) chains[ch]=item; }
+      else if(/afro|afryk|africa/i.test(tg.name||"")||/african/i.test(tg.cuisine||"")) afr.push(item); }
+    afr.sort((a,b)=>a.dist-b.dist);
+    near={loc,chains,afr:afr.filter((x,i,a)=>a.findIndex(y=>y.name===x.name&&Math.abs(y.dist-x.dist)<0.05)===i).slice(0,4),ts:Date.now()};
+    try{ localStorage.setItem("cozjem-stores",JSON.stringify(near)); }catch(e){}
+  }catch(e){ nearState.err=t.storesErr; }
+  nearState.busy=false; renderStoresModal(); renderView();
+}
+function useMyLocation(){
+  const t=L(); if(!navigator.geolocation){ nearState.err=t.geoNo; renderStoresModal(); return; }
+  nearState.busy=true; nearState.err=""; renderStoresModal();
+  navigator.geolocation.getCurrentPosition(pos=>{ findStores({lat:pos.coords.latitude,lon:pos.coords.longitude,label:t.myLoc}); },
+    ()=>{ nearState.busy=false; nearState.err=t.geoDenied; renderStoresModal(); },{enableHighAccuracy:false,timeout:15000,maximumAge:600000});
+}
+async function geocode(q){
+  const t=L(); if(!q.trim()) return; nearState.busy=true; nearState.err=""; renderStoresModal();
+  try{ const r=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=pl&accept-language="+st.lang+"&q="+encodeURIComponent(q));
+    const j=await r.json(); if(!j.length){ nearState.busy=false; nearState.err=t.addrNone; renderStoresModal(); return; }
+    findStores({lat:+j[0].lat,lon:+j[0].lon,label:j[0].display_name.split(",").slice(0,3).join(",")});
+  }catch(e){ nearState.busy=false; nearState.err=t.storesErr; renderStoresModal(); }
+}
+const dirUrl=s2=>`https://www.google.com/maps/dir/?api=1&destination=${s2.lat},${s2.lon}`;
+const mapSearch=q=>`https://www.google.com/maps/search/${encodeURIComponent(q)}`;
+function storeFor(k){ if(!near) return null; if(ING[k][3]==="afr") return near.afr[0]?{...near.afr[0],label:near.afr[0].name}:null; const c=near.chains[st.store]; return c?{...c,label:st.store}:null; }
+function whereLine(k){ const s2=storeFor(k); if(!s2) return ""; return `<a class="where" href="${dirUrl(s2)}" target="_blank" rel="noopener">${esc(s2.label)}${s2.addr?", "+esc(s2.addr):""} · ${fmtKm(s2.dist)}</a>`; }
+function whereText(ks){ if(!near) return ""; const t=L(), out=[]; const c=near.chains[st.store];
+  if(c&&ks.some(k=>ING[k]&&ING[k][3]!=="afr")) out.push(`${st.store}: ${c.addr||c.name} (${fmtKm(c.dist)})`);
+  if(near.afr[0]&&ks.some(k=>ING[k]&&ING[k][3]==="afr")) out.push(`${t.afrShop}: ${near.afr[0].name}${near.afr[0].addr?", "+near.afr[0].addr:""} (${fmtKm(near.afr[0].dist)})`);
+  return out.length?out.join("\n")+"\n":""; }
+function openStores(){ const el=document.createElement("div"); el.className="landing"; el.id="storesm"; document.body.appendChild(el); renderStoresModal(); }
+function renderStoresModal(){
+  const el=$("storesm"); if(!el) return; const t=L();
+  const chainCard=c=>{ const s2=near&&near.chains[c]; const cur=c===st.store;
+    return `<div class="stc${cur?" cur":""}"><div class="sth"><b>${c}</b>${cur?`<span class="pill fresh">${t.yourShop}</span>`:""}${s2?`<span class="std">${fmtKm(s2.dist)}</span>`:""}</div>
+      ${s2?`<p>${esc(s2.addr||s2.name||t.addrUnknown)}</p>${s2.hours?`<p class="sthr">${esc(s2.hours)}</p>`:""}`:`<p class="sthr">${near?t.noneNear:t.searchMap}</p>`}
+      <div class="actions">${s2?`<a class="btn sm" href="${dirUrl(s2)}" target="_blank" rel="noopener">${t.directions}</a>`:`<a class="btn sm" href="${mapSearch(c+(near?" "+(near.loc.label||""):""))}" target="_blank" rel="noopener">${t.onMap}</a>`}
+        <a class="btn sm" href="${esc(s2&&s2.web||STORE_WEB[c])}" target="_blank" rel="noopener">${t.website}</a>${cur?"":`<button type="button" class="btn sm" data-setstore="${c}">${t.shopHere}</button>`}</div></div>`; };
+  const afrList=near&&near.afr.length?near.afr.map(a=>`<div class="stc"><div class="sth"><b>${esc(a.name)}</b><span class="std">${fmtKm(a.dist)}</span></div>${a.addr?`<p>${esc(a.addr)}</p>`:""}${a.hours?`<p class="sthr">${esc(a.hours)}</p>`:""}
+      <div class="actions"><a class="btn sm" href="${dirUrl(a)}" target="_blank" rel="noopener">${t.directions}</a>${a.web?`<a class="btn sm" href="${esc(a.web)}" target="_blank" rel="noopener">${t.website}</a>`:""}</div></div>`).join("")
+    :`<p class="sthr" style="margin:0">${near?t.afrNone:""}</p>`;
+  el.innerHTML=`<div class="lback" data-stclose="1"></div><div class="lcard storesc" role="dialog" aria-modal="true" aria-label="${t.storesH}">
+    <div class="sthead"><p class="lkick">${t.storesH}</p><button type="button" class="sclose" data-stclose="1" aria-label="${t.close}">×</button></div>
+    <p class="hint" style="margin:0">${near?t.storesNear(esc(near.loc.label||t.myLoc)):t.storesSub}</p>
+    <div class="actions">${navigator.geolocation?`<button type="button" class="btn primary" id="geoBtn">${t.useLoc}</button>`:""}</div>
+    <form id="addrForm" class="pform"><input id="addrIn" type="text" autocomplete="street-address" placeholder="${t.addrPh}" aria-label="${t.addrPh}" value="${esc(nearState.q)}"><button class="btn" type="submit">${t.find}</button></form>
+    ${nearState.busy?`<div class="thinking">${POT}<span>${t.storesBusy}</span></div>`:""}
+    ${nearState.err?`<p class="pferr">${nearState.err}</p>`:""}
+    <div class="stgrid">${STORES.map(chainCard).join("")}</div>
+    <p class="lkick" style="text-align:left">${t.afrShopsH}</p>
+    <div class="stgrid">${afrList}</div>
+    <div class="actions"><a class="btn sm" href="${mapSearch((st.lang==="pl"?"sklep afrykański ":"African food shop ")+(near?near.loc.label||"":""))}" target="_blank" rel="noopener">${t.afrMap}</a></div>
+    <p class="hint" style="margin:0">${t.storesNote}</p></div>`;
+}
 // ---------- Search ----------
 const AFR_O=new Set(["ng","gh","sn","ma","et","ke","wa","za","eg"]);
 const srch={q:"",meal:"",cui:"",fl:new Set(),ai:"idle",err:""};
@@ -1816,7 +1933,7 @@ function renderToday(quiet){
    </div>${pic(r)}</div>
    <div class="cols">
      <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
-       <div class="have"><p class="label">${t.ingr}</p><p class="hint">${t.tickHint}</p><ul>${r.n.map(k=>`<li class="${st.have.has(k)?"":"miss"}"><button type="button" class="hv" data-ing="${k}" aria-pressed="${st.have.has(k)}" aria-label="${esc(nm(k))}">${st.have.has(k)?"✓":""}</button><span>${esc(nm(k))} <span class="count">· ${st.have.has(k)?t.ok:t.miss}</span> <a class="img" href="${imgUrl(k)}" target="_blank" rel="noopener">${t.see}</a></span></li>`).join("")}</ul></div>
+       <div class="have"><p class="label">${t.ingr}</p><p class="hint">${t.tickHint}</p><ul>${r.n.map(k=>`<li class="${st.have.has(k)?"":"miss"}"><button type="button" class="hv" data-ing="${k}" aria-pressed="${st.have.has(k)}" aria-label="${esc(nm(k))}">${st.have.has(k)?"✓":""}</button><span>${esc(nm(k))} <span class="count">· ${st.have.has(k)?t.ok:t.miss}</span> <a class="img" href="${imgUrl(k)}" target="_blank" rel="noopener">${t.see}</a>${st.have.has(k)?"":whereLine(k)}</span></li>`).join("")}</ul></div>
        <div><p class="label">${t.steps}</p><ol class="steps">${(st.lang==="pl"?r.sp:r.se).map(s=>`<li>${esc(s)}</li>`).join("")}</ol></div>
      </div>
      <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
@@ -1830,7 +1947,7 @@ function renderToday(quiet){
      </div>
    </div>
    ${alts?`<div><p class="label">${t.alts}</p><div class="alts">${alts}</div></div>`:""}`;
-  v.dataset.text=`CoZjem · ${r[st.lang]}\n${t.list} (${st.store})\n`+x.miss.map(k=>`- ${nmS(k)}  ~${zl(pr(k))}`).join("\n")+`\n${t.total} ${zl(x.cost)}`;
+  v.dataset.text=`CoZjem · ${r[st.lang]}\n${t.list} (${st.store})\n`+whereText(x.miss)+x.miss.map(k=>`- ${nmS(k)}  ~${zl(pr(k))}`).join("\n")+`\n${t.total} ${zl(x.cost)}`;
   expo={title:r[st.lang],items:x.miss.map(expItem)};
 }
 function renderWeek(){
@@ -1881,7 +1998,7 @@ function renderShop(){
   const sh=weekShop();
   const spent=Object.entries(st.bought).filter(([k,ts])=>now-ts<7*D).reduce((a,[k])=>a+pr(k),0);
   const buy=sh.ks.map(k=>`<li><button type="button" class="tick" data-buy="${k}" aria-label="${t.markBought}: ${esc(nm(k))}"></button>
-     <span class="nm">${esc(nm(k))}${ING[k][3]==="afr"?` <span class="tag plain">${t.afrShop}</span>`:""} <a class="img" href="${imgUrl(k)}" target="_blank" rel="noopener">${t.see}</a></span><span class="pr">${(q=>q.src==="promo"?`<span class="pill check">${t.promo}</span> `:q.src==="mine"?"* ":"")(priceAt(k,st.store))}${zl(pr(k))}</span></li>`).join("");
+     <span class="nm">${esc(nm(k))}${ING[k][3]==="afr"?` <span class="tag plain">${t.afrShop}</span>`:""} <a class="img" href="${imgUrl(k)}" target="_blank" rel="noopener">${t.see}</a>${whereLine(k)}</span><span class="pr">${(q=>q.src==="promo"?`<span class="pill check">${t.promo}</span> `:q.src==="mine"?"* ":"")(priceAt(k,st.store))}${zl(pr(k))}</span></li>`).join("");
   const kit=[...st.have].map(k=>{const ts=st.bought[k], life=shelf(k), left=ts?life-(now-ts)/D:null;
       const stt=left===null?"none":left<0?"check":left<=1.5?"soon":"fresh"; return {k,ts,left,stt};})
     .sort((a,b)=>(a.left??1e9)-(b.left??1e9));
@@ -1926,7 +2043,7 @@ function renderShop(){
    </div>
    ${compareHtml(sh.ks)}
    ${pricesBlock}`;
-  v.dataset.text=`CoZjem · ${t.list} (${st.store})\n`+sh.ks.map(k=>`- ${nmS(k)}  ~${zl(pr(k))}`).join("\n")+`\n${t.total} ${zl(sh.cost)}`;
+  v.dataset.text=`CoZjem · ${t.list} (${st.store})\n`+whereText(sh.ks)+sh.ks.map(k=>`- ${nmS(k)}  ~${zl(pr(k))}`).join("\n")+`\n${t.total} ${zl(sh.cost)}`;
   expo={title:t.list,items:sh.ks.map(expItem)};
 }
 function renderView(){ if(st.view==="search"){ renderSearch(); return; } st.view==="week"?renderWeek():st.view==="shop"?renderShop():st.view==="saved"?renderSaved():renderToday(); animateIn(); }
@@ -1957,6 +2074,9 @@ document.addEventListener("click",e=>{
   if(b.dataset.sopen){ const r=RB[b.dataset.sopen]; if(!r) return; st.view="today"; st.mode="pick"; st.forced=r.id; if(!r.m.includes(st.meal)) st.meal=r.m[0]; save(); all(); flash(); return; }
   if(b.id==="srchAi"){ askAiDish(srch.q.trim()); return; }
   if(b.id==="srchStop"){ aiCtl?.abort(); return; }
+  if(b.id==="findStoresBtn"){ openStores(); return; }
+  if(b.dataset.stclose){ const el=$("storesm"); if(el) el.remove(); return; }
+  if(b.id==="geoBtn"){ useMyLocation(); return; }
   if(b.id==="creditsBtn"){ const t=L(); const el=document.createElement("div"); el.className="landing"; el.id="credits";
     el.innerHTML=`<div class="lback" data-ccl="1"></div><div class="lcard credl" role="dialog" aria-modal="true" aria-label="${t.credits}"><p class="lkick">${t.credits}</p><p class="hint" style="margin:0">${t.creditsSub}</p>
       <ul>${R.filter(r=>PHOTOS[r.id]).map(r=>{const p=PHOTOS[r.id]; return `<li><b>${esc(r[st.lang])}</b><span><a href="${p.u}" target="_blank" rel="noopener">${esc(p.a)}</a>, ${esc(p.l)}</span></li>`;}).join("")}</ul>
@@ -1980,7 +2100,7 @@ document.addEventListener("click",e=>{
     try{ navigator.share(d).catch(()=>{}); }catch(e){} return; }
   if(b.id==="shLink"&&shareCur){copyText(shareCur.url,$("shNote"),L().shCopiedLink); return;}
   if(b.id==="shText"&&shareCur){copyText(shareCur.full,$("shNote"),L().shCopiedText); return;}
-  if(b.dataset.setstore){st.store=b.dataset.setstore; save(); all(); flash(); return;}
+  if(b.dataset.setstore){st.store=b.dataset.setstore; save(); all(); renderStoresModal(); flash(); return;}
   if(b.dataset.rmpromo!==undefined){st.promos.splice(+b.dataset.rmpromo,1); save(); renderView(); return;}
   if(b.dataset.rmprice){const [k,sx]=b.dataset.rmprice.split("|"); if(st.prices[k]){delete st.prices[k][sx]; if(!Object.keys(st.prices[k]).length) delete st.prices[k];} save(); renderView(); return;}
   if(b.dataset.unsave!==undefined){st.saved.splice(+b.dataset.unsave,1); save(); renderStatic(); renderView(); return;}
@@ -2039,6 +2159,7 @@ function fallback(txt,ok){const ta=document.createElement("textarea");ta.value=t
 $("q").addEventListener("input",e=>{st.q=e.target.value;renderChips();});
 $("photoIn").addEventListener("change",e=>{ const f=e.target.files&&e.target.files[0]; onPhoto(f); });
 document.addEventListener("submit",e=>{
+  if(e.target.id==="addrForm"){e.preventDefault(); nearState.q=$("addrIn").value; geocode(nearState.q); return;}
   if(e.target.id==="emailForm"){e.preventDefault(); sendLink(($("acctEmail").value||"").trim()); return;}
   if(e.target.id==="codeForm"){e.preventDefault(); const c=($("acctCode").value||"").replace(/\D/g,""); if(c.length===6) verifyCode(c); return;}
   if(e.target.id!=="priceForm") return; e.preventDefault(); const t=L();
