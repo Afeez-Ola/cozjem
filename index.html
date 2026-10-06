@@ -241,6 +241,20 @@ a.img{font-size:.78rem;color:var(--beet);text-decoration:none;border-bottom:1px 
 @keyframes carddown{to{opacity:0;transform:translateY(30px) scale(.97)}}
 @keyframes fadein{from{opacity:0}}
 @keyframes fadeout{to{opacity:0}}
+/* real dish photos */
+.pic{margin:0;display:flex;flex-direction:column;gap:4px;min-width:0}
+.pic img{width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;border-radius:14px;display:block;background:var(--bg);animation:rise .4s ease both}
+.pic figcaption{font-size:.68rem;color:var(--muted);line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pic figcaption a{color:inherit}
+.pic.broken img{visibility:hidden;aspect-ratio:4/3}
+.dish-hero .pic{align-self:start}
+.lart .pic img{border-radius:16px}
+.scard .pic{align-self:stretch}
+.credl{max-width:520px;text-align:left;align-items:stretch}
+.credl ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;overflow:auto;max-height:55vh;font-size:.85rem}
+.credl li{display:flex;flex-direction:column;border-bottom:1px solid var(--line);padding-bottom:6px}
+.credl li span{color:var(--muted)}
+.credl a{color:var(--beet)}
 /* search */
 .ticon{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;vertical-align:-2px;margin-right:4px}
 .srchbox input{font-size:1.05rem;padding:.7rem .9rem}
@@ -490,7 +504,7 @@ main .panel:nth-child(2){animation-delay:.08s}.habits{animation-delay:.16s}
 
   <section class="panel habits" id="habits"></section>
 
-  <footer id="foot"></footer>
+  <footer><span id="foot"></span> <button type="button" class="linkbtn" id="creditsBtn"></button></footer>
 </div>
 
 <script>
@@ -825,6 +839,7 @@ const T = {
   signedAs:"Zalogowano jako", syncedAt:x=>`Zsynchronizowano o ${x}`, syncErr:"Nie udało się zsynchronizować. Spróbujemy ponownie przy następnej zmianie.",
   syncNow:"Synchronizuj teraz", signOut:"Wyloguj", delCloud:"Usuń dane z chmury", delConfirm:"Kliknij ponownie, aby usunąć",
   acctNote:"Przechowujemy tylko Twój e-mail i dane z aplikacji (w UE, Frankfurt). Bez konta wszystko zostaje tylko w tej przeglądarce.",
+  photoBy:"Zdjęcie:", credits:"Autorzy zdjęć", creditsSub:"Zdjęcia dań pochodzą z Wikimedia Commons, na wolnych licencjach. Zostały przycięte. Stuknij autora, aby zobaczyć oryginał i licencję.",
   tSearch:"Szukaj", srchH:"Znajdź danie", srchSub:"Szukaj po nazwie, składniku lub kuchni, np. „żurek”, „kurczak”, „Nigeria”.", srchPh:"Czego szukasz?",
   all:"Wszystkie", allCui:"Każda kuchnia", cuiPl:"Polska", cuiEu:"Europejska", cuiAfr:"Afrykańska", fQuick:"Do 25 min", fHave:"Mam większość",
   srchCount:n=>n===1?"1 danie":`${n} ${(n%10>=2&&n%10<=4&&(n%100<12||n%100>14))?"dania":"dań"}`, srchNoFilter:"Nic nie pasuje do tych filtrów. Odznacz któryś z nich.",
@@ -894,6 +909,7 @@ const T = {
   signedAs:"Signed in as", syncedAt:x=>`Synced at ${x}`, syncErr:"Couldn't sync. We'll try again on your next change.",
   syncNow:"Sync now", signOut:"Sign out", delCloud:"Delete my cloud data", delConfirm:"Tap again to delete",
   acctNote:"We store only your email and your app data (in the EU, Frankfurt). Without an account everything stays in this browser only.",
+  photoBy:"Photo:", credits:"Photo credits", creditsSub:"Dish photos come from Wikimedia Commons under free licences and have been cropped. Tap an author to see the original and its licence.",
   tSearch:"Search", srchH:"Find a dish", srchSub:"Search by name, ingredient or cuisine, for example “żurek”, “chicken” or “Nigeria”.", srchPh:"What are you looking for?",
   all:"All", allCui:"Any cuisine", cuiPl:"Polish", cuiEu:"European", cuiAfr:"African", fQuick:"Under 25 min", fHave:"I have most",
   srchCount:n=>n===1?"1 dish":`${n} dishes`, srchNoFilter:"Nothing matches these filters. Try turning one off.",
@@ -991,6 +1007,11 @@ const VIS={golabki:["pan", "#B5452B", ["#9FC46B", "#E8D2A6"]],kotlet:["plate", "
  egusi:["bowl","#C9A227",["#2E6B2E","#7A3E2A"]],dodo:["plate","#E8932B",["#F2C94C","#D63A2F"]],akara:["plate","#C9852F",["#B5702A","#E0A04A"]],
  redred:["bowl","#C2412D",["#E8932B","#8B3A2A"]],maafe:["bowl","#B5652B",["#F0D9B5","#E08A3A"]],tagine:["plate","#F0D9A0",["#C96A2B","#E6C27A","#4A8C3A"]],
  misir:["bowl","#B8452B",["#E8DCC4"]],sukuma:["plate","#F5F1E8",["#2E6B2E","#D63A2F"]]};
+const PHOTOS={"jajecznica":{"a":"Takeaway","l":"CC BY-SA 3.0","u":"https://commons.wikimedia.org/wiki/File:Scrambed_eggs.jpg"},"owsianka":{"a":"Renee Comet (Photographer)","l":"Public domain","u":"https://commons.wikimedia.org/wiki/File:Oatmeal_%281%29.jpg"},"racuchy":{"a":"Pilecka","l":"CC BY-SA 3.0","u":"https://commons.wikimedia.org/wiki/File:Racuchy.JPG"},"szakszuka":{"a":"Calliopejen1","l":"CC BY-SA 3.0","u":"https://commons.wikimedia.org/wiki/File:Shakshuka_by_Calliopejen1.jpg"},"omlet":{"a":"Guilhem Vellut from Annecy, France","l":"CC BY 2.0","u":"https://commons.wikimedia.org/wiki/File:Gorgonzola_%2B_Bacon_Omelette_%40_Omelegg_%40_Amsterdam_%2816600947041%29.jpg"},"ogorkowa":{"a":"Mariuszjbie","l":"CC BY-SA 3.0","u":"https://commons.wikimedia.org/wiki/File:Cucumber_soup...jpg"},"krem":{"a":"Alpha from Melbourne, Australia","l":"CC BY-SA 2.0","u":"https://commons.wikimedia.org/wiki/File:Cream_of_broccoli_soup.jpg"},"schabowy":{"a":"Dmitry Dzema","l":"CC BY-SA 4.0","u":"https://commons.wikimedia.org/wiki/File:Kotlet_Schabowy.jpg"},"kurczakkasza":{"a":"Laitr Keiows","l":"CC BY-SA 3.0","u":"https://commons.wikimedia.org/wiki/File:%D0%93%D1%80%D0%B5%D1%87%D0%BD%D0%B5%D0%B2%D0%B0%D1%8F_%D0%BA%D0%B0%D1%88%D0%B0.jpg"},"pieczony":{"a":"Evan Swigart from Chicago, USA","l":"CC BY 2.0","u":"https://commons.wikimedia.org/wiki/File:Max%27s_Roasted_Chicken_-_Evan_Swigart.jpg"},"pierogi":{"a":"Aw58","l":"CC BY-SA 4.0","u":"https://commons.wikimedia.org/wiki/File:Pierogi_z_mas%C5%82em_-_2023.03.31.jpg"},"bolognese":{"a":"Ivan Vighetto","l":"CC BY-SA 3.0","u":"https://commons.wikimedia.org/wiki/File:Tagliatelle_al_rag%C3%B9_%28image_modified%29.jpg"},"leczo":{"a":"zeevveez","l":"CC BY-SA 4.0","u":"https://commons.wikimedia.org/wiki/File:Warm_Colors-_my_Mom%27s_Hungarian_Lecs%C3%B3_cropped.jpg"},"bigos":{"a":"Dr. Bernd Gross","l":"CC BY-SA 4.0","u":"https://commons.wikimedia.org/wiki/File:Bigos_%281%29.jpg"},"risotto":{"a":"Luca Nebuloni from Milan, Italy","l":"CC BY 2.0","u":"https://commons.wikimedia.org/wiki/File:Risotto_with_speck_and_goat_cheese_%286101067436%29.jpg"},"krupnik":{"a":"Aw58","l":"CC BY-SA 4.0","u":"https://commons.wikimedia.org/wiki/File:Krupnik_-_2023.08.03.jpg"},"tunczyk":{"a":"U.S. Department of Agriculture","l":"CC BY 2.0","u":"https://commons.wikimedia.org/wiki/File:Tuna_fish_sandwiches_for_the_National_School_Lunch_Program_%281%29.jpg"},"zapiekanka":{"a":"MichalPL","l":"CC BY-SA 4.0","u":"https://commons.wikimedia.org/wiki/File:Polish_zapiekanka%2C_June_2021.jpg"},"pesto":{"a":"Ɱ","l":"CC BY-SA 3.0","u":"https://commons.wikimedia.org/wiki/File:BasilPesto.JPG"},"jollof":{"a":"Noahalorwu","l":"CC BY-SA 4.0","u":"https://commons.wikimedia.org/wiki/File:Jollof_Rice_with_Stew.jpg"},"akara":{"a":"AkinkuotuFunmi","l":"CC BY-SA 4.0","u":"https://commons.wikimedia.org/wiki/File:Beans_Ball-Akara.jpg"},"maafe":{"a":"Marshiayers","l":"CC0","u":"https://commons.wikimedia.org/wiki/File:Mafe.malien.jpg"},"tagine":{"a":"BBouchra00","l":"CC BY-SA 4.0","u":"https://commons.wikimedia.org/wiki/File:Tajine-marocain-un-plat-varie-et-sain_%28cropped%29.jpg"},"misir":{"a":"stu_spivack","l":"CC BY-SA 2.0","u":"https://commons.wikimedia.org/wiki/File:Ethiopian_wat.jpg"},"sukuma":{"a":"Paresh Jai from Nairobi, Kenya","l":"CC BY 2.0","u":"https://commons.wikimedia.org/wiki/File:Ugali_%26_Sukuma_Wiki.jpg"},"golabki":{"a":"Silar","l":"CC BY-SA 4.0","u":"https://commons.wikimedia.org/wiki/File:02022_Hungarian_stuffed_cabbage_rolls_in_pickled_cabbage_leaves_with_veal_and_deer_meat.jpg"},"kotlet":{"a":"Jacek Halicki","l":"CC BY-SA 4.0","u":"https://commons.wikimedia.org/wiki/File:2023_Kotlety_mielone.jpg"},"rosol":{"a":"Silar","l":"CC BY-SA 3.0","u":"https://commons.wikimedia.org/wiki/File:09516_rosol_z_makaronem%2C_sanok.jpg"},"fasolka":{"a":"Silar","l":"CC BY-SA 3.0","u":"https://commons.wikimedia.org/wiki/File:00956_Polish_baked_beans_-_a_la_bretonne_-.png"},"kopytka":{"a":"MOs810","l":"CC BY-SA 3.0","u":"https://commons.wikimedia.org/wiki/File:Kopytka_in_tomato_sauce.jpg"},"leniwe":{"a":"Przykuta","l":"CC BY-SA 3.0","u":"https://commons.wikimedia.org/wiki/File:Pierogi_leniwe_3538.jpg"},"kapusniak":{"a":"Mariuszjbie","l":"CC BY-SA 3.0","u":"https://commons.wikimedia.org/wiki/File:Kapusniak.jpg"},"carbonara":{"a":"Javier Somoza","l":"CC BY-SA 4.0","u":"https://commons.wikimedia.org/wiki/File:Espaguetis_carbonara.jpg"},"arrabbiata":{"a":"Petar Milošević","l":"CC BY-SA 4.0","u":"https://commons.wikimedia.org/wiki/File:Penne_Arrabbiata.jpg"},"lasagne":{"a":"jules / stonesoup","l":"CC BY 2.0","u":"https://commons.wikimedia.org/wiki/File:Lasagne_-_stonesoup.jpg"},"minestrone":{"a":"Daniel Ziegener","l":"CC BY-SA 2.0","u":"https://commons.wikimedia.org/wiki/File:Minestrone_soup_%285%29.jpg"},"gulyas":{"a":"Lily15","l":"CC BY-SA 2.5","u":"https://commons.wikimedia.org/wiki/File:Gulyas080.jpg"},"souvlaki":{"a":"EntaXoyas","l":"CC BY-SA 3.0","u":"https://commons.wikimedia.org/wiki/File:%CE%95%CE%BB%CE%BB%CE%B7%CE%BD%CE%B9%CE%BA%CF%8C_%CE%A3%CE%BF%CF%85%CE%B2%CE%BB%CE%AC%CE%BA%CE%B9_-_panoramio.jpg"},"ratatouille":{"a":"Jack145945","l":"CC0","u":"https://commons.wikimedia.org/wiki/File:Ratatouille_home_cooked.jpg"},"efo":{"a":"Bukky658","l":"CC BY-SA 4.0","u":"https://commons.wikimedia.org/wiki/File:Efo_Riro_with_fried_mackerel_fishes_and_roasted_cowskin.jpg"},"peppersoup":{"a":"bob walker","l":"CC BY-SA 2.0","u":"https://commons.wikimedia.org/wiki/File:Assorted_meat_pepper_soup_at_Lagos_Island.jpg"},"moimoi":{"a":"ProVeg International","l":"CC0","u":"https://commons.wikimedia.org/wiki/File:Moin-Moin-good.jpg"},"suya":{"a":"WhisperToMe","l":"CC0","u":"https://commons.wikimedia.org/wiki/File:SuyavarietiesTX.JPG"},"yassa":{"a":"T.K. Naliaka","l":"CC BY-SA 4.0","u":"https://commons.wikimedia.org/wiki/File:Poulet_Yassa_Chicken_rice_with_onion_sauce.jpg"},"koshari":{"a":"Dina Said","l":"CC BY-SA 4.0","u":"https://commons.wikimedia.org/wiki/File:Egyptian_food_Koshary.jpg"},"harira":{"a":"Kattusa24","l":"Public domain","u":"https://commons.wikimedia.org/wiki/File:Harira.png"},"chakalaka":{"a":"philipp from cape town, south africa","l":"CC BY 2.0","u":"https://commons.wikimedia.org/wiki/File:Chakalaka.jpg"}};/*PHOTOS*/
+function pic(r,big){
+  const ph=PHOTOS[r.id]; if(!ph) return art(r); const t=L();
+  return `<figure class="pic"><img src="img/${r.id}.jpg" alt="${esc(r[st.lang]||"")}" loading="lazy" width="800" height="600" onerror="this.parentNode.classList.add('broken')"><figcaption>${t.photoBy} <a href="${ph.u}" target="_blank" rel="noopener">${esc(ph.a)}</a>, ${esc(ph.l)}</figcaption></figure>`;
+}
 function art(r){
   const [type,base,gs]=r.vis||VIS[r.id]||["plate","#D9A441",["#4A8C3A"]];
   let h=0; for(const c of r.id) h=(h*31+c.charCodeAt(0))>>>0; const rnd=()=>{h=(h*1103515245+12345)>>>0;return (h>>>8)/16777216;};
@@ -1191,7 +1212,7 @@ function renderStatic(){
   const t=L(); document.documentElement.lang=st.lang;
   $("l-mine").textContent=t.mineL; $("mineIn").placeholder=t.minePh; $("mineAdd").textContent=t.mineAdd; $("suggest").textContent=t.suggest; renderMine(); renderAcct();
   $("tagline").textContent=t.tag; $("l-goal").textContent=t.goal; $("l-meal").textContent=t.meal; $("l-store").textContent=t.store; $("l-fridge").textContent=t.fridge;
-  $("q").placeholder=t.search; $("clear").textContent=t.clear; $("basics").textContent=t.basics; $("go").textContent=st.view==="week"?t.regen:t.go; $("foot").textContent=t.foot;
+  $("creditsBtn").textContent=t.credits; $("creditsBtn").hidden=!Object.keys(PHOTOS).length; $("q").placeholder=t.search; $("clear").textContent=t.clear; $("basics").textContent=t.basics; $("go").textContent=st.view==="week"?t.regen:t.go; $("foot").textContent=t.foot;
   $("tab-today").textContent=t.tToday; $("tab-week").textContent=t.tWeek; $("tab-shop").textContent=t.tShop; $("tab-shop").setAttribute("aria-selected",st.view==="shop");
   $("tab-search").innerHTML=`<svg class="ticon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>${t.tSearch}`; $("tab-search").setAttribute("aria-selected",st.view==="search");
   $("tab-saved").innerHTML=`${t.tSaved}${st.saved.length?` <span class="tcount">${st.saved.length}</span>`:""}`; $("tab-saved").setAttribute("aria-selected",st.view==="saved");
@@ -1322,7 +1343,7 @@ function aiDishHtml(a,fromSaved){
      <div class="eyebrow"><span class="tag good">${t.aiTag}</span>${a.origin?`<span class="tag plain">${esc(a.origin)}</span>`:""}<span class="tag plain">${a.t} ${t.min}</span><span class="tag plain">${a.s} ${t.serves}</span>${nutTags(a)}</div>
      <div class="titlerow"><h2>${esc(a.name)}</h2><div class="tbtns">${bmBtn(isSavedAi(a),"ai",a.id)}${shareBtn("ai",a.id)}${cookBtn("ai",a.id)}</div></div>${shareBox()}
      ${a.why?`<p style="margin:0;color:var(--muted)">${esc(a.why)}</p>`:""}
-   </div>${art(r)}</div>
+   </div>${pic(r)}</div>
    <div class="cols">
      <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
        <div class="have"><p class="label">${t.ingr}</p><p class="hint">${t.tickHint}</p><ul>${a.ings.map((i,n)=>`<li class="${i.have?"":"miss"}"><button type="button" class="hv" data-aiing="${n}" aria-pressed="${i.have}" aria-label="${esc(i.name)}">${i.have?"✓":""}</button><span>${esc(i.name)} <span class="count">· ${i.have?t.ok:t.miss}</span> <a class="img" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(i.name+" "+st.store)}" target="_blank" rel="noopener">${t.see}</a></span></li>`).join("")}</ul></div>
@@ -1390,7 +1411,7 @@ function showLanding(id){
   el.innerHTML=`<div class="lback" data-lclose="1"></div>
    <div class="lcard" role="dialog" aria-modal="true" aria-labelledby="landT">
      <p class="lkick">${t.landKicker}</p>
-     <div class="lart">${art(r)}</div>
+     <div class="lart">${pic(r)}</div>
      <h2 id="landT">${esc(r[st.lang])}</h2>
      <div class="eyebrow lmeta"><span class="tag plain">${ORIGIN[r.o][st.lang]}</span><span class="tag plain">${r.t} ${t.min}</span><span class="tag plain">~${r.k} kcal</span><span class="tag plain">${r.p} g ${t.protShort}</span></div>
      <p class="lhave">${t.landIng(r.n.length,e.own.length)}</p>
@@ -1405,7 +1426,7 @@ function closeLanding(toRecipe){
   setTimeout(()=>{el.remove(); if(toRecipe) $("result").scrollIntoView({behavior:"smooth",block:"start"});},220);
 }
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&$("cardmodal")) closeCard(); else if(e.key==="Escape"&&$("landing")) closeLanding(false); else if(e.key==="Escape"&&shop) closeShop(false); });
-document.addEventListener("click",e=>{ if(e.target.classList&&e.target.classList.contains("lback")){ if(e.target.dataset.cardclose) closeCard(); else closeLanding(false); } });
+document.addEventListener("click",e=>{ if(e.target.dataset&&e.target.dataset.ccl){ const el=$("credits"); if(el) el.remove(); return; } if(e.target.classList&&e.target.classList.contains("lback")){ if(e.target.dataset.cardclose) closeCard(); else closeLanding(false); } });
 let expo=null, dlFn=null;
 const expItem=k=>{const q=priceAt(k,st.store); return {k,cat:ING[k][3],name:nm(k),price:q.p,src:ING[k][3]==="afr"?"afr":q.src};};
 function wrapText(ctx,text,maxW){ const words=String(text).split(" "); const out=[]; let line="";
@@ -1697,7 +1718,7 @@ function searchResults(){
 function renderSearch(onlyResults){
   const t=L(), v=$("view"), res=searchResults();
   const chip=(grp,val,label)=>{const on=grp==="fl"?srch.fl.has(val):srch[grp]===val; return `<button type="button" class="chip schip" data-sf="${grp}" data-sv="${val}" aria-pressed="${on}">${label}</button>`;};
-  const cards=res.map(({r,e})=>`<div class="scard">${art(r)}<div class="eyebrow"><span class="tag plain">${ORIGIN[r.o][st.lang]}</span><span class="tag plain">${r.t} ${t.min}</span><span class="tag plain">~${r.k} kcal</span><span class="tag plain">${r.p} g</span></div>
+  const cards=res.map(({r,e})=>`<div class="scard">${pic(r)}<div class="eyebrow"><span class="tag plain">${ORIGIN[r.o][st.lang]}</span><span class="tag plain">${r.t} ${t.min}</span><span class="tag plain">~${r.k} kcal</span><span class="tag plain">${r.p} g</span></div>
       <h3>${esc(r[st.lang])}</h3><small>${t.have(e.own.length,r.n.length)}${e.miss.length?` · +${zl(e.cost)}`:""}</small>
       <div class="actions"><button type="button" class="btn primary" data-sopen="${r.id}">${t.open}</button>${bmBtn(isSavedR(r.id),"r",r.id)}</div></div>`).join("");
   const q=srch.q.trim();
@@ -1744,7 +1765,7 @@ function renderSaved(){
   const fmtD=ts=>new Date(ts).toLocaleDateString(st.lang==="pl"?"pl-PL":"en-GB",{day:"numeric",month:"short"});
   const cards=st.saved.map((x,i)=>{
     if(x.type==="r"){ const r=RB[x.id], e=evalR(r);
-      return `<div class="scard">${art(r)}<div class="eyebrow"><span class="tag plain">${ORIGIN[r.o][st.lang]}</span><span class="tag plain">${r.t} ${t.min}</span><span class="tag plain">~${r.k} kcal</span><span class="tag plain">${r.p} g</span></div>
+      return `<div class="scard">${pic(r)}<div class="eyebrow"><span class="tag plain">${ORIGIN[r.o][st.lang]}</span><span class="tag plain">${r.t} ${t.min}</span><span class="tag plain">~${r.k} kcal</span><span class="tag plain">${r.p} g</span></div>
         <h3>${esc(r[st.lang])}</h3><small>${t.have(e.own.length,r.n.length)}${e.miss.length?` · +${zl(e.cost)}`:""} · ${t.savedOn(fmtD(x.ts))}</small>
         <div class="actions"><button type="button" class="btn primary" data-opensaved="${i}">${t.open}</button><button type="button" class="btn" data-unsave="${i}">${t.unsave}</button></div></div>`; }
     const d=x.d, miss=d.ings.filter(g=>!g.have).length;
@@ -1792,7 +1813,7 @@ function renderToday(quiet){
      <div class="eyebrow"><span class="tag">${t.today[mealKey]}</span><span class="tag plain">${ORIGIN[r.o][st.lang]}</span><span class="tag plain">${r.t} ${t.min}</span><span class="tag plain">${r.s} ${t.serves}</span>${nutTags(r)}${r.bk?`<span class="tag plain">${t.keeps}</span>`:""}</div>
      <div class="titlerow"><h2>${esc(r[st.lang])}</h2><div class="tbtns">${bmBtn(isSavedR(r.id),"r",r.id)}${shareBtn("r",r.id)}${cookBtn("r",r.id)}</div></div>${shareBox()}${st.sharedIn===r.id?`<p class="sharedin">${t.sharedIn}</p>`:""}
      <div class="meter"><span>${t.have(x.own.length,r.n.length)}</span><div class="bar" aria-hidden="true"><i style="width:${pct}%"></i></div><b>${pct}%</b></div>
-   </div>${art(r)}</div>
+   </div>${pic(r)}</div>
    <div class="cols">
      <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
        <div class="have"><p class="label">${t.ingr}</p><p class="hint">${t.tickHint}</p><ul>${r.n.map(k=>`<li class="${st.have.has(k)?"":"miss"}"><button type="button" class="hv" data-ing="${k}" aria-pressed="${st.have.has(k)}" aria-label="${esc(nm(k))}">${st.have.has(k)?"✓":""}</button><span>${esc(nm(k))} <span class="count">· ${st.have.has(k)?t.ok:t.miss}</span> <a class="img" href="${imgUrl(k)}" target="_blank" rel="noopener">${t.see}</a></span></li>`).join("")}</ul></div>
@@ -1936,6 +1957,11 @@ document.addEventListener("click",e=>{
   if(b.dataset.sopen){ const r=RB[b.dataset.sopen]; if(!r) return; st.view="today"; st.mode="pick"; st.forced=r.id; if(!r.m.includes(st.meal)) st.meal=r.m[0]; save(); all(); flash(); return; }
   if(b.id==="srchAi"){ askAiDish(srch.q.trim()); return; }
   if(b.id==="srchStop"){ aiCtl?.abort(); return; }
+  if(b.id==="creditsBtn"){ const t=L(); const el=document.createElement("div"); el.className="landing"; el.id="credits";
+    el.innerHTML=`<div class="lback" data-ccl="1"></div><div class="lcard credl" role="dialog" aria-modal="true" aria-label="${t.credits}"><p class="lkick">${t.credits}</p><p class="hint" style="margin:0">${t.creditsSub}</p>
+      <ul>${R.filter(r=>PHOTOS[r.id]).map(r=>{const p=PHOTOS[r.id]; return `<li><b>${esc(r[st.lang])}</b><span><a href="${p.u}" target="_blank" rel="noopener">${esc(p.a)}</a>, ${esc(p.l)}</span></li>`;}).join("")}</ul>
+      <button type="button" class="btn" data-ccl="1">${t.close}</button></div>`; document.body.appendChild(el); return; }
+  if(b.dataset.ccl){ const el=$("credits"); if(el) el.remove(); return; }
   if(b.id==="saveImg"){exportListImage(b); return;}
   if(b.id==="shopMode"){openShop(listFromExpo()); return;}
   if(b.id==="shareList"||b.id==="shareList2"){shareCurrentList(b); return;}
