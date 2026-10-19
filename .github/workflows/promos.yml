@@ -1,10 +1,13 @@
-name: Update Lidl promotions
+name: Update promotions
+
 on:
   schedule:
-    - cron: "17 4 * * *"   # every day around 06:17 Warsaw time
+    - cron: "17 4 * * *"    # every day around 06:17 Warsaw time
   workflow_dispatch: {}
+
 permissions:
   contents: write
+
 jobs:
   promos:
     runs-on: ubuntu-latest
@@ -13,13 +16,29 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install image tools (Biedronka leaflet covers)
+        run: pip install pillow
       - name: Collect promotions
         run: python tools/promos.py
+
       - name: Commit if changed
+        id: commit_promos
         run: |
-          if git diff --quiet -- promos.json; then echo "No change"; exit 0; fi
+          git add -A promos.json img/leaf
+          if git diff --cached --quiet; then echo "No change"; echo "changed=false" >> $GITHUB_OUTPUT; exit 0; fi
           git config user.name "cozjem-bot"
           git config user.email "afeezbolajiola@gmail.com"
-          git add promos.json
-          git commit -m "Update Lidl promotions"
+          git commit -m "Update promotions"
           git push
+          echo "changed=true" >> $GITHUB_OUTPUT
+
+      # Alerts are sent by the Supabase "push" function. It reads the new promos.json,
+      # notifies only about deals it has not announced before, personalises each alert
+      # (language, the user's ingredients) and never sends more than once in 6 hours,
+      # so no keys or secrets are needed here.
+      - name: Send promotion alerts
+        if: steps.commit_promos.outputs.changed == 'true'
+        run: |
+          sleep 20
+          curl -sS -m 120 -X POST -H "Content-Type: application/json" \
+            -d '{"action":"send"}' https://zgsznfyoxlgrnbxjylyr.supabase.co/functions/v1/push
