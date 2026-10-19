@@ -513,6 +513,7 @@ main .panel:nth-child(2){animation-delay:.08s}.habits{animation-delay:.16s}
 .credl .isteps li{display:list-item;border:0;padding:0 0 0 4px}
 .isteps li::marker{color:var(--beet);font-weight:700}
 @media (max-width:700px){.instbar{bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
+.wtopb{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 </style>
 </head>
 <body>
@@ -1048,12 +1049,13 @@ const T = {
    ["Statystyki odwiedzin","Liczymy odwiedziny i używane funkcje za pomocą GoatCounter: bez ciasteczek, bez śledzenia między stronami, bez zapisywania adresów IP i danych osobowych."],
    ["Usuwanie danych","Konto: zaloguj się, otwórz konto i dwa razy stuknij „Usuń moje konto”. To trwale usuwa twój e-mail i zsynchronizowane dane. Dane na urządzeniu: wyczyść dane strony cozjem.com w przeglądarce."],
    ["Kontakt","Pytania o twoje dane lub prośba o ich usunięcie: hello@cozjem.com"]],
-  calAdd:"Dodaj tydzień do kalendarza", calDone:"Dodano do kalendarza", calFail:"Nie udało się utworzyć pliku kalendarza",
+  calAdd:"Dodaj tydzień do kalendarza", calMeal:"Dodaj do kalendarza", calDone:"Dodano do kalendarza", calFail:"Nie udało się utworzyć pliku kalendarza",
   calHint:"Posiłki na najbliższe 7 dni, przypomnienie, kiedy zacząć gotować, i niedzielne planowanie.",
   calCook:m=>`Czas zacząć gotować (${m} min)`, calLeft:"resztki", calIngr:"Składniki", calRecipe:"Przepis",
   calPlanT:"Zaplanuj następny tydzień w CoZjem", calPlanD:"Otwórz CoZjem, wybierz dania i zrób listę zakupów na nowy tydzień.",
-  instT:"Dodaj CoZjem do ekranu głównego", instS:"Otwieraj jednym stuknięciem, jak aplikację. Działa też offline.", instGo:"Dodaj", instLater:"Nie teraz", instFoot:"Zainstaluj aplikację",
+  instT:"Dodaj CoZjem do ekranu głównego", instTD:"Zainstaluj CoZjem na komputerze", instSD:"Otwieraj w osobnym oknie z pulpitu lub Docka, jak aplikację.", instS:"Otwieraj jednym stuknięciem, jak aplikację. Działa też offline.", instGo:"Dodaj", instLater:"Nie teraz", instFoot:"Zainstaluj aplikację",
   instIosH:"Dodaj CoZjem do ekranu głównego", instIos:["Stuknij przycisk Udostępnij na dole Safari (kwadrat ze strzałką w górę).","Przewiń w dół i wybierz „Do ekranu początkowego”.","Stuknij „Dodaj”. Ikona CoZjem pojawi się na ekranie."],
+    instDesk:["W Chrome lub Edge kliknij ikonę instalacji po prawej stronie paska adresu (ekran ze strzałką w dół).","Albo otwórz menu ⋮ i wybierz „Zainstaluj CoZjem” (w Chrome: Przesyłaj, zapisz i udostępnij, a potem Zainstaluj stronę jako aplikację).","Potwierdź. CoZjem otworzy się we własnym oknie i pojawi na pulpicie lub w menu Start."], instMac:["W Safari otwórz menu Plik.","Wybierz „Dodaj do Docka”.","Kliknij „Dodaj”. CoZjem pojawi się w Docku jak aplikacja."], instFf:["Firefox nie instaluje stron jako aplikacji.","Otwórz cozjem.com w Chrome lub Edge i kliknij ikonę instalacji w pasku adresu.","Możesz też dodać stronę do zakładek (Ctrl+D)."],
   instInApp:"Otwórz tę stronę w Safari lub Chrome, aby dodać ją do ekranu głównego.", instAndroid:["Otwórz menu przeglądarki (⋮ w prawym górnym rogu).","Wybierz „Zainstaluj aplikację” lub „Dodaj do ekranu głównego”.","Potwierdź. Ikona CoZjem pojawi się na ekranie."], instDone:"CoZjem jest już na twoim ekranie głównym.",
   photoBy:"Zdjęcie:", credits:"Autorzy zdjęć", creditsSub:"Zdjęcia dań pochodzą z Wikimedia Commons, na wolnych licencjach. Zostały przycięte. Stuknij autora, aby zobaczyć oryginał i licencję.",
   tSearch:"Szukaj", srchH:"Znajdź danie", srchSub:"Szukaj po nazwie, składniku lub kuchni, np. „żurek”, „kurczak”, „Nigeria”.", srchPh:"Czego szukasz?",
@@ -1150,12 +1152,13 @@ const T = {
    ["Visit statistics","We count visits and which features are used with GoatCounter: no cookies, no tracking across sites, no IP addresses or personal data stored."],
    ["Deleting your data","Account: sign in, open your account and tap “Delete my account” twice. This permanently removes your email and synced data. Data on your device: clear site data for cozjem.com in your browser."],
    ["Contact","Questions about your data, or a request to delete it: hello@cozjem.com"]],
-  calAdd:"Add week to calendar", calDone:"Added to calendar", calFail:"Couldn't create the calendar file",
+  calAdd:"Add week to calendar", calMeal:"Add to calendar", calDone:"Added to calendar", calFail:"Couldn't create the calendar file",
   calHint:"Your meals for the next 7 days, a reminder when to start cooking, and Sunday planning.",
   calCook:m=>`Time to start cooking (${m} min)`, calLeft:"leftovers", calIngr:"Ingredients", calRecipe:"Recipe",
   calPlanT:"Plan next week on CoZjem", calPlanD:"Open CoZjem, pick your meals and make the shopping list for the new week.",
-  instT:"Add CoZjem to your home screen", instS:"Open it with one tap, like an app. Works offline too.", instGo:"Add", instLater:"Not now", instFoot:"Install the app",
+  instT:"Add CoZjem to your home screen", instTD:"Install CoZjem on this computer", instSD:"Open it in its own window from your desktop or Dock, like an app.", instS:"Open it with one tap, like an app. Works offline too.", instGo:"Add", instLater:"Not now", instFoot:"Install the app",
   instIosH:"Add CoZjem to your home screen", instIos:["Tap the Share button at the bottom of Safari (the square with an arrow pointing up).","Scroll down and choose “Add to Home Screen”.","Tap “Add”. The CoZjem icon appears on your home screen."],
+    instDesk:["In Chrome or Edge, click the install icon at the right of the address bar (a screen with a down arrow).","Or open the ⋮ menu and choose “Install CoZjem” (in Chrome: Cast, save and share, then Install page as app).","Confirm. CoZjem opens in its own window and appears on your desktop or Start menu."], instMac:["In Safari, open the File menu.","Choose “Add to Dock”.","Click “Add”. CoZjem appears in your Dock like an app."], instFf:["Firefox can’t install websites as apps.","Open cozjem.com in Chrome or Edge and click the install icon in the address bar.","Or bookmark it with Ctrl+D (Cmd+D on a Mac)."],
   instInApp:"Open this page in Safari or Chrome to add it to your home screen.", instAndroid:["Open the browser menu (⋮ at the top right).","Choose “Install app” or “Add to Home screen”.","Confirm. The CoZjem icon appears on your home screen."], instDone:"CoZjem is already on your home screen.",
   photoBy:"Photo:", credits:"Photo credits", creditsSub:"Dish photos come from Wikimedia Commons under free licences and have been cropped. Tap an author to see the original and its licence.",
   tSearch:"Search", srchH:"Find a dish", srchSub:"Search by name, ingredient or cuisine, for example “żurek”, “chicken” or “Nigeria”.", srchPh:"What are you looking for?",
@@ -1395,18 +1398,21 @@ function engGet(){ try{ return JSON.parse(localStorage.getItem("cozjem-eng")||"{
 function engSet(o){ try{ localStorage.setItem("cozjem-eng",JSON.stringify(Object.assign(engGet(),o))); }catch(e){} }
 (function(){ try{ if(!sessionStorage.getItem("cozjem-visit")){ sessionStorage.setItem("cozjem-visit","1"); const e=engGet(); engSet({visits:(e.visits||0)+1}); } }catch(e){} })();
 addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); instEvt=e; });
-function canInstall(){ return !isStandalone()&&!window.claude&&(instEvt||IS_IOS||/Android/.test(navigator.userAgent)); }
+const IS_ANDROID=/Android/.test(navigator.userAgent), IS_FF=/Firefox\//.test(navigator.userAgent), IS_MACSAFARI=!IS_IOS&&/Macintosh/.test(navigator.userAgent)&&/Safari\//.test(navigator.userAgent)&&!/Chrome|Chromium|Edg\//.test(navigator.userAgent);
+function canInstall(){ return !isStandalone()&&!window.claude; }
 function engaged(){ const e=engGet(), n=(e.n||0)+1; engSet({n}); if(e.installed||isStandalone()||!canInstall()) return;
-  if(Date.now()<(e.until||0)) return; if((e.visits||1)<2&&n<2) return; setTimeout(showInstall,700); }
+  if(Date.now()<(e.until||0)) return; setTimeout(showInstall,700); }
+setTimeout(()=>{ const e=engGet(); if((e.visits||1)>=2&&!e.installed&&canInstall()&&Date.now()>=(e.until||0)) showInstall(); },6000);
 function hideInstall(){ const el=$("instbar"); if(el) el.remove(); }
 function showInstall(){ if($("instbar")||$("instm")||shop) return; const t=L(); const el=document.createElement("div"); el.className="instbar"; el.id="instbar"; el.setAttribute("role","dialog"); el.setAttribute("aria-label",t.instT);
-  el.innerHTML=`<img src="icon-192.png" alt="" width="44" height="44" onerror="this.remove()"><div><b>${t.instT}</b><span>${t.instS}</span></div><div class="ibtns"><button type="button" class="btn primary sm" id="instGo">${t.instGo}</button><button type="button" class="linkbtn" id="instLater">${t.instLater}</button></div>`;
+  const desk=!IS_IOS&&!IS_ANDROID;
+  el.innerHTML=`<img src="icon-192.png" alt="" width="44" height="44" onerror="this.remove()"><div><b>${desk?t.instTD:t.instT}</b><span>${desk?t.instSD:t.instS}</span></div><div class="ibtns"><button type="button" class="btn primary sm" id="instGo">${t.instGo}</button><button type="button" class="linkbtn" id="instLater">${t.instLater}</button></div>`;
   document.body.appendChild(el); gc("install/prompt","Install prompt shown"); }
 async function doInstall(){ const t=L(); hideInstall(); if(isStandalone()){ return; }
   if(instEvt){ try{ instEvt.prompt(); const r=await instEvt.userChoice; gc("install/"+(r&&r.outcome||"x"),"Install choice"); if(r&&r.outcome==="accepted") engSet({installed:1}); else engSet({until:Date.now()+14*864e5}); }catch(e){} instEvt=null; return; }
-  const steps=IN_APP?[t.instInApp]:IS_IOS?t.instIos:t.instAndroid; const old=$("credits"); if(old) old.remove();
+  const desk=!IS_IOS&&!IS_ANDROID; const steps=IN_APP?[t.instInApp]:IS_IOS?t.instIos:IS_ANDROID?t.instAndroid:IS_MACSAFARI?t.instMac:IS_FF?t.instFf:t.instDesk; const old=$("credits"); if(old) old.remove();
   const el=document.createElement("div"); el.className="landing"; el.id="credits";
-  el.innerHTML=`<div class="lback" data-ccl="1"></div><div class="lcard credl privl" role="dialog" aria-modal="true" aria-label="${t.instIosH}"><p class="lkick">${t.instIosH}</p>
+  el.innerHTML=`<div class="lback" data-ccl="1"></div><div class="lcard credl privl" role="dialog" aria-modal="true" aria-label="${t.instIosH}"><p class="lkick">${desk?t.instTD:t.instIosH}</p>
     <ol class="isteps">${steps.map(x=>`<li>${esc(x)}</li>`).join("")}</ol><button type="button" class="btn" data-ccl="1">${t.close}</button></div>`;
   document.body.appendChild(el); gc("install/howto","Install how-to"); engSet({until:Date.now()+14*864e5}); }
 // ---------- engagement: week to calendar (.ics) ----------
@@ -1430,9 +1436,18 @@ function buildWeekIcs(){ const t=L(); if(!st.plan) genWeek(); const now=new Date
   if(sunday){ const s=new Date(sunday.getFullYear(),sunday.getMonth(),sunday.getDate(),18,0); if(s>now){ ev(`${icsDT(s)}-plan`,s,15,t.calPlanT,t.calPlanD+"\n"+SITE,SITE,[0,t.calPlanT]); } }
   const lines=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//CoZjem//Meal plan//"+st.lang.toUpperCase(),"CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:CoZjem",...L2,"END:VCALENDAR"];
   return {ics:lines.map(icsFold).join("\r\n")+"\r\n",count}; }
-async function addWeekToCalendar(btn){ const t=L(), orig=btn.textContent; const done=msg=>{ btn.textContent=msg; btn.disabled=false; setTimeout(()=>{btn.textContent=orig;},2400); };
-  btn.disabled=true; gc("calendar/week","Week added to calendar"); engaged();
-  try{ const {ics}=buildWeekIcs(); const name="cozjem-week.ics"; const blob=new Blob([ics],{type:"text/calendar;charset=utf-8"});
+function buildMealIcs(r,m){ const t=L(), now=new Date(), stamp=now.toISOString().replace(/[-:]/g,"").replace(/\.\d+/,""); const [h,mi,al]=MEALT[m];
+  let start=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,mi); if(start<now) start=new Date(start.getTime()+864e5);
+  const url=SITE+"r/"+r.id+"/", cook=Math.min(120,Math.max(20,r.t)), end=new Date(start.getTime()+30*60000);
+  const desc=t.calIngr+": "+r.n.map(k=>baseName(nm(k))).join(", ")+"\n\n"+t.calRecipe+": "+url;
+  const L2=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//CoZjem//Meal//"+st.lang.toUpperCase(),"CALSCALE:GREGORIAN","METHOD:PUBLISH","BEGIN:VEVENT","UID:"+icsDT(start)+"-"+m+"-"+r.id+"@cozjem.com","DTSTAMP:"+stamp,"DTSTART:"+icsDT(start),"DTEND:"+icsDT(end),"SUMMARY:"+icsEsc(t.meals[m]+": "+r[st.lang]),"DESCRIPTION:"+icsEsc(desc),"URL:"+url];
+  L2.push("BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+icsEsc(al?t.calCook(cook):t.meals[m]+": "+r[st.lang]),"TRIGGER:-PT"+(al?cook:15)+"M","END:VALARM","END:VEVENT","END:VCALENDAR");
+  return {ics:L2.map(icsFold).join("\r\n")+"\r\n"}; }
+async function addMealToCalendar(btn){ const r=RB[st.cur]; if(!r) return; const m=btn.dataset.cm||st.meal; gc("calendar/meal","Meal added to calendar"); engaged(); return saveIcs(btn,buildMealIcs(r,m).ics,"cozjem-"+r.id+".ics"); }
+async function addWeekToCalendar(btn){ gc("calendar/week","Week added to calendar"); engaged(); return saveIcs(btn,buildWeekIcs().ics,"cozjem-week.ics"); }
+async function saveIcs(btn,ics,name){ const t=L(), orig=btn.innerHTML; const done=msg=>{ btn.textContent=msg; btn.disabled=false; setTimeout(()=>{btn.innerHTML=orig;},2400); };
+  btn.disabled=true;
+  try{ const blob=new Blob([ics],{type:"text/calendar;charset=utf-8"});
     if(window.claude&&window.claude.use){ if(dlFn===null) dlFn=await window.claude.use("downloads").catch(()=>false)||false;
       if(dlFn){ try{ await dlFn.save({filename:name,data:blob}); return done(t.calDone);}catch(e){ return done(e&&e.code==="declined"?orig:t.calFail);} } }
     const url=URL.createObjectURL(blob);
@@ -2309,6 +2324,7 @@ function renderToday(quiet){
        ${compareHtml(x.miss)}
        <div class="actions">
          <button type="button" class="btn primary" id="another">${t.another}</button>
+         <button type="button" class="btn" id="calMeal" data-cm="${mealKey}"><svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4M12 13.5v4M10 15.5h4"/></svg>${t.calMeal}</button>
          ${x.miss.length?`<button type="button" class="btn" id="copy">${t.copy}</button><button type="button" class="btn" id="saveImg">${t.saveImg}</button><button type="button" class="btn" id="shopMode">${t.shopMode}</button><button type="button" class="btn" id="shareList">${t.shareList}</button>`:""}
        </div>
      </div>
@@ -2333,7 +2349,8 @@ function renderWeek(){
   const sh=weekShop();
   const saved=st.plan.filter(r=>r.lo).length;
   v.innerHTML=`${budgetBanner()}<div class="wtop"><p style="margin:0;color:var(--muted);font-size:.92rem;max-width:52ch">${t.wIntro}${st.batch?" "+t.batchIntro:""}</p>
-     <button type="button" class="toggle" id="batch" aria-pressed="${st.batch}"><span class="knob" aria-hidden="true"></span>${t.batch}</button></div>
+     <div class="wtopb"><button type="button" class="btn primary" id="calAdd" title="${esc(t.calHint)}"><svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4M12 13.5v4M10 15.5h4"/></svg>${t.calAdd}</button>
+     <button type="button" class="toggle" id="batch" aria-pressed="${st.batch}"><span class="knob" aria-hidden="true"></span>${t.batch}</button></div></div>
    <div style="overflow-x:auto"><div class="week">
      <div class="wrow head"><span></span>${["b","l","d"].map(m=>`<span class="whead">${t.meals[m]}</span>`).join("")}</div>
      ${rows}
@@ -2346,7 +2363,6 @@ function renderWeek(){
        ${st.batch?`<div class="stat"><b>${saved}</b><span>${t.saved}</span></div>`:""}
        <div class="actions">
          <button type="button" class="btn primary" id="regen">${t.regen}</button>
-         <button type="button" class="btn" id="calAdd" title="${esc(t.calHint)}">${t.calAdd}</button>
          ${sh.ks.length?`<button type="button" class="btn" id="copy">${t.copy}</button><button type="button" class="btn" id="saveImg">${t.saveImg}</button><button type="button" class="btn" id="shopMode">${t.shopMode}</button><button type="button" class="btn" id="shareList">${t.shareList}</button>`:""}
        </div>
      </div>
@@ -2524,6 +2540,7 @@ document.addEventListener("click",e=>{
     renderView(); flash(); return;}
   if(b.id==="regen"){genWeek(); renderView(); flash(); engaged(); return;}
   if(b.id==="calAdd"){ addWeekToCalendar(b); return; }
+  if(b.id==="calMeal"){ addMealToCalendar(b); return; }
   if(b.id==="instGo"||b.id==="instFoot"){ doInstall(); return; }
   if(b.id==="instLater"){ hideInstall(); engSet({until:Date.now()+14*864e5}); gc("install/later","Install not now"); return; }
   if(b.id==="go"){ closeSheet(); if(st.mode==="budget"){ st.mode="pick"; }
