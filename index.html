@@ -503,6 +503,16 @@ main .panel:nth-child(2){animation-delay:.08s}.habits{animation-delay:.16s}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 .protchips small{opacity:.6;font-size:.78em;margin-left:2px}
 #tbProt svg{fill:none}
+.instbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:45;width:min(520px,calc(100% - 24px));display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 14px 34px -14px rgba(0,0,0,.35);animation:instup .28s ease both}
+@keyframes instup{from{opacity:0;transform:translate(-50%,30px)}to{opacity:1;transform:translate(-50%,0)}}
+.instbar img{border-radius:10px;flex:none}
+.instbar div{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.instbar b{font-size:.92rem}.instbar span{font-size:.8rem;color:var(--muted);line-height:1.35}
+.instbar .ibtns{flex:none;align-items:center;gap:4px}
+.isteps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:12px;line-height:1.45;font-size:.92rem;list-style:decimal}
+.credl .isteps li{display:list-item;border:0;padding:0 0 0 4px}
+.isteps li::marker{color:var(--beet);font-weight:700}
+@media (max-width:700px){.instbar{bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
 </style>
 </head>
 <body>
@@ -615,7 +625,7 @@ main .panel:nth-child(2){animation-delay:.08s}.habits{animation-delay:.16s}
 
   <section class="panel habits" id="habits"></section>
 
-  <footer><span id="foot"></span> <button type="button" class="linkbtn" id="privBtn"></button> <button type="button" class="linkbtn" id="creditsBtn"></button></footer>
+  <footer><span id="foot"></span> <button type="button" class="linkbtn" id="instFoot" hidden></button> <button type="button" class="linkbtn" id="privBtn"></button> <button type="button" class="linkbtn" id="creditsBtn"></button></footer>
 </div>
 
 <script>
@@ -1038,6 +1048,13 @@ const T = {
    ["Statystyki odwiedzin","Liczymy odwiedziny i używane funkcje za pomocą GoatCounter: bez ciasteczek, bez śledzenia między stronami, bez zapisywania adresów IP i danych osobowych."],
    ["Usuwanie danych","Konto: zaloguj się, otwórz konto i dwa razy stuknij „Usuń moje konto”. To trwale usuwa twój e-mail i zsynchronizowane dane. Dane na urządzeniu: wyczyść dane strony cozjem.com w przeglądarce."],
    ["Kontakt","Pytania o twoje dane lub prośba o ich usunięcie: hello@cozjem.com"]],
+  calAdd:"Dodaj tydzień do kalendarza", calDone:"Dodano do kalendarza", calFail:"Nie udało się utworzyć pliku kalendarza",
+  calHint:"Posiłki na najbliższe 7 dni, przypomnienie, kiedy zacząć gotować, i niedzielne planowanie.",
+  calCook:m=>`Czas zacząć gotować (${m} min)`, calLeft:"resztki", calIngr:"Składniki", calRecipe:"Przepis",
+  calPlanT:"Zaplanuj następny tydzień w CoZjem", calPlanD:"Otwórz CoZjem, wybierz dania i zrób listę zakupów na nowy tydzień.",
+  instT:"Dodaj CoZjem do ekranu głównego", instS:"Otwieraj jednym stuknięciem, jak aplikację. Działa też offline.", instGo:"Dodaj", instLater:"Nie teraz", instFoot:"Zainstaluj aplikację",
+  instIosH:"Dodaj CoZjem do ekranu głównego", instIos:["Stuknij przycisk Udostępnij na dole Safari (kwadrat ze strzałką w górę).","Przewiń w dół i wybierz „Do ekranu początkowego”.","Stuknij „Dodaj”. Ikona CoZjem pojawi się na ekranie."],
+  instInApp:"Otwórz tę stronę w Safari lub Chrome, aby dodać ją do ekranu głównego.", instAndroid:["Otwórz menu przeglądarki (⋮ w prawym górnym rogu).","Wybierz „Zainstaluj aplikację” lub „Dodaj do ekranu głównego”.","Potwierdź. Ikona CoZjem pojawi się na ekranie."], instDone:"CoZjem jest już na twoim ekranie głównym.",
   photoBy:"Zdjęcie:", credits:"Autorzy zdjęć", creditsSub:"Zdjęcia dań pochodzą z Wikimedia Commons, na wolnych licencjach. Zostały przycięte. Stuknij autora, aby zobaczyć oryginał i licencję.",
   tSearch:"Szukaj", srchH:"Znajdź danie", srchSub:"Szukaj po nazwie, składniku lub kuchni, np. „żurek”, „kurczak”, „Nigeria”.", srchPh:"Czego szukasz?",
   all:"Wszystkie", allCui:"Każda kuchnia", cuiPl:"Polska", cuiEu:"Europejska", cuiAfr:"Afrykańska", fQuick:"Do 25 min", fHave:"Mam większość",
@@ -1133,6 +1150,13 @@ const T = {
    ["Visit statistics","We count visits and which features are used with GoatCounter: no cookies, no tracking across sites, no IP addresses or personal data stored."],
    ["Deleting your data","Account: sign in, open your account and tap “Delete my account” twice. This permanently removes your email and synced data. Data on your device: clear site data for cozjem.com in your browser."],
    ["Contact","Questions about your data, or a request to delete it: hello@cozjem.com"]],
+  calAdd:"Add week to calendar", calDone:"Added to calendar", calFail:"Couldn't create the calendar file",
+  calHint:"Your meals for the next 7 days, a reminder when to start cooking, and Sunday planning.",
+  calCook:m=>`Time to start cooking (${m} min)`, calLeft:"leftovers", calIngr:"Ingredients", calRecipe:"Recipe",
+  calPlanT:"Plan next week on CoZjem", calPlanD:"Open CoZjem, pick your meals and make the shopping list for the new week.",
+  instT:"Add CoZjem to your home screen", instS:"Open it with one tap, like an app. Works offline too.", instGo:"Add", instLater:"Not now", instFoot:"Install the app",
+  instIosH:"Add CoZjem to your home screen", instIos:["Tap the Share button at the bottom of Safari (the square with an arrow pointing up).","Scroll down and choose “Add to Home Screen”.","Tap “Add”. The CoZjem icon appears on your home screen."],
+  instInApp:"Open this page in Safari or Chrome to add it to your home screen.", instAndroid:["Open the browser menu (⋮ at the top right).","Choose “Install app” or “Add to Home screen”.","Confirm. The CoZjem icon appears on your home screen."], instDone:"CoZjem is already on your home screen.",
   photoBy:"Photo:", credits:"Photo credits", creditsSub:"Dish photos come from Wikimedia Commons under free licences and have been cropped. Tap an author to see the original and its licence.",
   tSearch:"Search", srchH:"Find a dish", srchSub:"Search by name, ingredient or cuisine, for example “żurek”, “chicken” or “Nigeria”.", srchPh:"What are you looking for?",
   all:"All", allCui:"Any cuisine", cuiPl:"Polish", cuiEu:"European", cuiAfr:"African", fQuick:"Under 25 min", fHave:"I have most",
@@ -1361,7 +1385,60 @@ const GC_ON=/^(www\.)?cozjem\.com$/.test(location.hostname);
 let gcLast=null;
 function gc(path,title){ if(!GC_ON) return; const go=()=>{ try{ window.goatcounter.count({path:path,title:title||path,event:true}); }catch(e){} };
   if(window.goatcounter&&window.goatcounter.count) go(); else setTimeout(()=>{ if(window.goatcounter&&window.goatcounter.count) go(); },3000); }
-addEventListener("appinstalled",()=>gc("installed","Installed to home screen"));
+addEventListener("appinstalled",()=>{ gc("installed","Installed to home screen"); engSet({installed:1}); hideInstall(); });
+// ---------- engagement: home screen prompt ----------
+const IS_IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const IN_APP=/FBAN|FBAV|Instagram|Line\/|WhatsApp|TikTok|Snapchat|wv\)/.test(navigator.userAgent);
+const isStandalone=()=>(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;
+let instEvt=null;
+function engGet(){ try{ return JSON.parse(localStorage.getItem("cozjem-eng")||"{}")||{}; }catch(e){ return {}; } }
+function engSet(o){ try{ localStorage.setItem("cozjem-eng",JSON.stringify(Object.assign(engGet(),o))); }catch(e){} }
+(function(){ try{ if(!sessionStorage.getItem("cozjem-visit")){ sessionStorage.setItem("cozjem-visit","1"); const e=engGet(); engSet({visits:(e.visits||0)+1}); } }catch(e){} })();
+addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); instEvt=e; });
+function canInstall(){ return !isStandalone()&&!window.claude&&(instEvt||IS_IOS||/Android/.test(navigator.userAgent)); }
+function engaged(){ const e=engGet(), n=(e.n||0)+1; engSet({n}); if(e.installed||isStandalone()||!canInstall()) return;
+  if(Date.now()<(e.until||0)) return; if((e.visits||1)<2&&n<2) return; setTimeout(showInstall,700); }
+function hideInstall(){ const el=$("instbar"); if(el) el.remove(); }
+function showInstall(){ if($("instbar")||$("instm")||shop) return; const t=L(); const el=document.createElement("div"); el.className="instbar"; el.id="instbar"; el.setAttribute("role","dialog"); el.setAttribute("aria-label",t.instT);
+  el.innerHTML=`<img src="icon-192.png" alt="" width="44" height="44" onerror="this.remove()"><div><b>${t.instT}</b><span>${t.instS}</span></div><div class="ibtns"><button type="button" class="btn primary sm" id="instGo">${t.instGo}</button><button type="button" class="linkbtn" id="instLater">${t.instLater}</button></div>`;
+  document.body.appendChild(el); gc("install/prompt","Install prompt shown"); }
+async function doInstall(){ const t=L(); hideInstall(); if(isStandalone()){ return; }
+  if(instEvt){ try{ instEvt.prompt(); const r=await instEvt.userChoice; gc("install/"+(r&&r.outcome||"x"),"Install choice"); if(r&&r.outcome==="accepted") engSet({installed:1}); else engSet({until:Date.now()+14*864e5}); }catch(e){} instEvt=null; return; }
+  const steps=IN_APP?[t.instInApp]:IS_IOS?t.instIos:t.instAndroid; const old=$("credits"); if(old) old.remove();
+  const el=document.createElement("div"); el.className="landing"; el.id="credits";
+  el.innerHTML=`<div class="lback" data-ccl="1"></div><div class="lcard credl privl" role="dialog" aria-modal="true" aria-label="${t.instIosH}"><p class="lkick">${t.instIosH}</p>
+    <ol class="isteps">${steps.map(x=>`<li>${esc(x)}</li>`).join("")}</ol><button type="button" class="btn" data-ccl="1">${t.close}</button></div>`;
+  document.body.appendChild(el); gc("install/howto","Install how-to"); engSet({until:Date.now()+14*864e5}); }
+// ---------- engagement: week to calendar (.ics) ----------
+const MEALT={b:[8,0,0],l:[13,0,1],d:[18,30,1]};
+function icsEsc(x){ return String(x).replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\r?\n/g,"\\n"); }
+function icsFold(line){ const out=[]; let cur=""; for(const ch of line){ const nb=new TextEncoder().encode(cur+ch).length; if(nb>73){ out.push(cur); cur=" "+ch; } else cur+=ch; } out.push(cur); return out.join("\r\n"); }
+const p2=n=>String(n).padStart(2,"0");
+const icsDT=d=>`${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}T${p2(d.getHours())}${p2(d.getMinutes())}00`;
+function buildWeekIcs(){ const t=L(); if(!st.plan) genWeek(); const now=new Date(), stamp=new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d+/,""), L2=[];
+  const ev=(uid,start,mins,title,desc,url,alarm)=>{ const end=new Date(start.getTime()+mins*60000);
+    L2.push("BEGIN:VEVENT","UID:"+uid+"@cozjem.com","DTSTAMP:"+stamp,"DTSTART:"+icsDT(start),"DTEND:"+icsDT(end),"SUMMARY:"+icsEsc(title),"DESCRIPTION:"+icsEsc(desc));
+    if(url) L2.push("URL:"+url);
+    if(alarm) L2.push("BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+icsEsc(alarm[1]),"TRIGGER:-PT"+alarm[0]+"M","END:VALARM");
+    L2.push("END:VEVENT"); };
+  let count=0, sunday=null;
+  for(let i=0;i<7;i++){ const day=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i); const wd=(day.getDay()+6)%7, row=st.plan[wd]; if(wd===6&&!sunday) sunday=day;
+    for(const m of ["b","l","d"]){ const r=RB[row[m]]; if(!r) continue; const [h,mi,al]=MEALT[m]; const start=new Date(day.getFullYear(),day.getMonth(),day.getDate(),h,mi);
+      if(start<now) continue; const lo=m==="l"&&row.lo; const url=SITE+"r/"+r.id+"/";
+      const desc=(lo?t.calLeft+"\n\n":"")+t.calIngr+": "+r.n.map(k=>baseName(nm(k))).join(", ")+"\n\n"+t.calRecipe+": "+url;
+      const cook=Math.min(120,Math.max(20,r.t)); ev(`${icsDT(start)}-${m}-${r.id}`,start,30,`${t.meals[m]}: ${r[st.lang]}${lo?" ("+t.calLeft+")":""}`,desc,url,al&&!lo?[cook,t.calCook(cook)]:(al?[15,t.meals[m]+": "+r[st.lang]]:null)); count++; } }
+  if(sunday){ const s=new Date(sunday.getFullYear(),sunday.getMonth(),sunday.getDate(),18,0); if(s>now){ ev(`${icsDT(s)}-plan`,s,15,t.calPlanT,t.calPlanD+"\n"+SITE,SITE,[0,t.calPlanT]); } }
+  const lines=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//CoZjem//Meal plan//"+st.lang.toUpperCase(),"CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:CoZjem",...L2,"END:VCALENDAR"];
+  return {ics:lines.map(icsFold).join("\r\n")+"\r\n",count}; }
+async function addWeekToCalendar(btn){ const t=L(), orig=btn.textContent; const done=msg=>{ btn.textContent=msg; btn.disabled=false; setTimeout(()=>{btn.textContent=orig;},2400); };
+  btn.disabled=true; gc("calendar/week","Week added to calendar"); engaged();
+  try{ const {ics}=buildWeekIcs(); const name="cozjem-week.ics"; const blob=new Blob([ics],{type:"text/calendar;charset=utf-8"});
+    if(window.claude&&window.claude.use){ if(dlFn===null) dlFn=await window.claude.use("downloads").catch(()=>false)||false;
+      if(dlFn){ try{ await dlFn.save({filename:name,data:blob}); return done(t.calDone);}catch(e){ return done(e&&e.code==="declined"?orig:t.calFail);} } }
+    const url=URL.createObjectURL(blob);
+    if(IS_IOS){ location.href=url; } else { const a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); }
+    setTimeout(()=>URL.revokeObjectURL(url),60000); done(t.calDone);
+  }catch(e){ done(t.calFail); } }
 function mergeStates(L,Rm){
   const newer=(Rm.ts||0)>(L.ts||0)?Rm:L;
   const m={...newer};
@@ -1525,7 +1602,7 @@ function renderStatic(){
   const t=L(); document.documentElement.lang=st.lang;
   $("l-mine").textContent=t.mineL; $("mineIn").placeholder=t.minePh; $("mineAdd").textContent=t.mineAdd; $("suggest").textContent=t.suggest; renderMine(); renderAcct();
   $("tagline").textContent=t.tag; $("l-goal").textContent=t.goal; $("l-meal").textContent=t.meal; $("l-store").textContent=t.store; $("l-fridge").textContent=t.fridge;
-  $("privBtn").textContent=t.privL; $("creditsBtn").textContent=t.credits; $("creditsBtn").hidden=!Object.keys(PHOTOS).length; $("q").placeholder=t.search; $("clear").textContent=t.clear; $("basics").textContent=t.basics; $("go").textContent=st.view==="week"?t.regen:t.showMeals; $("foot").textContent=t.foot;
+  $("privBtn").textContent=t.privL; $("instFoot").textContent=t.instFoot; $("instFoot").hidden=!canInstall(); $("creditsBtn").textContent=t.credits; $("creditsBtn").hidden=!Object.keys(PHOTOS).length; $("q").placeholder=t.search; $("clear").textContent=t.clear; $("basics").textContent=t.basics; $("go").textContent=st.view==="week"?t.regen:t.showMeals; $("foot").textContent=t.foot;
   $("tab-today").textContent=t.tToday; $("tab-week").textContent=t.tWeek; $("tab-shop").textContent=t.tShop; $("tab-shop").setAttribute("aria-selected",st.view==="shop");
   $("tab-search").innerHTML=`<svg class="ticon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>${t.tSearch}`; $("tab-search").setAttribute("aria-selected",st.view==="search");
   $("tab-saved").innerHTML=`${t.tSaved}${st.saved.length?` <span class="tcount">${st.saved.length}</span>`:""}`; $("tab-saved").setAttribute("aria-selected",st.view==="saved");
@@ -1798,7 +1875,7 @@ async function makeListImage(){
   return await new Promise(res=>c.toBlob(b=>res(b),"image/png"));
 }
 async function exportListImage(btn){
-  gc("list/image","Shopping list image");
+  gc("list/image","Shopping list image"); engaged();
   const t=L(), orig=btn.textContent; btn.disabled=true; btn.textContent=t.imgMaking;
   const done=msg=>{btn.textContent=msg; btn.disabled=false; setTimeout(()=>{btn.textContent=orig;},2200);};
   try{
@@ -1985,7 +2062,7 @@ function finishShop(){
   save(); closeShop(false); renderChips(); renderView();
 }
 async function shareCurrentList(btn){
-  gc("list/share","Shared shopping list");
+  gc("list/share","Shared shopping list"); engaged();
   const t=L(); const lst=shop?shop.list:listFromExpo(); if(!lst) return;
   const orig=btn.textContent; btn.disabled=true; btn.textContent=t.linkMaking;
   const done=msg=>{btn.textContent=msg; btn.disabled=false; setTimeout(()=>{btn.textContent=orig;},2400);};
@@ -2269,6 +2346,7 @@ function renderWeek(){
        ${st.batch?`<div class="stat"><b>${saved}</b><span>${t.saved}</span></div>`:""}
        <div class="actions">
          <button type="button" class="btn primary" id="regen">${t.regen}</button>
+         <button type="button" class="btn" id="calAdd" title="${esc(t.calHint)}">${t.calAdd}</button>
          ${sh.ks.length?`<button type="button" class="btn" id="copy">${t.copy}</button><button type="button" class="btn" id="saveImg">${t.saveImg}</button><button type="button" class="btn" id="shopMode">${t.shopMode}</button><button type="button" class="btn" id="shareList">${t.shareList}</button>`:""}
        </div>
      </div>
@@ -2351,7 +2429,7 @@ document.addEventListener("click",e=>{
     if(!st.mine.length){st.aiErr="empty"; renderView(); flash(); return;}
     if(sampleFn){ askAi(false); } else renderView();
     flash(); return;}
-  if(b.dataset.bm){ toggleSave(b.dataset.bm,b.dataset.bmid); const on=b.dataset.bm==="r"?isSavedR(b.dataset.bmid):st.saved.some(x=>x.type==="ai"&&x.d.id===b.dataset.bmid);
+  if(b.dataset.bm){ toggleSave(b.dataset.bm,b.dataset.bmid); engaged(); const on=b.dataset.bm==="r"?isSavedR(b.dataset.bmid):st.saved.some(x=>x.type==="ai"&&x.d.id===b.dataset.bmid);
     b.setAttribute("aria-pressed",on); b.title=on?L().unsave:L().save; b.querySelector("span").textContent=on?L().savedL:L().save;
     b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); renderStatic(); return;}
   if(b.dataset.cooked){startCooked(b.dataset.cooked,b.dataset.cid); return;}
@@ -2444,7 +2522,10 @@ document.addEventListener("click",e=>{
   if(b.id==="another"){
     if(st.forced){const list=ranked(); const j=list.findIndex(a=>a.r.id===st.forced); st.pick=j<0?0:j+1; st.forced=null;} else st.pick++;
     renderView(); flash(); return;}
-  if(b.id==="regen"){genWeek(); renderView(); flash(); return;}
+  if(b.id==="regen"){genWeek(); renderView(); flash(); engaged(); return;}
+  if(b.id==="calAdd"){ addWeekToCalendar(b); return; }
+  if(b.id==="instGo"||b.id==="instFoot"){ doInstall(); return; }
+  if(b.id==="instLater"){ hideInstall(); engSet({until:Date.now()+14*864e5}); gc("install/later","Install not now"); return; }
   if(b.id==="go"){ closeSheet(); if(st.mode==="budget"){ st.mode="pick"; }
     if(st.view==="week"){genWeek(); renderView(); flash(); return;}
     if(st.view==="shop"){st.view="today"; save(); renderStatic();}
@@ -2462,7 +2543,7 @@ $("photoIn").addEventListener("change",e=>{ const f=e.target.files&&e.target.fil
 document.addEventListener("submit",e=>{
   if(e.target.id==="budgetForm"){ e.preventDefault(); const amt=Math.round(parseFloat(String($("budgetIn").value).replace(",","."))*100)/100;
     if(!Number.isFinite(amt)||amt<=0||amt>5000){ $("budHint").textContent=L().budBad; return; }
-    const scope=st.budgetScope||(st.budget&&st.budget.scope)||"meal"; st.budget={amt,scope}; closeSheet(); gc("budget/"+scope,"Budget "+scope);
+    const scope=st.budgetScope||(st.budget&&st.budget.scope)||"meal"; st.budget={amt,scope}; closeSheet(); gc("budget/"+scope,"Budget "+scope); engaged();
     if(scope==="week"){ st.view="week"; genWeekBudget(amt); } else { st.view="today"; st.mode="budget"; }
     save(); all(); window.scrollTo({top:0,behavior:"smooth"}); flash(); return; }
   if(e.target.id==="addrForm"){e.preventDefault(); nearState.q=$("addrIn").value; geocode(nearState.q); return;}
