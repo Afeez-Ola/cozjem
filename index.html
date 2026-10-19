@@ -560,6 +560,15 @@ main .panel:nth-child(2){animation-delay:.08s}.habits{animation-delay:.16s}
 .offer .ot small{color:var(--muted);font-size:.76rem}.offer .oin{color:var(--dill);font-weight:600}
 .offer .op{display:flex;flex-direction:column;align-items:flex-end;gap:1px;flex:none;font-size:.85rem}.offer .op s{color:var(--muted);font-size:.75rem}.offer .op i{font-style:normal;font-weight:700;color:var(--beet);font-size:.78rem}
 .offm{max-width:560px}.offm .offlist{max-height:62vh;overflow:auto}
+.offfilter{gap:6px}
+.leafgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.leaf{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:8px;color:var(--ink);text-decoration:none}
+.leaf img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:8px;background:#fff}
+.leaf .leafph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;width:100%;aspect-ratio:2/3;border-radius:8px;background:var(--beet-soft);color:var(--beet);font-weight:800;font-size:1.3rem}
+.leaf span{display:flex;flex-direction:column;gap:2px}.leaf b{font-size:.86rem;line-height:1.25}.leaf small{color:var(--muted);font-size:.75rem}.leaf em{font-style:normal;color:var(--beet);font-weight:600;font-size:.8rem}
+.mypromo{display:flex;flex-direction:column;gap:8px;border:1px dashed var(--line);border-radius:12px;padding:12px}.mypromo ul{margin:0;padding-left:18px;font-size:.9rem}
+.mypromo .btn{align-self:flex-start}
+.leaf .leafph small{font-size:.8rem;font-weight:600;opacity:.8}.leaf .leafph.s-biedronka{background:#FDECEC;color:#C8102E}.leaf .leafph.s-aldi{background:#E6EEF8;color:#00205B}
 </style>
 </head>
 <body>
@@ -598,6 +607,7 @@ main .panel:nth-child(2){animation-delay:.08s}.habits{animation-delay:.16s}
     <button type="button" role="tab" id="tab-today"></button>
     <button type="button" role="tab" id="tab-week"></button>
     <button type="button" role="tab" id="tab-shop"></button>
+    <button type="button" role="tab" id="tab-offers"></button>
     <button type="button" role="tab" id="tab-search"></button>
     <button type="button" role="tab" id="tab-saved"></button>
   </nav>
@@ -1098,7 +1108,7 @@ const T = {
   syncNow:"Synchronizuj teraz", signOut:"Wyloguj", delCloud:"Usuń moje konto", delConfirm:"Kliknij ponownie, aby usunąć",
   acctNote:"Przechowujemy tylko Twój e-mail i dane z aplikacji (w UE, Frankfurt). Bez konta wszystko zostaje tylko w tej przeglądarce.",
   protL:"Białko", protH:"Jakie białko?", protHint:"Wybierz mięso, rybę lub inne białko, a pokażemy wszystkie dania z nim.", prots:{any:"Dowolne",chicken:"Kurczak",turkey:"Indyk",beef:"Wołowina",pork:"Wieprzowina",mince:"Mięso mielone",goat:"Kozina",fish:"Ryby",eggs:"Jajka",beans:"Fasola i soczewica",cheese:"Ser i twaróg",veg:"Bez mięsa"}, protMore:(p,n)=>`Więcej dań: ${p} (${n})`, protAll:"Białko",
-  nav:{today:"Dziś",week:"Tydzień",shop:"Zakupy",search:"Szukaj",saved:"Zapisane"}, kitchenL:"Moja kuchnia", budgetL:"Budżet", budPerWeek:"/ tydzień", budPerMeal:"/ posiłek",
+  nav:{today:"Dziś",week:"Tydzień",shop:"Zakupy",offers:"Promocje",search:"Szukaj",saved:"Zapisane"}, kitchenL:"Moja kuchnia", budgetL:"Budżet", budPerWeek:"/ tydzień", budPerMeal:"/ posiłek",
   sheetT:"Kuchnia i ustawienia", showMeals:"Pokaż propozycję", budgetH:"Gotuj w budżecie", budPh:"np. 25", budMeal:"Na posiłek", budWeek:"Na cały tydzień", budGo:"Znajdź dania",
   budHint:"Liczymy koszt tylko tego, czego brakuje w Twojej kuchni, w wybranym sklepie.", budClear:"Usuń budżet", budBad:"Wpisz kwotę w złotych, np. 25 albo 150.",
   budH:(a,m)=>`Dania do ${a} (${m})`, budSub:s2=>`Koszt brakujących składników w sklepie ${s2}. To, co już masz, nic nie kosztuje.`, budChange:"Zmień budżet", budExit:"Wróć do propozycji dnia",
@@ -1122,7 +1132,7 @@ const T = {
    ["Statystyki odwiedzin","Liczymy odwiedziny i używane funkcje za pomocą GoatCounter: bez ciasteczek, bez śledzenia między stronami, bez zapisywania adresów IP i danych osobowych."],
    ["Usuwanie danych","Konto: zaloguj się, otwórz konto i dwa razy stuknij „Usuń moje konto”. To trwale usuwa twój e-mail i zsynchronizowane dane. Dane na urządzeniu: wyczyść dane strony cozjem.com w przeglądarce."],
    ["Kontakt","Pytania o twoje dane lub prośba o ich usunięcie: hello@cozjem.com"]],
-  grpSel:(n,all)=>`${n} z ${all}`, grpNone:"Brak składników dla tego wyszukiwania.", offH:"Promocje w tym tygodniu", offAll:n=>`Zobacz wszystkie (${n})`, offUsed:"w przepisach CoZjem", offNote:d=>`Promocje Lidla na żywność, sprawdzone ${d}. Ceny i warunki mogą się różnić w sklepie. Biedronka, Aldi i Auchan publikują oferty tylko w gazetkach, więc tu ich nie ma.`, cookThis:"Gotuję to", backIdeas:"Wróć do pomysłów", orTry:"Albo spróbuj", hBuy:(n,c)=>`${n} do kupienia, ok. ${c}`, hAll:"Masz wszystkie składniki",
+  grpSel:(n,all)=>`${n} z ${all}`, grpNone:"Brak składników dla tego wyszukiwania.", offPageH:"Promocje w tym tygodniu", offPageS:"Aktualne promocje na żywność w Lidlu oraz bieżące gazetki Biedronki, Auchan i Aldi.", offProdH:"Produkty w promocji", offLeafH:"Gazetki sklepów", offOpenLeaf:"Otwórz gazetkę", offAldiT:"Oferty Aldi", offAldiS:"Aldi pokazuje promocje tylko na swojej stronie", offMineF:"Tylko z moich przepisów", offInPlan:"w twoim planie", offNone:"Brak promocji do pokazania. Sprawdź później.", offNoneMine:"Żadna promocja nie pasuje teraz do twojego planu.", offYoursH:"Twoje promocje", offYoursNone:"Widzisz promocję w sklepie lub gazetce? Dodaj ją, a uwzględnimy ją w cenach.", offAddBtn:"Dodaj promocję", offLoading:"Ładowanie promocji…", offH:"Promocje w tym tygodniu", offAll:n=>`Zobacz wszystkie (${n})`, offUsed:"w przepisach CoZjem", offNote:d=>`Sprawdzone ${d}, aktualizowane codziennie. Ceny i warunki mogą się różnić w sklepie. Biedronka i Auchan publikują produkty tylko jako obrazy w gazetkach, więc pokazujemy ich gazetki.`, cookThis:"Gotuję to", backIdeas:"Wróć do pomysłów", orTry:"Albo spróbuj", hBuy:(n,c)=>`${n} do kupienia, ok. ${c}`, hAll:"Masz wszystkie składniki",
   editT:(m,d)=>`${m} na ${d}`, editPh:"Szukaj dania", editBtn:"Zmień danie", editNone:"Brak dań dla tego wyszukiwania",
   askWeekT:"Dodać ten tydzień do kalendarza?", askWeekS:"Dostaniesz przypomnienie, kiedy zacząć gotować.", askMealT:n=>`Dodać „${n}” do kalendarza?`, askMealS:"Przypomnimy ci, kiedy zacząć gotować.", askYes:"Dodaj do kalendarza", askNo:"Nie, dziękuję",
   calAdd:"Dodaj tydzień do kalendarza", calMeal:"Dodaj do kalendarza", calDone:"Dodano do kalendarza", calOpen:"Otwórz pobrany plik, aby dodać do kalendarza", calOpenIos:"Stuknij „Dodaj wszystkie” w kalendarzu", calSaved:"Plik kalendarza zapisany", calNone:"Brak nadchodzących posiłków do dodania", calFail:"Nie udało się utworzyć pliku kalendarza",
@@ -1204,7 +1214,7 @@ const T = {
   syncNow:"Sync now", signOut:"Sign out", delCloud:"Delete my account", delConfirm:"Tap again to delete",
   acctNote:"We store only your email and your app data (in the EU, Frankfurt). Without an account everything stays in this browser only.",
   protL:"Protein", protH:"Which protein?", protHint:"Pick a meat, fish or other protein and we show every dish made with it.", prots:{any:"Any",chicken:"Chicken",turkey:"Turkey",beef:"Beef",pork:"Pork",mince:"Minced meat",goat:"Goat",fish:"Fish",eggs:"Eggs",beans:"Beans & lentils",cheese:"Cheese & quark",veg:"Meat free"}, protMore:(p,n)=>`More ${({"Eggs":"egg","Beans & lentils":"bean and lentil","Cheese & quark":"cheese and quark"})[p]||p.toLowerCase()} dishes (${n})`, protAll:"Protein",
-  nav:{today:"Today",week:"Week",shop:"Groceries",search:"Search",saved:"Saved"}, kitchenL:"My kitchen", budgetL:"Budget", budPerWeek:"/ week", budPerMeal:"/ meal",
+  nav:{today:"Today",week:"Week",shop:"Groceries",offers:"Offers",search:"Search",saved:"Saved"}, kitchenL:"My kitchen", budgetL:"Budget", budPerWeek:"/ week", budPerMeal:"/ meal",
   sheetT:"Kitchen and settings", showMeals:"Show me a meal", budgetH:"Cook on a budget", budPh:"e.g. 25", budMeal:"Per meal", budWeek:"For the whole week", budGo:"Find meals",
   budHint:"We count only what's missing from your kitchen, at your chosen store.", budClear:"Remove budget", budBad:"Enter an amount in złoty, for example 25 or 150.",
   budH:(a,m)=>`Meals for ${a} or less (${m})`, budSub:s2=>`Cost of the ingredients you still need at ${s2}. What you already have is free.`, budChange:"Change budget", budExit:"Back to today's pick",
@@ -1228,7 +1238,7 @@ const T = {
    ["Visit statistics","We count visits and which features are used with GoatCounter: no cookies, no tracking across sites, no IP addresses or personal data stored."],
    ["Deleting your data","Account: sign in, open your account and tap “Delete my account” twice. This permanently removes your email and synced data. Data on your device: clear site data for cozjem.com in your browser."],
    ["Contact","Questions about your data, or a request to delete it: hello@cozjem.com"]],
-  grpSel:(n,all)=>`${n} of ${all}`, grpNone:"No ingredients match that search.", offH:"On offer this week", offAll:n=>`See all (${n})`, offUsed:"used in CoZjem recipes", offNote:d=>`Lidl food promotions, checked ${d}. Prices and conditions may differ in store. Biedronka, Aldi and Auchan only publish offers in leaflets, so they are not listed here.`, cookThis:"Cook this", backIdeas:"Back to ideas", orTry:"Or try", hBuy:(n,c)=>`${n} to buy, about ${c}`, hAll:"You have every ingredient",
+  grpSel:(n,all)=>`${n} of ${all}`, grpNone:"No ingredients match that search.", offPageH:"Promotions this week", offPageS:"Current Lidl food deals plus this week\u2019s leaflets from Biedronka, Auchan and Aldi.", offProdH:"Products on offer", offLeafH:"Store leaflets", offOpenLeaf:"Open leaflet", offAldiT:"Aldi offers", offAldiS:"Aldi only shows its promotions on its own website", offMineF:"Only my recipes", offInPlan:"in your plan", offNone:"No promotions to show right now. Check back later.", offNoneMine:"No promotion matches your plan right now.", offYoursH:"Your promotions", offYoursNone:"Spotted a deal in store or in a leaflet? Add it and CoZjem uses it in your prices.", offAddBtn:"Add a promotion", offLoading:"Loading promotions\u2026", offH:"On offer this week", offAll:n=>`See all (${n})`, offUsed:"used in CoZjem recipes", offNote:d=>`Checked ${d}, updated daily. Prices and conditions may differ in store. Biedronka and Auchan only publish their products as leaflet images, so we show their leaflets.`, cookThis:"Cook this", backIdeas:"Back to ideas", orTry:"Or try", hBuy:(n,c)=>`${n} to buy, about ${c}`, hAll:"You have every ingredient",
   editT:(m,d)=>`${m} for ${d}`, editPh:"Search dishes", editBtn:"Change dish", editNone:"No dishes match that search",
   askWeekT:"Add this week to your calendar?", askWeekS:"You'll get a reminder when it's time to start cooking.", askMealT:n=>`Add “${n}” to your calendar?`, askMealS:"We'll remind you when it's time to start cooking.", askYes:"Add to calendar", askNo:"No thanks",
   calAdd:"Add week to calendar", calMeal:"Add to calendar", calDone:"Added to calendar", calOpen:"Open the downloaded file to add it to your calendar", calOpenIos:"Tap \u201cAdd All\u201d in Calendar", calSaved:"Calendar file saved", calNone:"No upcoming meals to add", calFail:"Couldn't create the calendar file",
@@ -1313,7 +1323,7 @@ function applyState(s){
 }
 try{const s=JSON.parse(localStorage.getItem("cozjem")||"null"); if(s) applyState(s);}catch(e){}
 if(!TIPS[st.goal]) st.goal="bal";
-if(!["today","week","shop","saved","search"].includes(st.view)) st.view="today";
+if(!["today","week","shop","offers","saved","search"].includes(st.view)) st.view="today";
 const cloud={on:false,sb:null,user:null,status:"",last:null,timer:null,sent:null,err:"",confirmDel:false,pulled:0};
 const snapshot=()=>({kitchenSet:!!st.kitchenSet,lang:st.lang,meal:st.meal,store:st.store,goal:st.goal,view:st.view,have:[...st.have],plan:st.plan,batch:st.batch,bought:st.bought,mine:st.mine,aiDish:st.aiDish,mode:st.mode,saved:st.saved,prices:st.prices,promos:st.promos,shopTicks:st.shopTicks,budget:st.budget,prot:st.prot,ts:st.ts||0});
 const saveLocal=()=>{try{localStorage.setItem("cozjem",JSON.stringify(snapshot()))}catch(e){}};
@@ -1383,8 +1393,31 @@ function feedPct(x){ if(x.pct) return x.pct; const h=x.hl||""; let m=h.match(/-(
 function feedPromos(){ return feedItems().filter(x=>x.k&&ING[x.k]).map(x=>{ const pct=feedPct(x); return pct?{k:x.k,store:x.store,p:Math.round(ING[x.k][2]*SF[x.store]*(1-pct/100)*100)/100,until:x.until,feed:x}:null; }).filter(Boolean); }
 const activePromos=()=>{const t0=day0();return st.promos.filter(p=>p.until>=t0).concat(feedPromos())};
 async function loadFeed(){ if(window.claude||!/^https?:/.test(location.protocol)) return; try{ const r=await fetch("promos.json?d="+new Date().toISOString().slice(0,13),{cache:"no-store"}); if(!r.ok) return; const d=await r.json();
-  const items=[]; Object.entries(d.stores||{}).forEach(([store,o])=>(o.items||[]).forEach(x=>{ if(STORES.includes(store)&&x&&typeof x.t==="string"&&Number.isFinite(x.until)) items.push({...x,store}); }));
-  FEED={updated:d.updated,items}; renderView(); }catch(e){} }
+  const items=[], leaflets=[]; Object.entries(d.stores||{}).forEach(([store,o])=>{ if(!STORES.includes(store)) return;
+    (o.items||[]).forEach(x=>{ if(x&&typeof x.t==="string"&&Number.isFinite(x.until)) items.push({...x,store}); });
+    (o.leaflets||[]).forEach(x=>{ if(x&&typeof x.t==="string"&&Number.isFinite(x.until)&&/^https:\/\//.test(x.url)) leaflets.push({...x,store}); }); });
+  FEED={updated:d.updated,items,leaflets}; renderView(); }catch(e){} }
+let offStore="all", offMine=false;
+function renderOffers(){ const t=L(), v=$("view"), now=Date.now();
+  const myKeys=new Set(); if(st.plan) st.plan.forEach(row=>["b","l","d"].forEach(m=>{ const r=RB[row[m]]; if(r) r.n.forEach(k=>myKeys.add(k)); }));
+  if(st.cur&&RB[st.cur]) RB[st.cur].n.forEach(k=>myKeys.add(k));
+  const show=s=>offStore==="all"||offStore===s;
+  const prods=feedItems().filter(x=>show(x.store)&&(!offMine||(x.k&&myKeys.has(x.k)))).sort((a,b)=>(!!b.k-!!a.k)||(feedPct(b)-feedPct(a)));
+  const leaf=(FEED?FEED.leaflets:[]).filter(x=>x.until>=now&&show(x.store)).sort((a,b)=>a.store.localeCompare(b.store)||(b.from||0)-(a.from||0));
+  const mine=st.promos.filter(p=>p.until>=day0()&&show(p.store));
+  const chip=(val,label)=>`<button type="button" class="chip" data-offstore="${val}" aria-pressed="${offStore===val}">${label}</button>`;
+  const row=x=>`<a class="offer" href="${esc(x.url)}" target="_blank" rel="noopener">${x.img?`<img src="${esc(x.img)}" alt="" loading="lazy" width="56" height="56">`:""}<span class="ot"><b>${esc(x.t)}</b><small>${x.store}${x.unit?" · "+esc(x.unit):""} · ${t.until(fmtDay(x.until))}${x.lp?" · Lidl Plus":""}${x.k?` · <span class="oin">${myKeys.has(x.k)?t.offInPlan:t.offUsed}</span>`:""}</small></span><span class="op">${x.p?`<b>${zl(x.p)}</b>`:""}${x.op?`<s>${zl(x.op)}</s>`:""}${feedPct(x)?`<i>-${feedPct(x)}%</i>`:x.hl?`<i>${esc(x.hl)}</i>`:""}</span></a>`;
+  const lcard=x=>`<a class="leaf" href="${esc(x.url)}" target="_blank" rel="noopener">${x.img?`<img src="${esc(x.img)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;leafph&quot;>${x.store}</span>'">`:`<span class="leafph s-${x.store.toLowerCase()}">${x.store}<small>${x.from?fmtDay(x.from):""}</small></span>`}<span><b>${esc(x.t)}</b><small>${x.store} · ${x.from?fmtDay(x.from)+" to ":""}${fmtDay(x.until)}</small><em>${t.offOpenLeaf}</em></span></a>`;
+  const aldi=show("Aldi")?`<a class="leaf aldi" href="https://www.aldi.pl/oferty.html" target="_blank" rel="noopener"><span class="leafph">ALDI</span><span><b>${t.offAldiT}</b><small>${t.offAldiS}</small><em>${t.offOpenLeaf}</em></span></a>`:"";
+  v.innerHTML=`<div class="sugh"><h2>${t.offPageH}</h2><p>${t.offPageS}</p></div>
+    <div class="chips offfilter">${chip("all",t.all)}${STORES.map(s=>chip(s,s)).join("")}<button type="button" class="chip" id="offMine" aria-pressed="${offMine}">${t.offMineF}</button></div>
+    ${prods.length?`<div><p class="label">${t.offProdH} <span class="scount">${prods.length}</span></p><div class="offlist">${prods.map(row).join("")}</div></div>`:(show("Lidl")?`<p class="empty" style="margin:0">${offMine?t.offNoneMine:t.offNone}</p>`:"")}
+    ${leaf.length||aldi?`<div><p class="label">${t.offLeafH}</p><div class="leafgrid">${leaf.map(lcard).join("")}${aldi}</div></div>`:""}
+    <div class="mypromo"><p class="label">${t.offYoursH}</p>${mine.length?`<ul>${mine.map(p=>`<li><b>${esc(baseName(nm(p.k)))}</b> · ${p.store} · ${zl(p.p)} · ${t.until(fmtDay(p.until))}</li>`).join("")}</ul>`:`<p class="hint" style="margin:0">${t.offYoursNone}</p>`}
+      <button type="button" class="btn sm" id="offAdd">${t.offAddBtn}</button></div>
+    ${FEED?`<p class="cmpnote">${t.offNote(fmtDay(Date.parse(FEED.updated)))}</p>`:`<p class="cmpnote">${t.offLoading}</p>`}`;
+  v.dataset.text="";
+}
 function priceAt(k,store){
   if(ING[k][3]==="afr") return {p:ING[k][2],src:"afr"};
   const pm=activePromos().filter(p=>p.k===k&&p.store===store).sort((a,b)=>a.p-b.p)[0]; if(pm) return {p:pm.p,src:"promo",until:pm.until};
@@ -1656,14 +1689,14 @@ async function verifyCode(code){
   const {error}=await cloud.sb.auth.verifyOtp({email:cloud.sent,token:code,type:"email"});
   if(error){cloud.err=t.badCode; renderAcct();}
 }
-const NAVI={today:'<path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/>',
+const NAVI={offers:'<path d="M3.5 12.6V4.5a1 1 0 0 1 1-1h8.1l7.9 7.9a1.4 1.4 0 0 1 0 2l-6.1 6.1a1.4 1.4 0 0 1-2 0z"/><circle cx="8.5" cy="8.5" r="1.6"/>',today:'<path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/>',
   week:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
   shop:'<path d="M5 8h14l-1.5 11h-11z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
   search:'<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>',
   saved:'<path d="M6 3.5h12a.5.5 0 0 1 .5.5v16.2a.3.3 0 0 1-.48.24L12 16l-6.02 4.44a.3.3 0 0 1-.48-.24V4a.5.5 0 0 1 .5-.5z"/>'};
 function renderNav(){
   const t=L();
-  ["today","week","shop","search","saved"].forEach(v=>{ const b=$("tab-"+v);
+  ["today","week","shop","offers","search","saved"].forEach(v=>{ const b=$("tab-"+v);
     const badge=v==="saved"&&st.saved.length?`<i class="nbadge">${st.saved.length}</i>`:"";
     b.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true">${NAVI[v]}</svg><span>${t.nav[v]}</span>${badge}`; b.setAttribute("aria-selected",st.view===v); });
 }
@@ -2588,7 +2621,7 @@ function renderShop(){
   v.dataset.text=`CoZjem · ${t.list} (${st.store})\n`+whereText(sh.ks)+sh.ks.map(k=>`- ${nmS(k)}  ~${zl(pr(k))}`).join("\n")+`\n${t.total} ${zl(sh.cost)}`;
   expo={title:t.list,items:sh.ks.map(expItem)};
 }
-function renderView(){ const hb=$("habits"); if(hb) hb.hidden=st.view!=="week"; if(st.view==="search"){ renderSearch(); return; } st.view==="week"?renderWeek():st.view==="shop"?renderShop():st.view==="saved"?renderSaved():renderToday(); animateIn(); }
+function renderView(){ const hb=$("habits"); if(hb) hb.hidden=st.view!=="week"; if(st.view==="search"){ renderSearch(); return; } st.view==="week"?renderWeek():st.view==="shop"?renderShop():st.view==="offers"?renderOffers():st.view==="saved"?renderSaved():renderToday(); animateIn(); }
 function all(){renderStatic();renderView();}
 function flash(){const el=$("result"); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
   const top=el.getBoundingClientRect().top; if(top<0||top>window.innerHeight*0.6) el.scrollIntoView({behavior:"smooth",block:"start"});}
@@ -2620,7 +2653,10 @@ document.addEventListener("click",e=>{
   if(b.dataset.stclose){ const el=$("storesm"); if(el) el.remove(); return; }
   if(b.id==="geoBtn"){ useMyLocation(); return; }
   if(b.id==="privBtn"){ openPrivacy(); return; }
-  if(b.id==="allOffers"){ openOffers(); return; }
+  if(b.id==="allOffers"){ st.view="offers"; save(); all(); window.scrollTo({top:0,behavior:"smooth"}); gc("tab/offers","Tab offers"); return; }
+  if(b.dataset.offstore){ offStore=b.dataset.offstore; renderOffers(); return; }
+  if(b.id==="offMine"){ offMine=!offMine; renderOffers(); return; }
+  if(b.id==="offAdd"){ st.view="shop"; save(); all(); setTimeout(()=>{ const f=$("priceForm"); if(f){ f.scrollIntoView({behavior:"smooth",block:"center"}); const c=$("pfPromo"); if(c&&!c.checked) c.click(); const i=$("pfItem"); if(i) i.focus({preventScroll:true}); } },150); return; }
   if(b.id==="creditsBtn"){ const t=L(); const el=document.createElement("div"); el.className="landing"; el.id="credits";
     el.innerHTML=`<div class="lback" data-ccl="1"></div><div class="lcard credl" role="dialog" aria-modal="true" aria-label="${t.credits}"><p class="lkick">${t.credits}</p><p class="hint" style="margin:0">${t.creditsSub}</p>
       <ul>${R.filter(r=>PHOTOS[r.id]).map(r=>{const p=PHOTOS[r.id]; return `<li><b>${esc(r[st.lang])}</b><span><a href="${p.u}" target="_blank" rel="noopener">${esc(p.a)}</a>, ${esc(p.l)}</span></li>`;}).join("")}</ul>
@@ -2691,7 +2727,7 @@ document.addEventListener("click",e=>{
   if(b.id==="batch"){st.batch=!st.batch; genWeek(); save(); renderView(); flash(); return;}
   if(b.dataset.swap){const [d,m]=b.dataset.swap.split(":"); swapCell(+d,m); renderView(); return;}
   if(b.id==="lang-pl"||b.id==="lang-en"){st.lang=b.id.slice(5);save();all();return;}
-  if(b.id==="tab-today"||b.id==="tab-week"||b.id==="tab-shop"||b.id==="tab-saved"||b.id==="tab-search"){st.view=b.id.slice(4);if(st.view==="today")todayDetail=false;save();closeSheet();all();gc("tab/"+st.view,"Tab "+st.view);
+  if(b.id==="tab-today"||b.id==="tab-week"||b.id==="tab-shop"||b.id==="tab-offers"||b.id==="tab-saved"||b.id==="tab-search"){st.view=b.id.slice(4);if(st.view==="today")todayDetail=false;save();closeSheet();all();gc("tab/"+st.view,"Tab "+st.view);
     window.scrollTo({top:0,behavior:"smooth"});
     if(st.view==="search"&&window.matchMedia("(min-width:901px)").matches){ const i=$("srchQ"); if(i) i.focus({preventScroll:true}); }
     return;}
