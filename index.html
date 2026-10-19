@@ -539,6 +539,16 @@ main .panel:nth-child(2){animation-delay:.08s}.habits{animation-delay:.16s}
 .editlist{display:flex;flex-direction:column;gap:6px;max-height:52vh;overflow:auto}
 .editlist .alt.on{border-color:var(--beet);background:var(--beet-soft)}
 .calask .calic{flex:none;width:44px;height:44px;border-radius:10px;background:var(--beet-soft);color:var(--beet);display:grid;place-items:center}
+.grp{border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.grp summary{list-style:none;display:flex;align-items:center;gap:10px;padding:.7rem .85rem;cursor:pointer;font-weight:600;font-size:.95rem;user-select:none}
+.grp summary::-webkit-details-marker{display:none}
+.grp .gname{flex:1}
+.grp .gcount{font-size:.78rem;font-weight:600;color:var(--muted);background:var(--bg);border-radius:999px;padding:.12rem .55rem}
+.grp .gcount.on{color:var(--dill);background:var(--dill-soft)}
+.grp .gchev{width:18px;height:18px;fill:none;stroke:var(--muted);stroke-width:2;transition:transform .2s ease}
+.grp[open] .gchev{transform:rotate(180deg)}
+.grp .chips{padding:0 .85rem .85rem}
+#cats{gap:8px!important}
 </style>
 </head>
 <body>
@@ -1101,7 +1111,7 @@ const T = {
    ["Statystyki odwiedzin","Liczymy odwiedziny i używane funkcje za pomocą GoatCounter: bez ciasteczek, bez śledzenia między stronami, bez zapisywania adresów IP i danych osobowych."],
    ["Usuwanie danych","Konto: zaloguj się, otwórz konto i dwa razy stuknij „Usuń moje konto”. To trwale usuwa twój e-mail i zsynchronizowane dane. Dane na urządzeniu: wyczyść dane strony cozjem.com w przeglądarce."],
    ["Kontakt","Pytania o twoje dane lub prośba o ich usunięcie: hello@cozjem.com"]],
-  cookThis:"Gotuję to", backIdeas:"Wróć do pomysłów", orTry:"Albo spróbuj", hBuy:(n,c)=>`${n} do kupienia, ok. ${c}`, hAll:"Masz wszystkie składniki",
+  grpSel:(n,all)=>`${n} z ${all}`, grpNone:"Brak składników dla tego wyszukiwania.", cookThis:"Gotuję to", backIdeas:"Wróć do pomysłów", orTry:"Albo spróbuj", hBuy:(n,c)=>`${n} do kupienia, ok. ${c}`, hAll:"Masz wszystkie składniki",
   editT:(m,d)=>`${m} na ${d}`, editPh:"Szukaj dania", editBtn:"Zmień danie", editNone:"Brak dań dla tego wyszukiwania",
   askWeekT:"Dodać ten tydzień do kalendarza?", askWeekS:"Dostaniesz przypomnienie, kiedy zacząć gotować.", askMealT:n=>`Dodać „${n}” do kalendarza?`, askMealS:"Przypomnimy ci, kiedy zacząć gotować.", askYes:"Dodaj do kalendarza", askNo:"Nie, dziękuję",
   calAdd:"Dodaj tydzień do kalendarza", calMeal:"Dodaj do kalendarza", calDone:"Dodano do kalendarza", calFail:"Nie udało się utworzyć pliku kalendarza",
@@ -1207,7 +1217,7 @@ const T = {
    ["Visit statistics","We count visits and which features are used with GoatCounter: no cookies, no tracking across sites, no IP addresses or personal data stored."],
    ["Deleting your data","Account: sign in, open your account and tap “Delete my account” twice. This permanently removes your email and synced data. Data on your device: clear site data for cozjem.com in your browser."],
    ["Contact","Questions about your data, or a request to delete it: hello@cozjem.com"]],
-  cookThis:"Cook this", backIdeas:"Back to ideas", orTry:"Or try", hBuy:(n,c)=>`${n} to buy, about ${c}`, hAll:"You have every ingredient",
+  grpSel:(n,all)=>`${n} of ${all}`, grpNone:"No ingredients match that search.", cookThis:"Cook this", backIdeas:"Back to ideas", orTry:"Or try", hBuy:(n,c)=>`${n} to buy, about ${c}`, hAll:"You have every ingredient",
   editT:(m,d)=>`${m} for ${d}`, editPh:"Search dishes", editBtn:"Change dish", editNone:"No dishes match that search",
   askWeekT:"Add this week to your calendar?", askWeekS:"You'll get a reminder when it's time to start cooking.", askMealT:n=>`Add “${n}” to your calendar?`, askMealS:"We'll remind you when it's time to start cooking.", askYes:"Add to calendar", askNo:"No thanks",
   calAdd:"Add week to calendar", calMeal:"Add to calendar", calDone:"Added to calendar", calFail:"Couldn't create the calendar file",
@@ -1710,13 +1720,32 @@ function renderStatic(){
   $("stores").innerHTML=STORES.map(s=>`<button type="button" data-store="${s}" aria-pressed="${st.store===s}">${s}</button>`).join("");
   renderChips(); renderHabits(); renderNav(); renderToolbar(); renderBudgetBox();
 }
+const GROUPS=[
+ ["dairy",{pl:"Nabiał i jajka",en:"Dairy & eggs"},"jajka maslo mleko twarog smietana ser feta grana skyr jogurt mozzarella smietanka kefir ricotta"],
+ ["meat",{pl:"Mięso",en:"Meat"},"kurczak udka indyk mielone schab boczek kielbasa szynka parowki wolowina watrobka chorizo"],
+ ["fish",{pl:"Ryby i owoce morza",en:"Fish & seafood"},"tunczyk ryba makrela losos krewetki dorsz"],
+ ["veg",{pl:"Warzywa",en:"Vegetables"},"ziemniaki cebula czosnek marchew pietruszka pomidory ogorek papryka cukinia pieczarki rzodkiewka kapusta brokul buraki baklazan groszek chili szpinak bataty jarmuz imbir kalafior fasolkasz salata awokado dynia por"],
+ ["fruit",{pl:"Owoce",en:"Fruit"},"jablka banan cytryna jagody"],
+ ["herbs",{pl:"Zioła",en:"Fresh herbs"},"szczypiorek koperek natka"],
+ ["grains",{pl:"Pieczywo, makaron i kasze",en:"Bread, pasta & grains"},"chleb bagietka tortille makaron lasagne gnocchi ryz kasza kaszag kaszaj kuskus platki maka mkukurydziana bulka ciasto"],
+ ["pulses",{pl:"Strączki",en:"Beans & lentils"},"fasola soczewica ciecierzyca"],
+ ["tins",{pl:"Puszki, słoiki i sosy",en:"Tins, jars & sauces"},"passata koncentrat kukurydza kokos kiszone kwaszona oliwki pesto ketchup musztarda soja miod maslo_orz bulion zakwas"],
+ ["spices",{pl:"Przyprawy i pieczenie",en:"Spices & baking"},"ppapryka majeranek ziele kmin curry cynamon cukier drozdze"],
+ ["afr",{pl:"Ze sklepu afrykańskiego",en:"From an African shop"},""]];
+const GROUP_OF={}; GROUPS.forEach(([g,,ks])=>ks.split(" ").filter(Boolean).forEach(k=>GROUP_OF[k]=g));
+const groupOf=k=>ING[k][3]==="afr"?"afr":(GROUP_OF[k]||({dairy:"dairy",meat:"meat",veg:"veg",pantry:"tins"})[ING[k][3]]||"tins");
+const openG=new Set();
 function renderChips(){
-  const q=st.q.trim().toLowerCase();
-  $("cats").innerHTML=Object.keys(CAT).map(c=>{
-    const ks=Object.keys(ING).filter(k=>ING[k][3]===c&&(!q||ING[k][0].toLowerCase().includes(q)||ING[k][1].toLowerCase().includes(q)));
-    if(!ks.length) return "";
-    return `<div class="cat"><h3>${CAT[c][st.lang]}</h3><div class="chips">${ks.map(k=>`<button type="button" class="chip" data-ing="${k}" aria-pressed="${st.have.has(k)}">${esc(nm(k).replace(/ \d.*$| \(.*\)$/,""))}</button>`).join("")}</div></div>`;
-  }).join("");
+  const q=st.q.trim().toLowerCase(), t=L();
+  $("cats").innerHTML=GROUPS.map(([g,label])=>{
+    const all=Object.keys(ING).filter(k=>groupOf(k)===g); if(!all.length) return "";
+    const ks=all.filter(k=>!q||ING[k][0].toLowerCase().includes(q)||ING[k][1].toLowerCase().includes(q));
+    if(q&&!ks.length) return "";
+    const n=all.filter(k=>st.have.has(k)).length, open=q||openG.has(g);
+    return `<details class="grp" data-grp="${g}"${open?" open":""}><summary><span class="gname">${label[st.lang]}</span><span class="gcount${n?" on":""}">${n?t.grpSel(n,all.length):all.length}</span><svg class="gchev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+      <div class="chips">${ks.map(k=>`<button type="button" class="chip" data-ing="${k}" aria-pressed="${st.have.has(k)}">${esc(nm(k).replace(/ \d.*$| \(.*\)$/,""))}</button>`).join("")}</div></details>`;
+  }).join("")||`<p class="basics">${t.grpNone}</p>`;
+  $("cats").querySelectorAll("details.grp").forEach(d=>d.addEventListener("toggle",()=>{ if(st.q.trim()) return; d.open?openG.add(d.dataset.grp):openG.delete(d.dataset.grp); }));
   $("count").textContent=L().count(st.have.size); renderToolbar();
 }
 function renderHabits(){
@@ -2607,6 +2636,7 @@ document.addEventListener("click",e=>{
   if(b.dataset.ing){const k=b.dataset.ing;
     if(st.have.has(k)){st.have.delete(k); delete st.bought[k];} else st.have.add(k);
     document.querySelectorAll(`#cats [data-ing="${k}"]`).forEach(c=>c.setAttribute("aria-pressed",st.have.has(k)));
+    { const g=groupOf(k), gd=document.querySelector(`#cats details[data-grp="${g}"] .gcount`); if(gd){ const all=Object.keys(ING).filter(x=>groupOf(x)===g), n=all.filter(x=>st.have.has(x)).length; gd.textContent=n?L().grpSel(n,all.length):all.length; gd.classList.toggle("on",n>0); } }
     b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop");
     $("count").textContent=L().count(st.have.size); renderToolbar(); save();
     if(st.view==="today"){ if(st.cur) st.forced=st.cur; renderToday(true); }
