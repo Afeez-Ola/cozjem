@@ -2,8 +2,9 @@
 """Collect this week's Lidl Poland food promotions into promos.json for CoZjem.
 
 Runs daily (GitHub Actions). Uses Lidl's public product search data for the
-"Żywność i napoje" category. Biedronka, Aldi and Auchan publish their offers
-as leaflet images or app-only content, so they are not collected here.
+"Żywność i napoje" category, Auchan's online "Produkty z gazetki" shelf
+(zakupy.auchan.pl), and Biedronka / Auchan leaflet covers. Biedronka leaflets
+are images only, so Biedronka contributes leaflets, not product rows.
 """
 import json, re, sys, time, urllib.request, datetime, pathlib
 
@@ -86,11 +87,96 @@ def biedronka_leaflets():
         end = start + datetime.timedelta(days=6)
         if end < today: continue
         title = re.sub(r"-(od-)?\d{1,2}-\d{1,2}$", "", slug).replace("-p-", " ").replace("-", " ").strip().capitalize()
-        img = re.search(r'(?:data-src|src)="(https://[^"]+\.(?:jpg|jpeg|png|webp))"', inner)
+        img = ""
+        try: img = biedronka_cover(url, slug)
+        except Exception as e: print("Biedronka cover failed", slug, e, file=sys.stderr)
         out.append({"t": title, "from": int(datetime.datetime(start.year, start.month, start.day).timestamp() * 1000),
                     "until": int(datetime.datetime(end.year, end.month, end.day, 23, 59).timestamp() * 1000),
-                    "url": url, "img": ""})  # Biedronka blocks its covers on other sites
+                    "url": url, "img": img})
     return out
+
+LEAF_DIR = OUT.parent / "img" / "leaf"
+def biedronka_cover(url, slug):
+    """Biedronka's covers are multi-MB PNGs, so keep a small WebP copy on cozjem.com."""
+    name = re.sub(r"[^a-z0-9-]", "", slug.lower())[:60] + ".webp"
+    dst = LEAF_DIR / name
+    if dst.exists(): return "img/leaf/" + name
+    page = fetch_text(url)
+    m = re.search(r'galleryLeaflet\.init\("([0-9a-f-]{36})"\)', page)
+    if not m: return ""
+    d = json.loads(fetch_text(f"https://leaflet-api.prod.biedronka.cloud/api/leaflets/{m.group(1)}?ctx=web"))
+    pages = (d.get("images_mobile") or []) + (d.get("images_desktop") or [])
+    src = next((i for pg in pages for i in ([pg.get("image")] + list(pg.get("images") or [])) if i), "")
+    if not src: return ""
+    import subprocess, io
+    from PIL import Image
+    raw = subprocess.run(["curl", "-s", "-m", "60", "-A", UA, src], capture_output=True).stdout
+    im = Image.open(io.BytesIO(raw)).convert("RGB"); im.thumbnail((420, 640))
+    LEAF_DIR.mkdir(parents=True, exist_ok=True); im.save(dst, "WEBP", quality=78)
+    return "img/leaf/" + name
+
+AUCHAN_SHELF = "https://zakupy.auchan.pl/shop-in-shop/gazetka-produkty-online"
+SKIP_A = re.compile(r"zwierz|alkohol|chemia|kosmet|drogeria|higien|dom |dom,|ogr|elektr|zabawk|dziecko i mama|papier", re.I)
+def auchan_promo(price, desc):
+    """Turn Auchan's promo label into an effective unit price."""
+    d = desc.replace("\xa0", " ")
+    m = re.search(r"(\d+)\s*%\s*taniej", d, re.I)
+    if m: return price * (1 - int(m.group(1)) / 100), int(m.group(1))
+    m = re.search(r"(\d+)\s+za\s+(\d+)[,.](\d{2})", d)
+    if m:
+        n = int(m.group(1)); u = (int(m.group(2)) + int(m.group(3)) / 100) / n
+        return u, round((1 - u / price) * 100) if u < price else None
+    m = re.search(r"(\d+)\s*\+\s*(\d+)\s+za\s+grosz", d, re.I)
+    if m:
+        a, b = int(m.group(1)), int(m.group(2)); u = (a * price + b * 0.01) / (a + b)
+        return u, round((1 - u / price) * 100)
+    m = re.search(r"(drugi|trzeci)\s+za\s+(\d+)(?:[,.](\d{2}))?\s*zł", d, re.I)
+    if m:
+        n = 2 if m.group(1).lower() == "drugi" else 3; x = int(m.group(2)) + int(m.group(3) or 0) / 100
+        u = ((n - 1) * price + x) / n; return u, round((1 - u / price) * 100)
+    return None, None
+
+def auchan_items():
+    import subprocess, tempfile, os
+    jar = tempfile.mktemp()
+    try:
+        page = subprocess.run(["curl", "-s", "-m", "40", "-c", jar, "-A", UAS[1], AUCHAN_SHELF], capture_output=True).stdout.decode("utf-8", "ignore")
+        tok = re.search(r'"csrf":\{"token":"([0-9a-f-]+)"', page)
+        m = re.search(r"window\.__URQL_DATA__\s*=\s*", page)
+        if not (tok and m): raise RuntimeError("Auchan page layout changed")
+        urql, _ = json.JSONDecoder().raw_decode(page[m.end():])
+        ids = []
+        for v in urql.values():
+            d = v.get("data"); d = json.loads(d) if isinstance(d, str) else d
+            if d and "shopInShopPage" in d: ids = [x["productId"] for x in d["shopInShopPage"].get("products", [])]
+        items, now = [], time.time() * 1000
+        for i in range(0, min(len(ids), 400), 50):
+            r = subprocess.run(["curl", "-s", "-m", "40", "-b", jar, "-A", UAS[1], "-X", "PUT",
+                                "-H", "content-type: application/json; charset=utf-8", "-H", "accept: application/json; charset=utf-8",
+                                "-H", "x-csrf-token: " + tok.group(1), "-H", "ecom-request-source: web", "-H", "referer: " + AUCHAN_SHELF,
+                                "--data", json.dumps(ids[i:i + 50]), "https://zakupy.auchan.pl/api/webproductpagews/v6/products"], capture_output=True)
+            for p in json.loads(r.stdout or b"{}").get("products", []):
+                promos = p.get("promotions") or []
+                cats = " ".join(p.get("categoryPath") or [])
+                if not promos or not p.get("available", True) or SKIP_A.search(cats): continue
+                try: price = float(p["price"]["amount"])
+                except Exception: continue
+                desc = re.sub(r"\s+", " ", promos[0].get("description") or "").strip()
+                unit, pct = auchan_promo(price, desc)
+                title = re.sub(r"\s+", " ", p.get("name") or "").strip()
+                rid = p.get("retailerProductId") or ""
+                items.append({"t": title, "p": round(unit, 2) if unit else round(price, 2), "op": round(price, 2) if unit and unit < price else None,
+                              "pct": pct if pct and pct > 0 else None, "hl": desc[:40], "lp": False,
+                              "unit": (p.get("packSizeDescription") or "")[:30], "from": None, "until": int(now + 3 * 86400000),
+                              "url": f"https://zakupy.auchan.pl/products/p/{rid}" if rid else AUCHAN_SHELF,
+                              "img": (p.get("image") or {}).get("src", ""), "k": match(title), "online": True})
+            time.sleep(1)
+        items.sort(key=lambda x: (x["k"] is None, -(x["pct"] or 0)))
+        if not items: raise RuntimeError("no Auchan promo products")
+        return items
+    finally:
+        try: os.remove(jar)
+        except OSError: pass
 
 AUCHAN_KEY = "8039b23d-30f2-456f-a9b9-4100344de25d"  # public key shipped in auchan.pl's own web app config
 def auchan_leaflets():
@@ -164,10 +250,18 @@ def main():
         try: stores[name] = {"items": [], "leaflets": fn()}
         except Exception as e:
             print(name, "leaflets failed, keeping previous:", e, file=sys.stderr); stores[name] = {"items": [], "leaflets": previous(name)[1]}
+    try: stores["Auchan"]["items"] = auchan_items()
+    except BaseException as e:
+        print("Auchan products failed, keeping previous:", e, file=sys.stderr); stores["Auchan"]["items"] = previous("Auchan")[0]
+    stores["Auchan"]["source"] = AUCHAN_SHELF
+    if LEAF_DIR.exists():  # drop covers of leaflets that have ended
+        keep = {l.get("img", "").split("/")[-1] for l in stores["Biedronka"]["leaflets"]}
+        for f in LEAF_DIR.glob("*.webp"):
+            if f.name not in keep: f.unlink()
     stores["Aldi"] = {"items": [], "leaflets": [], "source": "https://www.aldi.pl/oferty.html"}
     out = {"updated": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="minutes"), "stores": stores}
     OUT.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")))
-    print(f"Lidl: {len(items)} food offers, {sum(1 for i in items if i['k'])} matched to CoZjem ingredients; leaflets: " + ", ".join(f"{k} {len(v['leaflets'])}" for k, v in stores.items()))
+    print(f"Lidl: {len(items)} food offers, {sum(1 for i in items if i['k'])} matched; Auchan: {len(stores['Auchan']['items'])} promo products; leaflets: " + ", ".join(f"{k} {len(v['leaflets'])}" for k, v in stores.items()))
 
 if __name__ == "__main__":
     main()
