@@ -549,6 +549,17 @@ main .panel:nth-child(2){animation-delay:.08s}.habits{animation-delay:.16s}
 .grp[open] .gchev{transform:rotate(180deg)}
 .grp .chips{padding:0 .85rem .85rem}
 #cats{gap:8px!important}
+.resetb.arm{background:var(--beet);color:#fff;border-color:var(--beet)}
+.khint{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between;background:var(--dill-soft);color:var(--ink);border-radius:12px;padding:.7rem .9rem;font-size:.9rem;margin-bottom:12px}
+.offers{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.offh{display:flex;justify-content:space-between;align-items:baseline;gap:10px}.offh .label{margin:0}
+.offlist{display:flex;flex-direction:column;gap:6px}
+.offer{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:8px 10px;color:var(--ink);text-decoration:none}
+.offer img{width:48px;height:48px;object-fit:contain;border-radius:8px;background:#fff;flex:none}
+.offer .ot{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.offer .ot b{font-size:.9rem;font-weight:600;line-height:1.25}
+.offer .ot small{color:var(--muted);font-size:.76rem}.offer .oin{color:var(--dill);font-weight:600}
+.offer .op{display:flex;flex-direction:column;align-items:flex-end;gap:1px;flex:none;font-size:.85rem}.offer .op s{color:var(--muted);font-size:.75rem}.offer .op i{font-style:normal;font-weight:700;color:var(--beet);font-size:.78rem}
+.offm{max-width:560px}.offm .offlist{max-height:62vh;overflow:auto}
 </style>
 </head>
 <body>
@@ -648,7 +659,7 @@ main .panel:nth-child(2){animation-delay:.08s}.habits{animation-delay:.16s}
         <p class="label" id="l-fridge"></p>
         <div class="search">
           <input id="q" type="search" autocomplete="off">
-          <button class="linkbtn" id="clear" type="button"></button>
+          <button class="btn sm resetb" id="clear" type="button"></button>
         </div>
         <div id="cats" style="display:flex;flex-direction:column;gap:14px"></div>
         <p class="basics" id="basics"></p>
@@ -1066,7 +1077,7 @@ const TIPS = {
 const T = {
  pl:{tag:"Zaznacz, co masz w lodówce. CoZjem wybierze danie z kuchni europejskiej lub afrykańskiej, ułoży plan na tydzień i poda listę zakupów do Twojego sklepu.",
   goal:"Twój cel", goals:{bal:"Zbilansowane",gym:"Siłownia",loss:"Redukcja",gain:"Przybranie wagi"},
-  meal:"Na kiedy?", meals:{b:"Śniadanie",l:"Obiad",d:"Kolacja"}, store:"Gdzie robisz zakupy?", fridge:"Co masz w domu?", search:"Szukaj składnika…", clear:"Wyczyść",
+  meal:"Na kiedy?", meals:{b:"Śniadanie",l:"Obiad",d:"Kolacja"}, store:"Gdzie robisz zakupy?", fridge:"Co masz w domu?", search:"Szukaj składnika…", clear:"Resetuj listę", resetSure:"Stuknij ponownie, aby wyczyścić", emptyK:"Zaznacz, co masz w domu, a dobierzemy lepsze dania.", emptyKBtn:"Otwórz moją kuchnię", grpFound:n=>`znaleziono: ${n}`,
   basics:"Zakładamy, że masz sól, pieprz, olej i wodę.", go:"Wybierz za mnie", count:n=>`Zaznaczone: ${n}`,
   tToday:"Dziś", tWeek:"Plan tygodnia",
   today:{b:"Na śniadanie",l:"Na obiad",d:"Na kolację"}, min:"min", serves:"porcje", have:(a,b)=>`Masz ${a} z ${b} składników`,
@@ -1111,10 +1122,10 @@ const T = {
    ["Statystyki odwiedzin","Liczymy odwiedziny i używane funkcje za pomocą GoatCounter: bez ciasteczek, bez śledzenia między stronami, bez zapisywania adresów IP i danych osobowych."],
    ["Usuwanie danych","Konto: zaloguj się, otwórz konto i dwa razy stuknij „Usuń moje konto”. To trwale usuwa twój e-mail i zsynchronizowane dane. Dane na urządzeniu: wyczyść dane strony cozjem.com w przeglądarce."],
    ["Kontakt","Pytania o twoje dane lub prośba o ich usunięcie: hello@cozjem.com"]],
-  grpSel:(n,all)=>`${n} z ${all}`, grpNone:"Brak składników dla tego wyszukiwania.", cookThis:"Gotuję to", backIdeas:"Wróć do pomysłów", orTry:"Albo spróbuj", hBuy:(n,c)=>`${n} do kupienia, ok. ${c}`, hAll:"Masz wszystkie składniki",
+  grpSel:(n,all)=>`${n} z ${all}`, grpNone:"Brak składników dla tego wyszukiwania.", offH:"Promocje w tym tygodniu", offAll:n=>`Zobacz wszystkie (${n})`, offUsed:"w przepisach CoZjem", offNote:d=>`Promocje Lidla na żywność, sprawdzone ${d}. Ceny i warunki mogą się różnić w sklepie. Biedronka, Aldi i Auchan publikują oferty tylko w gazetkach, więc tu ich nie ma.`, cookThis:"Gotuję to", backIdeas:"Wróć do pomysłów", orTry:"Albo spróbuj", hBuy:(n,c)=>`${n} do kupienia, ok. ${c}`, hAll:"Masz wszystkie składniki",
   editT:(m,d)=>`${m} na ${d}`, editPh:"Szukaj dania", editBtn:"Zmień danie", editNone:"Brak dań dla tego wyszukiwania",
   askWeekT:"Dodać ten tydzień do kalendarza?", askWeekS:"Dostaniesz przypomnienie, kiedy zacząć gotować.", askMealT:n=>`Dodać „${n}” do kalendarza?`, askMealS:"Przypomnimy ci, kiedy zacząć gotować.", askYes:"Dodaj do kalendarza", askNo:"Nie, dziękuję",
-  calAdd:"Dodaj tydzień do kalendarza", calMeal:"Dodaj do kalendarza", calDone:"Dodano do kalendarza", calFail:"Nie udało się utworzyć pliku kalendarza",
+  calAdd:"Dodaj tydzień do kalendarza", calMeal:"Dodaj do kalendarza", calDone:"Dodano do kalendarza", calOpen:"Otwórz pobrany plik, aby dodać do kalendarza", calOpenIos:"Stuknij „Dodaj wszystkie” w kalendarzu", calSaved:"Plik kalendarza zapisany", calNone:"Brak nadchodzących posiłków do dodania", calFail:"Nie udało się utworzyć pliku kalendarza",
   calHint:"Posiłki na najbliższe 7 dni, przypomnienie, kiedy zacząć gotować, i niedzielne planowanie.",
   calCook:m=>`Czas zacząć gotować (${m} min)`, calLeft:"resztki", calIngr:"Składniki", calRecipe:"Przepis",
   calPlanT:"Zaplanuj następny tydzień w CoZjem", calPlanD:"Otwórz CoZjem, wybierz dania i zrób listę zakupów na nowy tydzień.",
@@ -1169,10 +1180,10 @@ const T = {
   toBuyH:"Do kupienia", kitchenH:"W Twojej kuchni", spent:"wydane w ostatnich 7 dniach", inKitchen:"produktów w kuchni",
   buyAll:"Wszystko kupione", markBought:"Oznacz jako kupione", used:"Zużyte", boughtAgo:d=>d===0?"kupione dziś":d===1?"kupione wczoraj":`kupione ${d} dni temu`,
   noDate:"bez daty zakupu", fresh:"Świeże", soon:"Zużyj wkrótce", check:"Sprawdź", nothingToBuy:"Masz wszystko na ten tydzień.", emptyKitchen:"Odhacz zakupy albo zaznacz składniki po lewej.",
-  foot:"Przepisy są uproszczone. Ceny to szacunki dla typowych produktów dostępnych w Lidlu, Aldi, Biedronce i Auchan, a produkty oznaczone jako „sklep afrykański” kupisz w sklepach z żywnością afrykańską w Polsce. To nie są oferty sklepów. Linki „zdjęcia” otwierają wyszukiwarkę grafiki, żeby zobaczyć, jak wygląda produkt. CoZjem nie jest powiązany z żadną z tych sieci."},
+  foot:"Przepisy są uproszczone. Ceny to szacunki dla typowych produktów dostępnych w Lidlu, Aldi, Biedronce i Auchan, a produkty oznaczone jako „sklep afrykański” kupisz w sklepach z żywnością afrykańską w Polsce. Sekcja „Promocje w tym tygodniu” pokazuje aktualne promocje ze strony Lidla, aktualizowane codziennie. Linki „zdjęcia” otwierają wyszukiwarkę grafiki, żeby zobaczyć, jak wygląda produkt. CoZjem nie jest powiązany z żadną z tych sieci."},
  en:{tag:"Tick what's in your fridge. CoZjem picks a European or African dish, plans your week and gives you a shopping list for your store.",
   goal:"Your goal", goals:{bal:"Balanced",gym:"Gym",loss:"Weight loss",gain:"Weight gain"},
-  meal:"Which meal?", meals:{b:"Breakfast",l:"Lunch",d:"Dinner"}, store:"Where do you shop?", fridge:"What do you have?", search:"Search ingredients…", clear:"Clear",
+  meal:"Which meal?", meals:{b:"Breakfast",l:"Lunch",d:"Dinner"}, store:"Where do you shop?", fridge:"What do you have?", search:"Search ingredients…", clear:"Reset list", resetSure:"Tap again to clear everything", emptyK:"Tick what you have at home and we\u2019ll pick better dishes.", emptyKBtn:"Open my kitchen", grpFound:n=>`${n} found`,
   basics:"We assume you have salt, pepper, oil and water.", go:"Pick for me", count:n=>`Selected: ${n}`,
   tToday:"Today", tWeek:"Week plan",
   today:{b:"For breakfast",l:"For lunch",d:"For dinner"}, min:"min", serves:"servings", have:(a,b)=>`You have ${a} of ${b} ingredients`,
@@ -1217,10 +1228,10 @@ const T = {
    ["Visit statistics","We count visits and which features are used with GoatCounter: no cookies, no tracking across sites, no IP addresses or personal data stored."],
    ["Deleting your data","Account: sign in, open your account and tap “Delete my account” twice. This permanently removes your email and synced data. Data on your device: clear site data for cozjem.com in your browser."],
    ["Contact","Questions about your data, or a request to delete it: hello@cozjem.com"]],
-  grpSel:(n,all)=>`${n} of ${all}`, grpNone:"No ingredients match that search.", cookThis:"Cook this", backIdeas:"Back to ideas", orTry:"Or try", hBuy:(n,c)=>`${n} to buy, about ${c}`, hAll:"You have every ingredient",
+  grpSel:(n,all)=>`${n} of ${all}`, grpNone:"No ingredients match that search.", offH:"On offer this week", offAll:n=>`See all (${n})`, offUsed:"used in CoZjem recipes", offNote:d=>`Lidl food promotions, checked ${d}. Prices and conditions may differ in store. Biedronka, Aldi and Auchan only publish offers in leaflets, so they are not listed here.`, cookThis:"Cook this", backIdeas:"Back to ideas", orTry:"Or try", hBuy:(n,c)=>`${n} to buy, about ${c}`, hAll:"You have every ingredient",
   editT:(m,d)=>`${m} for ${d}`, editPh:"Search dishes", editBtn:"Change dish", editNone:"No dishes match that search",
   askWeekT:"Add this week to your calendar?", askWeekS:"You'll get a reminder when it's time to start cooking.", askMealT:n=>`Add “${n}” to your calendar?`, askMealS:"We'll remind you when it's time to start cooking.", askYes:"Add to calendar", askNo:"No thanks",
-  calAdd:"Add week to calendar", calMeal:"Add to calendar", calDone:"Added to calendar", calFail:"Couldn't create the calendar file",
+  calAdd:"Add week to calendar", calMeal:"Add to calendar", calDone:"Added to calendar", calOpen:"Open the downloaded file to add it to your calendar", calOpenIos:"Tap \u201cAdd All\u201d in Calendar", calSaved:"Calendar file saved", calNone:"No upcoming meals to add", calFail:"Couldn't create the calendar file",
   calHint:"Your meals for the next 7 days, a reminder when to start cooking, and Sunday planning.",
   calCook:m=>`Time to start cooking (${m} min)`, calLeft:"leftovers", calIngr:"Ingredients", calRecipe:"Recipe",
   calPlanT:"Plan next week on CoZjem", calPlanD:"Open CoZjem, pick your meals and make the shopping list for the new week.",
@@ -1275,10 +1286,11 @@ const T = {
   toBuyH:"To buy", kitchenH:"In your kitchen", spent:"spent in the last 7 days", inKitchen:"items in your kitchen",
   buyAll:"Bought everything", markBought:"Mark as bought", used:"Used up", boughtAgo:d=>d===0?"bought today":d===1?"bought yesterday":`bought ${d} days ago`,
   noDate:"no purchase date", fresh:"Fresh", soon:"Use soon", check:"Check it", nothingToBuy:"You have everything for this week.", emptyKitchen:"Tick off your shopping or select ingredients on the left.",
-  foot:"Recipes are simplified. Prices are estimates for typical products sold at Lidl, Aldi, Biedronka and Auchan, and items marked African shop come from African food shops in Poland. These are not store offers. The photos links open an image search so you can see what the product looks like. CoZjem is not affiliated with any of these chains."}
+  foot:"Recipes are simplified. Prices are estimates for typical products sold at Lidl, Aldi, Biedronka and Auchan, and items marked African shop come from African food shops in Poland. The “On offer this week” section shows current promotions from Lidl’s website, updated daily. The photos links open an image search so you can see what the product looks like. CoZjem is not affiliated with any of these chains."}
 };
-const DEFAULT = ["jajka","maslo","mleko","ziemniaki","cebula","maka","chleb","szczypiorek","twarog","kurczak"];
-let todayDetail=false;
+const DEFAULT = [];
+const OLD_DEFAULT = ["jajka","maslo","mleko","ziemniaki","cebula","maka","chleb","szczypiorek","twarog","kurczak"];
+let todayDetail=false, clearArm=false;
 let st = {lang:/^pl\b/i.test(navigator.language||"")?"pl":"en", goal:"bal", meal:"l", store:"Biedronka", have:new Set(DEFAULT), q:"", pick:0, forced:null, view:"today", plan:null, batch:false, bought:{}, mine:[], saved:[], prices:{}, promos:[], shopTicks:{}, budget:null, prot:"any", mode:"pick", aiDish:null, aiState:"idle", aiErr:null, aiPrev:[]};
 function applyState(s){
   ["lang","meal","store","goal","view"].forEach(k=>{if(s[k])st[k]=s[k]});
@@ -1293,7 +1305,8 @@ function applyState(s){
   if(s.mode==="budget"&&st.budget) st.mode="budget";
   if(PROT_ORDER.includes(s.prot)) st.prot=s.prot;
   st.batch=!!s.batch; if(s.bought&&typeof s.bought==="object") Object.entries(s.bought).forEach(([k,v])=>{if(ING[k]&&typeof v==="number")st.bought[k]=v});
-  if(Array.isArray(s.have)) st.have=new Set(s.have.filter(k=>ING[k]));
+  if(Array.isArray(s.have)){ let h=s.have.filter(k=>ING[k]); if(!s.kitchenSet&&h.length===OLD_DEFAULT.length&&OLD_DEFAULT.every(k=>h.includes(k))) h=[]; st.have=new Set(h); }
+  if(s.kitchenSet) st.kitchenSet=true;
   if(Array.isArray(s.plan)&&s.plan.length===7&&s.plan.every(d=>d&&RB[d.b]&&RB[d.l]&&RB[d.d])) st.plan=s.plan;
 
   if(Number.isFinite(s.ts)) st.ts=s.ts;
@@ -1302,7 +1315,7 @@ try{const s=JSON.parse(localStorage.getItem("cozjem")||"null"); if(s) applyState
 if(!TIPS[st.goal]) st.goal="bal";
 if(!["today","week","shop","saved","search"].includes(st.view)) st.view="today";
 const cloud={on:false,sb:null,user:null,status:"",last:null,timer:null,sent:null,err:"",confirmDel:false,pulled:0};
-const snapshot=()=>({lang:st.lang,meal:st.meal,store:st.store,goal:st.goal,view:st.view,have:[...st.have],plan:st.plan,batch:st.batch,bought:st.bought,mine:st.mine,aiDish:st.aiDish,mode:st.mode,saved:st.saved,prices:st.prices,promos:st.promos,shopTicks:st.shopTicks,budget:st.budget,prot:st.prot,ts:st.ts||0});
+const snapshot=()=>({kitchenSet:!!st.kitchenSet,lang:st.lang,meal:st.meal,store:st.store,goal:st.goal,view:st.view,have:[...st.have],plan:st.plan,batch:st.batch,bought:st.bought,mine:st.mine,aiDish:st.aiDish,mode:st.mode,saved:st.saved,prices:st.prices,promos:st.promos,shopTicks:st.shopTicks,budget:st.budget,prot:st.prot,ts:st.ts||0});
 const saveLocal=()=>{try{localStorage.setItem("cozjem",JSON.stringify(snapshot()))}catch(e){}};
 const save=()=>{st.ts=Date.now(); saveLocal(); if(cloud.user) schedulePush();};
 const $=id=>document.getElementById(id);
@@ -1364,7 +1377,14 @@ const SF={Lidl:1,Aldi:350.69/325.64,Biedronka:1,Auchan:280.94/325.64};
 const SF_KNOWN={Auchan:true,Aldi:true};
 const LEAF={Lidl:"https://blix.pl/sklep/lidl/",Aldi:"https://blix.pl/sklep/aldi/",Biedronka:"https://blix.pl/sklep/biedronka/",Auchan:"https://blix.pl/sklep/auchan/"};
 const day0=()=>{const d=new Date();d.setHours(0,0,0,0);return d.getTime()};
-const activePromos=()=>{const t0=day0();return st.promos.filter(p=>p.until>=t0)};
+let FEED=null; // {updated, items:[{store,...}]}
+function feedItems(){ if(!FEED) return []; const now=Date.now(); return FEED.items.filter(x=>x.until>=now&&(!x.from||x.from<=now+864e5)); }
+function feedPct(x){ if(x.pct) return x.pct; const h=x.hl||""; let m=h.match(/-(\d+)%/); if(m) return +m[1]; if(/1\s*\+\s*1/.test(h)) return 50; if(/2\s*\+\s*1/.test(h)) return 33; return 0; }
+function feedPromos(){ return feedItems().filter(x=>x.k&&ING[x.k]).map(x=>{ const pct=feedPct(x); return pct?{k:x.k,store:x.store,p:Math.round(ING[x.k][2]*SF[x.store]*(1-pct/100)*100)/100,until:x.until,feed:x}:null; }).filter(Boolean); }
+const activePromos=()=>{const t0=day0();return st.promos.filter(p=>p.until>=t0).concat(feedPromos())};
+async function loadFeed(){ if(window.claude||!/^https?:/.test(location.protocol)) return; try{ const r=await fetch("promos.json?d="+new Date().toISOString().slice(0,13),{cache:"no-store"}); if(!r.ok) return; const d=await r.json();
+  const items=[]; Object.entries(d.stores||{}).forEach(([store,o])=>(o.items||[]).forEach(x=>{ if(STORES.includes(store)&&x&&typeof x.t==="string"&&Number.isFinite(x.until)) items.push({...x,store}); }));
+  FEED={updated:d.updated,items}; renderView(); }catch(e){} }
 function priceAt(k,store){
   if(ING[k][3]==="afr") return {p:ING[k][2],src:"afr"};
   const pm=activePromos().filter(p=>p.k===k&&p.store===store).sort((a,b)=>a.p-b.p)[0]; if(pm) return {p:pm.p,src:"promo",until:pm.until};
@@ -1401,8 +1421,17 @@ function alertHtml(ks){
   const t=L(), set=new Set(ks), hits=activePromos().filter(p=>set.has(p.k)).sort((a,b)=>a.until-b.until);
   if(!hits.length) return "";
   return `<div class="palert" role="status"><div class="ph"><span class="pill check">${t.promoAlert}</span><span>${t.promoOnList(hits.length)}</span></div>
-    <ul>${hits.map(p=>{const reg=Math.round(ING[p.k][2]*SF[p.store]*100)/100;return `<li><b>${esc(baseName(nm(p.k)))}</b> · ${p.store} · ${zl(p.p)}${reg>p.p?` <s>${zl(reg)}</s>`:""} · ${t.until(fmtDay(p.until))}${p.store!==st.store?` <button type="button" class="linkbtn" data-setstore="${p.store}">${t.shopHere}</button>`:""}</li>`}).join("")}</ul></div>`;
+    <ul>${hits.map(p=>{const reg=Math.round(ING[p.k][2]*SF[p.store]*100)/100; if(p.feed){ const f=p.feed; return `<li><b>${esc(baseName(nm(p.k)))}</b> · ${p.store}: <a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.t)}</a> ${f.p?zl(f.p):""}${f.unit?" / "+esc(f.unit):""}${f.op?` <s>${zl(f.op)}</s>`:""}${feedPct(f)?` <span class="pill check">-${feedPct(f)}%</span>`:""}${f.lp?` <span class="pill soon">Lidl Plus</span>`:""} · ${t.until(fmtDay(p.until))}${p.store!==st.store?` <button type="button" class="linkbtn" data-setstore="${p.store}">${t.shopHere}</button>`:""}</li>`; } return `<li><b>${esc(baseName(nm(p.k)))}</b> · ${p.store} · ${zl(p.p)}${reg>p.p?` <s>${zl(reg)}</s>`:""} · ${t.until(fmtDay(p.until))}${p.store!==st.store?` <button type="button" class="linkbtn" data-setstore="${p.store}">${t.shopHere}</button>`:""}</li>`}).join("")}</ul></div>`;
 }
+function offersHtml(limit,full){ const t=L(), all=feedItems(); if(!all.length) return "";
+  const sorted=all.slice().sort((a,b)=>(!!b.k-!!a.k)||(feedPct(b)-feedPct(a)));
+  const list=limit?sorted.slice(0,limit):sorted;
+  const row=x=>`<a class="offer" href="${esc(x.url)}" target="_blank" rel="noopener">${x.img?`<img src="${esc(x.img)}" alt="" loading="lazy" width="56" height="56">`:""}<span class="ot"><b>${esc(x.t)}</b><small>${x.store}${x.unit?" · "+esc(x.unit):""} · ${t.until(fmtDay(x.until))}${x.lp?" · Lidl Plus":""}${x.k?` · <span class="oin">${t.offUsed}</span>`:""}</small></span><span class="op">${x.p?`<b>${zl(x.p)}</b>`:""}${x.op?`<s>${zl(x.op)}</s>`:""}${feedPct(x)?`<i>-${feedPct(x)}%</i>`:x.hl?`<i>${esc(x.hl)}</i>`:""}</span></a>`;
+  return `<div class="offers"><div class="offh"><p class="label">${t.offH}</p>${!full&&sorted.length>list.length?`<button type="button" class="linkbtn" id="allOffers">${t.offAll(sorted.length)}</button>`:""}</div>
+    <div class="offlist">${list.map(row).join("")}</div>${full?`<p class="cmpnote">${t.offNote(fmtDay(Date.parse(FEED.updated)))}</p>`:""}</div>`; }
+function openOffers(){ const t=L(); const old=$("credits"); if(old) old.remove(); const el=document.createElement("div"); el.className="landing"; el.id="credits";
+  el.innerHTML=`<div class="lback" data-ccl="1"></div><div class="lcard credl privl offm" role="dialog" aria-modal="true" aria-label="${t.offH}">${offersHtml(0,true)}<button type="button" class="btn" data-ccl="1">${t.close}</button></div>`;
+  document.body.appendChild(el); gc("offers/all","All offers"); }
 function evalR(r){
   const own=r.n.filter(k=>st.have.has(k)), miss=r.n.filter(k=>!st.have.has(k));
   return {r,own,miss,cost:miss.reduce((a,k)=>a+pr(k),0),match:own.length/r.n.length};
@@ -1512,8 +1541,8 @@ function icsEsc(x){ return String(x).replace(/\\/g,"\\\\").replace(/;/g,"\\;").r
 function icsFold(line){ const out=[]; let cur=""; for(const ch of line){ const nb=new TextEncoder().encode(cur+ch).length; if(nb>73){ out.push(cur); cur=" "+ch; } else cur+=ch; } out.push(cur); return out.join("\r\n"); }
 const p2=n=>String(n).padStart(2,"0");
 const icsDT=d=>`${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}T${p2(d.getHours())}${p2(d.getMinutes())}00`;
-function buildWeekIcs(){ const t=L(); if(!st.plan) genWeek(); const now=new Date(), stamp=new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d+/,""), L2=[];
-  const ev=(uid,start,mins,title,desc,url,alarm)=>{ const end=new Date(start.getTime()+mins*60000);
+function buildWeekIcs(){ const t=L(), EV=[]; if(!st.plan) genWeek(); const now=new Date(), stamp=new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d+/,""), L2=[];
+  const ev=(uid,start,mins,title,desc,url,alarm)=>{ const end=new Date(start.getTime()+mins*60000); EV.push([icsDT(start).slice(0,13),mins,title,desc,url||"",alarm?alarm[0]:null,alarm?alarm[1]:null]);
     L2.push("BEGIN:VEVENT","UID:"+uid+"@cozjem.com","DTSTAMP:"+stamp,"DTSTART:"+icsDT(start),"DTEND:"+icsDT(end),"SUMMARY:"+icsEsc(title),"DESCRIPTION:"+icsEsc(desc));
     if(url) L2.push("URL:"+url);
     if(alarm) L2.push("BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+icsEsc(alarm[1]),"TRIGGER:-PT"+alarm[0]+"M","END:VALARM");
@@ -1526,24 +1555,28 @@ function buildWeekIcs(){ const t=L(); if(!st.plan) genWeek(); const now=new Date
       const cook=Math.min(120,Math.max(20,r.t)); ev(`${icsDT(start)}-${m}-${r.id}`,start,30,`${t.meals[m]}: ${r[st.lang]}${lo?" ("+t.calLeft+")":""}`,desc,url,al&&!lo?[cook,t.calCook(cook)]:(al?[15,t.meals[m]+": "+r[st.lang]]:null)); count++; } }
   if(sunday){ const s=new Date(sunday.getFullYear(),sunday.getMonth(),sunday.getDate(),18,0); if(s>now){ ev(`${icsDT(s)}-plan`,s,15,t.calPlanT,t.calPlanD+"\n"+SITE,SITE,[0,t.calPlanT]); } }
   const lines=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//CoZjem//Meal plan//"+st.lang.toUpperCase(),"CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:CoZjem",...L2,"END:VCALENDAR"];
-  return {ics:lines.map(icsFold).join("\r\n")+"\r\n",count}; }
+  return {ics:lines.map(icsFold).join("\r\n")+"\r\n",count,evs:EV}; }
 function buildMealIcs(r,m){ const t=L(), now=new Date(), stamp=now.toISOString().replace(/[-:]/g,"").replace(/\.\d+/,""); const [h,mi,al]=MEALT[m];
   let start=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,mi); if(start<now) start=new Date(start.getTime()+864e5);
   const url=SITE+"r/"+r.id+"/", cook=Math.min(120,Math.max(20,r.t)), end=new Date(start.getTime()+30*60000);
   const desc=t.calIngr+": "+r.n.map(k=>baseName(nm(k))).join(", ")+"\n\n"+t.calRecipe+": "+url;
   const L2=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//CoZjem//Meal//"+st.lang.toUpperCase(),"CALSCALE:GREGORIAN","METHOD:PUBLISH","BEGIN:VEVENT","UID:"+icsDT(start)+"-"+m+"-"+r.id+"@cozjem.com","DTSTAMP:"+stamp,"DTSTART:"+icsDT(start),"DTEND:"+icsDT(end),"SUMMARY:"+icsEsc(t.meals[m]+": "+r[st.lang]),"DESCRIPTION:"+icsEsc(desc),"URL:"+url];
   L2.push("BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+icsEsc(al?t.calCook(cook):t.meals[m]+": "+r[st.lang]),"TRIGGER:-PT"+(al?cook:15)+"M","END:VALARM","END:VEVENT","END:VCALENDAR");
-  return {ics:L2.map(icsFold).join("\r\n")+"\r\n"}; }
-async function addMealToCalendar(btn){ const r=RB[st.cur]; if(!r) return; const m=btn.dataset.cm||st.meal; gc("calendar/meal","Meal added to calendar"); engaged(); return saveIcs(btn,buildMealIcs(r,m).ics,"cozjem-"+r.id+".ics"); }
-async function addWeekToCalendar(btn){ gc("calendar/week","Week added to calendar"); engaged(); return saveIcs(btn,buildWeekIcs().ics,"cozjem-week.ics"); }
-async function saveIcs(btn,ics,name){ const t=L(), orig=btn.innerHTML; const done=msg=>{ btn.textContent=msg; btn.disabled=false; setTimeout(()=>{btn.innerHTML=orig;},2400); };
+  return {ics:L2.map(icsFold).join("\r\n")+"\r\n",evs:[[icsDT(start).slice(0,13),30,t.meals[m]+": "+r[st.lang],desc,url,al?cook:15,al?t.calCook(cook):t.meals[m]+": "+r[st.lang]]]}; }
+async function addMealToCalendar(btn){ const r=RB[st.cur]; if(!r) return; const m=btn.dataset.cm||st.meal; gc("calendar/meal","Meal added to calendar"); engaged(); return saveIcs(btn,buildMealIcs(r,m),"cozjem-"+r.id); }
+async function addWeekToCalendar(btn){ gc("calendar/week","Week added to calendar"); engaged(); return saveIcs(btn,buildWeekIcs(),"cozjem-week"); }
+const ICS_FN="https://zgsznfyoxlgrnbxjylyr.supabase.co/functions/v1/ics";
+const b64uStr=x=>{ const bytes=new TextEncoder().encode(x); let bin=""; for(const c of bytes) bin+=String.fromCharCode(c); return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); };
+async function saveIcs(btn,built,name){ const t=L(), orig=btn.innerHTML, ics=built.ics; const done=msg=>{ btn.textContent=msg; btn.disabled=false; setTimeout(()=>{btn.innerHTML=orig;},3000); };
   btn.disabled=true;
-  try{ const blob=new Blob([ics],{type:"text/calendar;charset=utf-8"});
-    if(window.claude&&window.claude.use){ if(dlFn===null) dlFn=await window.claude.use("downloads").catch(()=>false)||false;
-      if(dlFn){ try{ await dlFn.save({filename:name,data:blob}); return done(t.calDone);}catch(e){ return done(e&&e.code==="declined"?orig:t.calFail);} } }
-    const url=URL.createObjectURL(blob);
-    if(IS_IOS){ location.href=url; } else { const a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); }
-    setTimeout(()=>URL.revokeObjectURL(url),60000); done(t.calDone);
+  try{
+    if(window.claude&&window.claude.use){ const blob=new Blob([ics],{type:"text/calendar;charset=utf-8"}); if(dlFn===null) dlFn=await window.claude.use("downloads").catch(()=>false)||false;
+      if(dlFn){ try{ await dlFn.save({filename:name+".ics",data:blob}); return done(t.calSaved);}catch(e){ return done(e&&e.code==="declined"?orig:t.calFail);} } }
+    if(!built.evs||!built.evs.length) return done(t.calNone);
+    const link=ICS_FN+"?n="+encodeURIComponent(name)+"&d="+b64uStr(JSON.stringify({e:built.evs}));
+    if(link.length<20000&&navigator.onLine!==false){ const a=document.createElement("a"); a.href=link; a.rel="noopener"; document.body.appendChild(a); a.click(); a.remove(); return done(IS_IOS?t.calOpenIos:t.calOpen); }
+    const blob=new Blob([ics],{type:"text/calendar;charset=utf-8"}), url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=name+".ics"; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),60000); done(t.calSaved);
   }catch(e){ done(t.calFail); } }
 function mergeStates(L,Rm){
   const newer=(Rm.ts||0)>(L.ts||0)?Rm:L;
@@ -1741,11 +1774,11 @@ function renderChips(){
     const all=Object.keys(ING).filter(k=>groupOf(k)===g); if(!all.length) return "";
     const ks=all.filter(k=>!q||ING[k][0].toLowerCase().includes(q)||ING[k][1].toLowerCase().includes(q));
     if(q&&!ks.length) return "";
-    const n=all.filter(k=>st.have.has(k)).length, open=q||openG.has(g);
-    return `<details class="grp" data-grp="${g}"${open?" open":""}><summary><span class="gname">${label[st.lang]}</span><span class="gcount${n?" on":""}">${n?t.grpSel(n,all.length):all.length}</span><svg class="gchev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+    const n=all.filter(k=>st.have.has(k)).length, open=openG.has(g);
+    return `<details class="grp" data-grp="${g}"${open?" open":""}><summary><span class="gname">${label[st.lang]}</span><span class="gcount${n?" on":""}">${q?t.grpFound(ks.length):n?t.grpSel(n,all.length):all.length}</span><svg class="gchev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
       <div class="chips">${ks.map(k=>`<button type="button" class="chip" data-ing="${k}" aria-pressed="${st.have.has(k)}">${esc(nm(k).replace(/ \d.*$| \(.*\)$/,""))}</button>`).join("")}</div></details>`;
   }).join("")||`<p class="basics">${t.grpNone}</p>`;
-  $("cats").querySelectorAll("details.grp").forEach(d=>d.addEventListener("toggle",()=>{ if(st.q.trim()) return; d.open?openG.add(d.dataset.grp):openG.delete(d.dataset.grp); }));
+  $("cats").querySelectorAll("details.grp").forEach(d=>d.addEventListener("toggle",()=>{ d.open?openG.add(d.dataset.grp):openG.delete(d.dataset.grp); }));
   $("count").textContent=L().count(st.have.size); renderToolbar();
 }
 function renderHabits(){
@@ -2420,7 +2453,7 @@ function renderToday(quiet){
   if(!todayDetail){
     const thumb=a=>`<span class="hthumb">${PHOTOS[a.r.id]?`<img src="img/${a.r.id}.jpg" alt="" loading="lazy">`:art(a.r)}</span>`;
     const more=altList.slice(0,protOn?8:3).map(a=>`<button type="button" class="hmore" data-altc="${a.r.id}">${thumb(a)}<span><b>${esc(a.r[st.lang])}</b><small>${a.r.t} ${t.min} · ${a.miss.length?"+"+zl(a.cost):"✓"}</small></span></button>`).join("");
-    v.innerHTML=`<div class="hcard">${pic(r)}
+    v.innerHTML=`${st.have.size?"":`<div class="khint"><span>${t.emptyK}</span><button type="button" class="btn sm" data-sheet="sec-kitchen">${t.emptyKBtn}</button></div>`}<div class="hcard">${pic(r)}
       <div class="hbody"><p class="hkick">${t.today[mealKey]} · ${ORIGIN[r.o][st.lang]}</p>
         <h2>${esc(r[st.lang])}</h2>
         <div class="hfacts"><span>${r.t} ${t.min}</span><span>~${r.k} kcal</span><span>${r.p} ${t.prot}</span></div>
@@ -2428,7 +2461,7 @@ function renderToday(quiet){
         <div class="hact"><button type="button" class="btn primary big" id="cookThis">${t.cookThis}</button><button type="button" class="btn big" id="another">${t.another}</button></div>
         <div class="hsmall">${bmBtn(isSavedR(r.id),"r",r.id)}${shareBtn("r",r.id)}</div>${shareBox()}${st.sharedIn===r.id?`<p class="sharedin">${t.sharedIn}</p>`:""}
       </div></div>
-      ${more?`<div><p class="label">${protOn?t.protMore(t.prots[st.prot],altList.length):t.orTry}</p><div class="hmores">${more}</div></div>`:""}`;
+      ${more?`<div><p class="label">${protOn?t.protMore(t.prots[st.prot],altList.length):t.orTry}</p><div class="hmores">${more}</div></div>`:""}${offersHtml(4)}`;
     v.dataset.text=`CoZjem · ${r[st.lang]}\n${t.list} (${st.store})\n`+x.miss.map(k=>`- ${nmS(k)}  ~${zl(pr(k))}`).join("\n")+`\n${t.total} ${zl(x.cost)}`;
     expo={title:r[st.lang],items:x.miss.map(expItem)}; return; }
   v.innerHTML=`<button type="button" class="linkbtn backb" id="backIdeas">← ${t.backIdeas}</button>
@@ -2537,7 +2570,7 @@ function renderShop(){
      <p class="label" style="margin-top:6px">${t.leafH}</p>
      <div class="actions">${STORES.map(x=>`<a class="btn" href="${LEAF[x]}" target="_blank" rel="noopener">${x} ↗</a>`).join("")}</div>
    </div>`;
-  v.innerHTML=`<p style="margin:0;color:var(--muted);font-size:.92rem;max-width:56ch">${t.shopIntro}</p>
+  v.innerHTML=`${offersHtml(6)}<p style="margin:0;color:var(--muted);font-size:.92rem;max-width:56ch">${t.shopIntro}</p>
    ${alertHtml(sh.ks)}
    <div class="shopstats">
      <div class="stat"><b>${sh.ks.length}</b><span>${t.toBuyH} · ~${zl(sh.cost)}</span></div>
@@ -2587,6 +2620,7 @@ document.addEventListener("click",e=>{
   if(b.dataset.stclose){ const el=$("storesm"); if(el) el.remove(); return; }
   if(b.id==="geoBtn"){ useMyLocation(); return; }
   if(b.id==="privBtn"){ openPrivacy(); return; }
+  if(b.id==="allOffers"){ openOffers(); return; }
   if(b.id==="creditsBtn"){ const t=L(); const el=document.createElement("div"); el.className="landing"; el.id="credits";
     el.innerHTML=`<div class="lback" data-ccl="1"></div><div class="lcard credl" role="dialog" aria-modal="true" aria-label="${t.credits}"><p class="lkick">${t.credits}</p><p class="hint" style="margin:0">${t.creditsSub}</p>
       <ul>${R.filter(r=>PHOTOS[r.id]).map(r=>{const p=PHOTOS[r.id]; return `<li><b>${esc(r[st.lang])}</b><span><a href="${p.u}" target="_blank" rel="noopener">${esc(p.a)}</a>, ${esc(p.l)}</span></li>`;}).join("")}</ul>
@@ -2633,7 +2667,7 @@ document.addEventListener("click",e=>{
   if(b.dataset.goal){st.goal=b.dataset.goal;st.pick=0;st.forced=null;genWeek();save();all();return;}
   if(b.dataset.meal){st.meal=b.dataset.meal;st.pick=0;st.forced=null;todayDetail=false;save();all();return;}
   if(b.dataset.store){st.store=b.dataset.store;save();all();return;}
-  if(b.dataset.ing){const k=b.dataset.ing;
+  if(b.dataset.ing){const k=b.dataset.ing; st.kitchenSet=true;
     if(st.have.has(k)){st.have.delete(k); delete st.bought[k];} else st.have.add(k);
     document.querySelectorAll(`#cats [data-ing="${k}"]`).forEach(c=>c.setAttribute("aria-pressed",st.have.has(k)));
     { const g=groupOf(k), gd=document.querySelector(`#cats details[data-grp="${g}"] .gcount`); if(gd){ const all=Object.keys(ING).filter(x=>groupOf(x)===g), n=all.filter(x=>st.have.has(x)).length; gd.textContent=n?L().grpSel(n,all.length):all.length; gd.classList.toggle("on",n>0); } }
@@ -2648,7 +2682,7 @@ document.addEventListener("click",e=>{
   if(b.id==="backIdeas"){ todayDetail=false; renderView(); window.scrollTo({top:0,behavior:"smooth"}); return; }
   if(b.dataset.edit){ openEdit(b.dataset.edit); return; }
   if(b.dataset.pick&&editTarget){ applyEdit(b.dataset.pick); return; }
-  if(b.id==="askYes"){ const a=calAsk; hideAsk(); if(a&&a.kind==="week") addWeekToCalendar(b); else if(a&&RB[a.id]) saveIcs(b,buildMealIcs(RB[a.id],a.m).ics,"cozjem-"+a.id+".ics"); gc("calendar/ask-yes","Calendar prompt yes"); return; }
+  if(b.id==="askYes"){ const a=calAsk; hideAsk(); if(a&&a.kind==="week") addWeekToCalendar(b); else if(a&&RB[a.id]) saveIcs(b,buildMealIcs(RB[a.id],a.m),"cozjem-"+a.id); gc("calendar/ask-yes","Calendar prompt yes"); return; }
   if(b.id==="askNo"){ hideAsk(); const e=engGet(); engSet({calNo:(e.calNo||0)+1}); gc("calendar/ask-no","Calendar prompt no"); return; }
   if(b.dataset.open){st.forced=b.dataset.open; todayDetail=true; st.meal=b.dataset.om; st.view="today"; save(); all(); flash(); return;}
   if(b.dataset.buy){const k=b.dataset.buy; st.have.add(k); st.bought[k]=Date.now(); save(); renderChips(); renderView(); return;}
@@ -2667,7 +2701,8 @@ document.addEventListener("click",e=>{
   if(b.id==="budClear"){ st.budget=null; if(st.mode==="budget") st.mode="pick"; save(); all(); return; }
   if(b.id==="budExit"){ st.mode="pick"; save(); all(); return; }
   if(b.id==="budReplan"&&st.budget){ genWeekBudget(st.budget.amt); renderView(); flash(); setTimeout(()=>askCalendar("week"),900); return; }
-  if(b.id==="clear"){st.have.clear();st.q="";$("q").value="";st.pick=0;st.forced=null;save();all();return;}
+  if(b.id==="clear"){ if(!st.have.size&&!st.q) return; if(!clearArm){ clearArm=true; b.textContent=L().resetSure; b.classList.add("arm"); setTimeout(()=>{ clearArm=false; if($("clear")){ $("clear").textContent=L().clear; $("clear").classList.remove("arm"); } },4000); return; }
+    clearArm=false; b.classList.remove("arm"); st.have.clear(); st.bought={}; st.kitchenSet=true; st.q=""; $("q").value=""; st.pick=0; st.forced=null; save(); all(); gc("kitchen/reset","Kitchen reset"); return;}
   if(b.id==="another"){
     if(st.forced){const list=ranked(); const j=list.findIndex(a=>a.r.id===st.forced); st.pick=j<0?0:j+1; st.forced=null;} else st.pick++;
     renderView(); flash(); return;}
@@ -2722,6 +2757,7 @@ all();
 if(st.sharedIn) showLanding(st.sharedIn);
 openFromHash();
 addEventListener("hashchange",()=>{ if(location.hash==="#privacy") openPrivacy(); });
+setTimeout(loadFeed,200);
 function goHome(){ ["credits","storesm","cardmodal","landing"].forEach(id=>{ const el=$(id); if(el) el.remove(); }); hideAsk(); if(shop) closeShop(false); closeSheet();
   st.view="today"; st.mode="pick"; st.forced=null; todayDetail=false; st.sharedIn=null;
   if(location.hash) history.replaceState(null,"",location.pathname+location.search);

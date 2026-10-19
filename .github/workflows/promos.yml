@@ -1,0 +1,25 @@
+name: Update Lidl promotions
+on:
+  schedule:
+    - cron: "17 4 * * *"   # every day around 06:17 Warsaw time
+  workflow_dispatch: {}
+permissions:
+  contents: write
+jobs:
+  promos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Collect promotions
+        run: python tools/promos.py
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- promos.json; then echo "No change"; exit 0; fi
+          git config user.name "cozjem-bot"
+          git config user.email "afeezbolajiola@gmail.com"
+          git add promos.json
+          git commit -m "Update Lidl promotions"
+          git push
