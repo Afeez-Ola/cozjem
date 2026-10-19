@@ -1036,7 +1036,8 @@ const T = {
    ["Udostępnione listy zakupów","Gdy udostępniasz listę na żywo, jej produkty i odhaczenia zapisujemy pod losowym linkiem, aby inni mogli ją otworzyć. Lista nie zawiera imienia ani e-maila."],
    ["Najbliższe sklepy","Jeśli użyjesz tej funkcji, twoja lokalizacja lub wpisany adres trafia do OpenStreetMap (Nominatim i Overpass), aby znaleźć sklepy. Wynik zostaje tylko na twoim urządzeniu."],
    ["Statystyki odwiedzin","Liczymy odwiedziny i używane funkcje za pomocą GoatCounter: bez ciasteczek, bez śledzenia między stronami, bez zapisywania adresów IP i danych osobowych."],
-   ["Usuwanie danych","Konto: zaloguj się, otwórz konto i dwa razy stuknij „Usuń moje konto”. To trwale usuwa twój e-mail i zsynchronizowane dane. Dane na urządzeniu: wyczyść dane strony cozjem.com w przeglądarce."]],
+   ["Usuwanie danych","Konto: zaloguj się, otwórz konto i dwa razy stuknij „Usuń moje konto”. To trwale usuwa twój e-mail i zsynchronizowane dane. Dane na urządzeniu: wyczyść dane strony cozjem.com w przeglądarce."],
+   ["Kontakt","Pytania o twoje dane lub prośba o ich usunięcie: hello@cozjem.com"]],
   photoBy:"Zdjęcie:", credits:"Autorzy zdjęć", creditsSub:"Zdjęcia dań pochodzą z Wikimedia Commons, na wolnych licencjach. Zostały przycięte. Stuknij autora, aby zobaczyć oryginał i licencję.",
   tSearch:"Szukaj", srchH:"Znajdź danie", srchSub:"Szukaj po nazwie, składniku lub kuchni, np. „żurek”, „kurczak”, „Nigeria”.", srchPh:"Czego szukasz?",
   all:"Wszystkie", allCui:"Każda kuchnia", cuiPl:"Polska", cuiEu:"Europejska", cuiAfr:"Afrykańska", fQuick:"Do 25 min", fHave:"Mam większość",
@@ -1130,7 +1131,8 @@ const T = {
    ["Shared shopping lists","When you share a live list, its items and ticks are stored under a random link so others can open it. The list holds no name or email."],
    ["Nearest shops","If you use it, your location or the address you type is sent to OpenStreetMap (Nominatim and Overpass) to find shops. The result stays only on your device."],
    ["Visit statistics","We count visits and which features are used with GoatCounter: no cookies, no tracking across sites, no IP addresses or personal data stored."],
-   ["Deleting your data","Account: sign in, open your account and tap “Delete my account” twice. This permanently removes your email and synced data. Data on your device: clear site data for cozjem.com in your browser."]],
+   ["Deleting your data","Account: sign in, open your account and tap “Delete my account” twice. This permanently removes your email and synced data. Data on your device: clear site data for cozjem.com in your browser."],
+   ["Contact","Questions about your data, or a request to delete it: hello@cozjem.com"]],
   photoBy:"Photo:", credits:"Photo credits", creditsSub:"Dish photos come from Wikimedia Commons under free licences and have been cropped. Tap an author to see the original and its licence.",
   tSearch:"Search", srchH:"Find a dish", srchSub:"Search by name, ingredient or cuisine, for example “żurek”, “chicken” or “Nigeria”.", srchPh:"What are you looking for?",
   all:"All", allCui:"Any cuisine", cuiPl:"Polish", cuiEu:"European", cuiAfr:"African", fQuick:"Under 25 min", fHave:"I have most",
@@ -1735,7 +1737,7 @@ function showLanding(id){
 }
 function openPrivacy(){ const t=L(); const old=$("credits"); if(old) old.remove(); const el=document.createElement("div"); el.className="landing"; el.id="credits";
   el.innerHTML=`<div class="lback" data-ccl="1"></div><div class="lcard credl privl" role="dialog" aria-modal="true" aria-label="${t.privH}"><p class="lkick">${t.privH}</p><p class="hint" style="margin:0">${t.privSub}</p>
-    <ul>${t.privItems.map(([h,p])=>`<li><b>${esc(h)}</b><span>${esc(p)}</span></li>`).join("")}</ul>
+    <ul>${t.privItems.map(([h,p])=>`<li><b>${esc(h)}</b><span>${esc(p).replace("hello@cozjem.com",'<a href="mailto:hello@cozjem.com">hello@cozjem.com</a>')}</span></li>`).join("")}</ul>
     <button type="button" class="btn" data-ccl="1">${t.close}</button></div>`; document.body.appendChild(el); gc("privacy","Privacy note"); }
 function closeLanding(toRecipe){
   const el=$("landing"); if(!el) return; el.classList.add("out");
