@@ -13,6 +13,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
+<script data-goatcounter="https://cozjem.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CoZjem">
@@ -335,6 +336,7 @@ a.where::before{content:"";display:inline-block;width:.5rem;height:.5rem;border-
 .credl li{display:flex;flex-direction:column;border-bottom:1px solid var(--line);padding-bottom:6px}
 .credl li span{color:var(--muted)}
 .credl a{color:var(--beet)}
+.privl ul{max-height:62vh;gap:10px}.privl li{gap:3px;line-height:1.45}
 /* search */
 .ticon{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;vertical-align:-2px;margin-right:4px}
 .srchbox input{font-size:1.05rem;padding:.7rem .9rem}
@@ -613,7 +615,7 @@ main .panel:nth-child(2){animation-delay:.08s}.habits{animation-delay:.16s}
 
   <section class="panel habits" id="habits"></section>
 
-  <footer><span id="foot"></span> <button type="button" class="linkbtn" id="creditsBtn"></button></footer>
+  <footer><span id="foot"></span> <button type="button" class="linkbtn" id="privBtn"></button> <button type="button" class="linkbtn" id="creditsBtn"></button></footer>
 </div>
 
 <script>
@@ -1009,7 +1011,7 @@ const T = {
   codeL:"Kod z e-maila", verify:"Potwierdź", badEmail:"Wpisz poprawny adres e-mail.", sendFail:"Nie udało się wysłać linku. Spróbuj ponownie za chwilę.",
   tooMany:"Za dużo prób. Odczekaj kilka minut i spróbuj ponownie.", badCode:"Kod jest nieprawidłowy lub wygasł.",
   signedAs:"Zalogowano jako", syncedAt:x=>`Zsynchronizowano o ${x}`, syncErr:"Nie udało się zsynchronizować. Spróbujemy ponownie przy następnej zmianie.",
-  syncNow:"Synchronizuj teraz", signOut:"Wyloguj", delCloud:"Usuń dane z chmury", delConfirm:"Kliknij ponownie, aby usunąć",
+  syncNow:"Synchronizuj teraz", signOut:"Wyloguj", delCloud:"Usuń moje konto", delConfirm:"Kliknij ponownie, aby usunąć",
   acctNote:"Przechowujemy tylko Twój e-mail i dane z aplikacji (w UE, Frankfurt). Bez konta wszystko zostaje tylko w tej przeglądarce.",
   protL:"Białko", protH:"Jakie białko?", protHint:"Wybierz mięso, rybę lub inne białko, a pokażemy wszystkie dania z nim.", prots:{any:"Dowolne",chicken:"Kurczak",turkey:"Indyk",beef:"Wołowina",pork:"Wieprzowina",mince:"Mięso mielone",goat:"Kozina",fish:"Ryby",eggs:"Jajka",beans:"Fasola i soczewica",cheese:"Ser i twaróg",veg:"Bez mięsa"}, protMore:(p,n)=>`Więcej dań: ${p} (${n})`, protAll:"Białko",
   nav:{today:"Dziś",week:"Tydzień",shop:"Zakupy",search:"Szukaj",saved:"Zapisane"}, kitchenL:"Moja kuchnia", budgetL:"Budżet", budPerWeek:"/ tydzień", budPerMeal:"/ posiłek",
@@ -1027,6 +1029,14 @@ const T = {
   addrUnknown:"Adres niepodany na mapie", noneNear:"Brak w promieniu 15 km.", searchMap:"Wyszukaj na mapie najbliższy sklep.", directions:"Trasa", website:"Strona", onMap:"Na mapie",
   afrShopsH:"Sklepy afrykańskie", afrNone:"Na mapie nie ma sklepów afrykańskich w pobliżu. Spróbuj wyszukiwania w Mapach Google.", afrMap:"Szukaj sklepów afrykańskich w Mapach Google",
   storesNote:"Dane sklepów z OpenStreetMap, mogą być niepełne. Lokalizacja zostaje tylko na tym urządzeniu.",
+  privL:"Prywatność", privH:"Prywatność w CoZjem", privSub:"Krótko i po ludzku: co zapisujemy, gdzie i jak to usunąć.",
+  privItems:[
+   ["Bez konta","Wszystko (twoja kuchnia, plany, zapisane dania, ceny, zdjęcia i dziennik gotowania) zostaje w tej przeglądarce na twoim urządzeniu. Nic nie trafia do nas."],
+   ["Z kontem","Przechowujemy twój adres e-mail i kopię danych aplikacji (bez zdjęć twoich dań), aby synchronizować je między urządzeniami. Dane są w Supabase we Frankfurcie (Niemcy, UE). E-maile logowania wysyła Resend z serwerów w Irlandii (UE)."],
+   ["Udostępnione listy zakupów","Gdy udostępniasz listę na żywo, jej produkty i odhaczenia zapisujemy pod losowym linkiem, aby inni mogli ją otworzyć. Lista nie zawiera imienia ani e-maila."],
+   ["Najbliższe sklepy","Jeśli użyjesz tej funkcji, twoja lokalizacja lub wpisany adres trafia do OpenStreetMap (Nominatim i Overpass), aby znaleźć sklepy. Wynik zostaje tylko na twoim urządzeniu."],
+   ["Statystyki odwiedzin","Liczymy odwiedziny i używane funkcje za pomocą GoatCounter: bez ciasteczek, bez śledzenia między stronami, bez zapisywania adresów IP i danych osobowych."],
+   ["Usuwanie danych","Konto: zaloguj się, otwórz konto i dwa razy stuknij „Usuń moje konto”. To trwale usuwa twój e-mail i zsynchronizowane dane. Dane na urządzeniu: wyczyść dane strony cozjem.com w przeglądarce."]],
   photoBy:"Zdjęcie:", credits:"Autorzy zdjęć", creditsSub:"Zdjęcia dań pochodzą z Wikimedia Commons, na wolnych licencjach. Zostały przycięte. Stuknij autora, aby zobaczyć oryginał i licencję.",
   tSearch:"Szukaj", srchH:"Znajdź danie", srchSub:"Szukaj po nazwie, składniku lub kuchni, np. „żurek”, „kurczak”, „Nigeria”.", srchPh:"Czego szukasz?",
   all:"Wszystkie", allCui:"Każda kuchnia", cuiPl:"Polska", cuiEu:"Europejska", cuiAfr:"Afrykańska", fQuick:"Do 25 min", fHave:"Mam większość",
@@ -1095,7 +1105,7 @@ const T = {
   codeL:"Code from the email", verify:"Verify", badEmail:"Enter a valid email address.", sendFail:"Couldn't send the link. Try again in a moment.",
   tooMany:"Too many attempts. Wait a few minutes and try again.", badCode:"That code is wrong or has expired.",
   signedAs:"Signed in as", syncedAt:x=>`Synced at ${x}`, syncErr:"Couldn't sync. We'll try again on your next change.",
-  syncNow:"Sync now", signOut:"Sign out", delCloud:"Delete my cloud data", delConfirm:"Tap again to delete",
+  syncNow:"Sync now", signOut:"Sign out", delCloud:"Delete my account", delConfirm:"Tap again to delete",
   acctNote:"We store only your email and your app data (in the EU, Frankfurt). Without an account everything stays in this browser only.",
   protL:"Protein", protH:"Which protein?", protHint:"Pick a meat, fish or other protein and we show every dish made with it.", prots:{any:"Any",chicken:"Chicken",turkey:"Turkey",beef:"Beef",pork:"Pork",mince:"Minced meat",goat:"Goat",fish:"Fish",eggs:"Eggs",beans:"Beans & lentils",cheese:"Cheese & quark",veg:"Meat free"}, protMore:(p,n)=>`More ${({"Eggs":"egg","Beans & lentils":"bean and lentil","Cheese & quark":"cheese and quark"})[p]||p.toLowerCase()} dishes (${n})`, protAll:"Protein",
   nav:{today:"Today",week:"Week",shop:"Groceries",search:"Search",saved:"Saved"}, kitchenL:"My kitchen", budgetL:"Budget", budPerWeek:"/ week", budPerMeal:"/ meal",
@@ -1113,6 +1123,14 @@ const T = {
   addrUnknown:"Address not listed on the map", noneNear:"None within 15 km.", searchMap:"Find the nearest one on the map.", directions:"Directions", website:"Website", onMap:"On the map",
   afrShopsH:"African shops", afrNone:"No African shops are on the map near you. Try a Google Maps search.", afrMap:"Search African shops on Google Maps",
   storesNote:"Store data from OpenStreetMap and may be incomplete. Your location stays on this device only.",
+  privL:"Privacy", privH:"Privacy at CoZjem", privSub:"Short and plain: what we store, where, and how to delete it.",
+  privItems:[
+   ["Without an account","Everything (your kitchen, plans, saved meals, prices, meal photos and cooking diary) stays in this browser on your device. Nothing is sent to us."],
+   ["With an account","We store your email address and a copy of your app data (not your meal photos) so it syncs between your devices. It is kept with Supabase in Frankfurt, Germany (EU). Sign-in emails are sent by Resend from servers in Ireland (EU)."],
+   ["Shared shopping lists","When you share a live list, its items and ticks are stored under a random link so others can open it. The list holds no name or email."],
+   ["Nearest shops","If you use it, your location or the address you type is sent to OpenStreetMap (Nominatim and Overpass) to find shops. The result stays only on your device."],
+   ["Visit statistics","We count visits and which features are used with GoatCounter: no cookies, no tracking across sites, no IP addresses or personal data stored."],
+   ["Deleting your data","Account: sign in, open your account and tap “Delete my account” twice. This permanently removes your email and synced data. Data on your device: clear site data for cozjem.com in your browser."]],
   photoBy:"Photo:", credits:"Photo credits", creditsSub:"Dish photos come from Wikimedia Commons under free licences and have been cropped. Tap an author to see the original and its licence.",
   tSearch:"Search", srchH:"Find a dish", srchSub:"Search by name, ingredient or cuisine, for example “żurek”, “chicken” or “Nigeria”.", srchPh:"What are you looking for?",
   all:"All", allCui:"Any cuisine", cuiPl:"Polish", cuiEu:"European", cuiAfr:"African", fQuick:"Under 25 min", fHave:"I have most",
@@ -1337,6 +1355,11 @@ function weekShop(){
 // ---------- Accounts and cloud sync (Supabase) ----------
 const SB_URL="https://zgsznfyoxlgrnbxjylyr.supabase.co", SB_KEY="sb_publishable_JI28d1IkXz1R8l4JNVbe3Q_io7WGnzF";
 const CLOUD_HOST=/(^|\.)github\.io$|cozjem|^localhost$|^127\./;
+const GC_ON=/^(www\.)?cozjem\.com$/.test(location.hostname);
+let gcLast=null;
+function gc(path,title){ if(!GC_ON) return; const go=()=>{ try{ window.goatcounter.count({path:path,title:title||path,event:true}); }catch(e){} };
+  if(window.goatcounter&&window.goatcounter.count) go(); else setTimeout(()=>{ if(window.goatcounter&&window.goatcounter.count) go(); },3000); }
+addEventListener("appinstalled",()=>gc("installed","Installed to home screen"));
 function mergeStates(L,Rm){
   const newer=(Rm.ts||0)>(L.ts||0)?Rm:L;
   const m={...newer};
@@ -1373,7 +1396,7 @@ function cloudInit(){
   cloud.on=true;
   cloud.sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{flowType:"implicit",persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:"cozjem-auth"}});
   cloud.sb.auth.onAuthStateChange((ev,session)=>{ const u=session&&session.user||null, was=cloud.user&&cloud.user.id; cloud.user=u;
-    if(u&&u.id!==was){ cloud.sent=null; setTimeout(pullMerge,0); }
+    if(u&&u.id!==was){ cloud.sent=null; setTimeout(pullMerge,0); if(ev==="SIGNED_IN") gc("account/signin","Signed in"); }
     if(!u){ cloud.status=""; }
     renderAcct(); });
   document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&cloud.user&&Date.now()-cloud.pulled>60000) pullMerge(); });
@@ -1500,7 +1523,7 @@ function renderStatic(){
   const t=L(); document.documentElement.lang=st.lang;
   $("l-mine").textContent=t.mineL; $("mineIn").placeholder=t.minePh; $("mineAdd").textContent=t.mineAdd; $("suggest").textContent=t.suggest; renderMine(); renderAcct();
   $("tagline").textContent=t.tag; $("l-goal").textContent=t.goal; $("l-meal").textContent=t.meal; $("l-store").textContent=t.store; $("l-fridge").textContent=t.fridge;
-  $("creditsBtn").textContent=t.credits; $("creditsBtn").hidden=!Object.keys(PHOTOS).length; $("q").placeholder=t.search; $("clear").textContent=t.clear; $("basics").textContent=t.basics; $("go").textContent=st.view==="week"?t.regen:t.showMeals; $("foot").textContent=t.foot;
+  $("privBtn").textContent=t.privL; $("creditsBtn").textContent=t.credits; $("creditsBtn").hidden=!Object.keys(PHOTOS).length; $("q").placeholder=t.search; $("clear").textContent=t.clear; $("basics").textContent=t.basics; $("go").textContent=st.view==="week"?t.regen:t.showMeals; $("foot").textContent=t.foot;
   $("tab-today").textContent=t.tToday; $("tab-week").textContent=t.tWeek; $("tab-shop").textContent=t.tShop; $("tab-shop").setAttribute("aria-selected",st.view==="shop");
   $("tab-search").innerHTML=`<svg class="ticon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>${t.tSearch}`; $("tab-search").setAttribute("aria-selected",st.view==="search");
   $("tab-saved").innerHTML=`${t.tSaved}${st.saved.length?` <span class="tcount">${st.saved.length}</span>`:""}`; $("tab-saved").setAttribute("aria-selected",st.view==="saved");
@@ -1685,6 +1708,7 @@ function openShare(btn){
   const open=box.hidden; box.hidden=!open; btn.setAttribute("aria-expanded",open);
   if(!open) return;
   shareCur=shareData(btn.dataset.share,btn.dataset.shid); if(!shareCur) return;
+  gc("share/"+btn.dataset.share+(btn.dataset.shid?"/"+btn.dataset.shid:""),"Share");
   $("shWa").href="https://wa.me/?text="+encodeURIComponent(shareCur.noLink?shareCur.full:shareCur.text+"\n"+shareCur.url);
   $("shLink").hidden=!!shareCur.noLink;
   $("shNote").textContent=L().shNote;
@@ -1709,11 +1733,15 @@ function showLanding(id){
   document.body.appendChild(el);
   const go=$("landGo"); try{go.focus({preventScroll:true});}catch(err){}
 }
+function openPrivacy(){ const t=L(); const old=$("credits"); if(old) old.remove(); const el=document.createElement("div"); el.className="landing"; el.id="credits";
+  el.innerHTML=`<div class="lback" data-ccl="1"></div><div class="lcard credl privl" role="dialog" aria-modal="true" aria-label="${t.privH}"><p class="lkick">${t.privH}</p><p class="hint" style="margin:0">${t.privSub}</p>
+    <ul>${t.privItems.map(([h,p])=>`<li><b>${esc(h)}</b><span>${esc(p)}</span></li>`).join("")}</ul>
+    <button type="button" class="btn" data-ccl="1">${t.close}</button></div>`; document.body.appendChild(el); gc("privacy","Privacy note"); }
 function closeLanding(toRecipe){
   const el=$("landing"); if(!el) return; el.classList.add("out");
   setTimeout(()=>{el.remove(); if(toRecipe) $("result").scrollIntoView({behavior:"smooth",block:"start"});},220);
 }
-document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&sheetOpen&&!$("cardmodal")&&!$("landing")&&!$("storesm")) { closeSheet(); return; } if(e.key==="Escape"&&$("cardmodal")) closeCard(); else if(e.key==="Escape"&&$("landing")) closeLanding(false); else if(e.key==="Escape"&&shop) closeShop(false); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&sheetOpen&&!$("cardmodal")&&!$("landing")&&!$("storesm")) { closeSheet(); return; } if(e.key==="Escape"&&$("cardmodal")) closeCard(); else if(e.key==="Escape"&&$("credits")) $("credits").remove(); else if(e.key==="Escape"&&$("landing")) closeLanding(false); else if(e.key==="Escape"&&shop) closeShop(false); });
 document.addEventListener("click",e=>{ if(e.target.dataset&&e.target.dataset.sheetclose){ closeSheet(); return; } if(e.target.dataset&&e.target.dataset.stclose){ const el=$("storesm"); if(el) el.remove(); return; } if(e.target.dataset&&e.target.dataset.ccl){ const el=$("credits"); if(el) el.remove(); return; } if(e.target.classList&&e.target.classList.contains("lback")){ if(e.target.dataset.cardclose) closeCard(); else closeLanding(false); } });
 let expo=null, dlFn=null;
 const expItem=k=>{const q=priceAt(k,st.store); return {k,cat:ING[k][3],name:nm(k),price:q.p,src:ING[k][3]==="afr"?"afr":q.src};};
@@ -1768,6 +1796,7 @@ async function makeListImage(){
   return await new Promise(res=>c.toBlob(b=>res(b),"image/png"));
 }
 async function exportListImage(btn){
+  gc("list/image","Shopping list image");
   const t=L(), orig=btn.textContent; btn.disabled=true; btn.textContent=t.imgMaking;
   const done=msg=>{btn.textContent=msg; btn.disabled=false; setTimeout(()=>{btn.textContent=orig;},2200);};
   try{
@@ -1896,6 +1925,7 @@ async function keepAwake(on){
 }
 document.addEventListener("visibilitychange",()=>{ if(shop&&document.visibilityState==="visible") keepAwake(true); });
 function openShop(list,opts={}){
+  gc("list/shopping-mode","Shopping mode");
   if(!list) return;
   closeShop(true);
   shop={list, ticks:opts.ticks||{}, shared:opts.shared||null, staticShared:!!opts.staticShared, sync:"", poll:null};
@@ -1953,6 +1983,7 @@ function finishShop(){
   save(); closeShop(false); renderChips(); renderView();
 }
 async function shareCurrentList(btn){
+  gc("list/share","Shared shopping list");
   const t=L(); const lst=shop?shop.list:listFromExpo(); if(!lst) return;
   const orig=btn.textContent; btn.disabled=true; btn.textContent=t.linkMaking;
   const done=msg=>{btn.textContent=msg; btn.disabled=false; setTimeout(()=>{btn.textContent=orig;},2400);};
@@ -2179,7 +2210,7 @@ function renderToday(quiet){
   let x, i=0, list=ranked();
   if(st.forced&&RB[st.forced]){x=evalR(RB[st.forced]);}
   else{ if(!list.length){v.innerHTML=`<p class="empty">${t.none}</p>`;return;} i=st.pick%list.length; x=list[i]; }
-  const r=x.r, pct=Math.round(x.match*100); st.cur=r.id;
+  const r=x.r, pct=Math.round(x.match*100); st.cur=r.id; if(gcLast!==r.id){ gcLast=r.id; gc("dish/"+r.id,r.en); }
   const protOn=st.prot!=="any", altList=list.filter(a=>a.r.id!==r.id), alts=altList.slice(0,protOn?12:3).map(a=>`<button type="button" class="alt" data-alt="${a.r.id}"><span>${esc(a.r[st.lang])}</span><small>${Math.round(a.match*100)}% · ${a.r.p} g${a.miss.length?" · +"+zl(a.cost):""}</small></button>`).join("");
   const mealKey=r.m.includes(st.meal)?st.meal:r.m[0];
   v.innerHTML=`
@@ -2334,6 +2365,7 @@ document.addEventListener("click",e=>{
   if(b.id==="findStoresBtn"){ openStores(); return; }
   if(b.dataset.stclose){ const el=$("storesm"); if(el) el.remove(); return; }
   if(b.id==="geoBtn"){ useMyLocation(); return; }
+  if(b.id==="privBtn"){ openPrivacy(); return; }
   if(b.id==="creditsBtn"){ const t=L(); const el=document.createElement("div"); el.className="landing"; el.id="credits";
     el.innerHTML=`<div class="lback" data-ccl="1"></div><div class="lcard credl" role="dialog" aria-modal="true" aria-label="${t.credits}"><p class="lkick">${t.credits}</p><p class="hint" style="margin:0">${t.creditsSub}</p>
       <ul>${R.filter(r=>PHOTOS[r.id]).map(r=>{const p=PHOTOS[r.id]; return `<li><b>${esc(r[st.lang])}</b><span><a href="${p.u}" target="_blank" rel="noopener">${esc(p.a)}</a>, ${esc(p.l)}</span></li>`;}).join("")}</ul>
@@ -2351,7 +2383,11 @@ document.addEventListener("click",e=>{
   if(b.id==="syncNow"){pullMerge(); return;}
   if(b.id==="signOut"){cloud.sb.auth.signOut().then(()=>{cloud.last=null; renderAcct();}); return;}
   if(b.id==="delCloud"){ if(!cloud.confirmDel){cloud.confirmDel=true; renderAcct(); return;}
-    cloud.confirmDel=false; cloud.sb.from("user_state").delete().eq("user_id",cloud.user.id).then(({error})=>{ if(error){cloud.status="error"; renderAcct(); return;} cloud.sb.auth.signOut().then(()=>{cloud.last=null; renderAcct();}); }); return;}
+    cloud.confirmDel=false;
+    cloud.sb.rpc("delete_my_account").then(({error})=>{
+      const after=()=>cloud.sb.auth.signOut().then(()=>{cloud.last=null; renderAcct();});
+      if(!error){ gc("account/deleted","Account deleted"); return after(); }
+      cloud.sb.from("user_state").delete().eq("user_id",cloud.user.id).then(({error:e2})=>{ if(e2){cloud.status="error"; renderAcct(); return;} after(); }); }); return;}
   if(b.dataset.share){openShare(b); return;}
   if(b.id==="shNative"&&shareCur){ const d=shareCur.noLink?{title:shareCur.title,text:shareCur.full}:{title:shareCur.title,text:shareCur.text,url:shareCur.url};
     try{ navigator.share(d).catch(()=>{}); }catch(e){} return; }
@@ -2372,7 +2408,7 @@ document.addEventListener("click",e=>{
   if(b.id==="aiStop"){aiCtl?.abort(); return;}
   if(b.id==="backPick"){st.forced=null; renderView(); flash(); return;}
   if(b.dataset.aiing!==undefined&&st.aiDish){const i=st.aiDish.ings[+b.dataset.aiing]; if(i){i.have=!i.have; save(); renderToday(true);} return;}
-  if(b.dataset.prot){ st.prot=b.dataset.prot; st.pick=0; st.forced=null; if(st.mode!=="budget") st.mode="pick"; genWeek(); save(); closeSheet(); if(!["today","week"].includes(st.view)) st.view="today"; all(); return; }
+  if(b.dataset.prot){ st.prot=b.dataset.prot; gc("protein/"+st.prot,"Protein "+st.prot); st.pick=0; st.forced=null; if(st.mode!=="budget") st.mode="pick"; genWeek(); save(); closeSheet(); if(!["today","week"].includes(st.view)) st.view="today"; all(); return; }
   if(b.dataset.goal){st.goal=b.dataset.goal;st.pick=0;st.forced=null;genWeek();save();all();return;}
   if(b.dataset.meal){st.meal=b.dataset.meal;st.pick=0;st.forced=null;save();all();return;}
   if(b.dataset.store){st.store=b.dataset.store;save();all();return;}
@@ -2392,7 +2428,7 @@ document.addEventListener("click",e=>{
   if(b.id==="batch"){st.batch=!st.batch; genWeek(); save(); renderView(); flash(); return;}
   if(b.dataset.swap){const [d,m]=b.dataset.swap.split(":"); swapCell(+d,m); renderView(); return;}
   if(b.id==="lang-pl"||b.id==="lang-en"){st.lang=b.id.slice(5);save();all();return;}
-  if(b.id==="tab-today"||b.id==="tab-week"||b.id==="tab-shop"||b.id==="tab-saved"||b.id==="tab-search"){st.view=b.id.slice(4);save();closeSheet();all();
+  if(b.id==="tab-today"||b.id==="tab-week"||b.id==="tab-shop"||b.id==="tab-saved"||b.id==="tab-search"){st.view=b.id.slice(4);save();closeSheet();all();gc("tab/"+st.view,"Tab "+st.view);
     window.scrollTo({top:0,behavior:"smooth"});
     if(st.view==="search"&&window.matchMedia("(min-width:901px)").matches){ const i=$("srchQ"); if(i) i.focus({preventScroll:true}); }
     return;}
@@ -2424,7 +2460,7 @@ $("photoIn").addEventListener("change",e=>{ const f=e.target.files&&e.target.fil
 document.addEventListener("submit",e=>{
   if(e.target.id==="budgetForm"){ e.preventDefault(); const amt=Math.round(parseFloat(String($("budgetIn").value).replace(",","."))*100)/100;
     if(!Number.isFinite(amt)||amt<=0||amt>5000){ $("budHint").textContent=L().budBad; return; }
-    const scope=st.budgetScope||(st.budget&&st.budget.scope)||"meal"; st.budget={amt,scope}; closeSheet();
+    const scope=st.budgetScope||(st.budget&&st.budget.scope)||"meal"; st.budget={amt,scope}; closeSheet(); gc("budget/"+scope,"Budget "+scope);
     if(scope==="week"){ st.view="week"; genWeekBudget(amt); } else { st.view="today"; st.mode="budget"; }
     save(); all(); window.scrollTo({top:0,behavior:"smooth"}); flash(); return; }
   if(e.target.id==="addrForm"){e.preventDefault(); nearState.q=$("addrIn").value; geocode(nearState.q); return;}
@@ -2452,6 +2488,8 @@ cloudInit();
 all();
 if(st.sharedIn) showLanding(st.sharedIn);
 openFromHash();
+addEventListener("hashchange",()=>{ if(location.hash==="#privacy") openPrivacy(); });
+if(location.hash==="#privacy") setTimeout(openPrivacy,300);
 addEventListener("hashchange",()=>{
   const m=/^#r-([a-z_]+)$/.exec(location.hash||"");
   if(m&&RB[m[1]]){ const r=RB[m[1]]; const old=$("landing"); if(old) old.remove();
