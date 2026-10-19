@@ -2,7 +2,7 @@
 // POST {action:"sub", sub, lang, stores, keys}   save a browser push subscription (from cozjem.com only)
 // POST {action:"unsub", endpoint}                remove it
 // POST {action:"send"}                           notify subscribers about promotions that are new since the last send.
-//   "send" is safe to call by anyone: it only sends when promos.json has new items and at most once every 18 hours.
+//   "send" is safe to call by anyone: it only sends when promos.json has new items and at most once every 6 hours (the workflow runs daily).
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 import webpush from "npm:web-push@3.6.7";
 
@@ -10,7 +10,7 @@ const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SE
 const SRC = "https://raw.githubusercontent.com/Afeez-Ola/cozjem/main/promos.json";
 const STORES = ["Lidl", "Biedronka", "Aldi", "Auchan"];
 const OK_ORIGIN = /^(https:\/\/(www\.)?cozjem\.com|http:\/\/localhost(:\d+)?)$/;
-const MIN_GAP_H = 18;
+const MIN_GAP_H = 6;
 const cors = (o: string | null) => ({
   "Access-Control-Allow-Origin": o && OK_ORIGIN.test(o) ? o : "https://cozjem.com",
   "Access-Control-Allow-Headers": "content-type, authorization, apikey, x-client-info",
@@ -72,6 +72,7 @@ async function send(force: boolean) {
   if (!fresh.length) return { fresh: 0 };
 
   const v = await getState("vapid");
+  if (!v?.privateKey) return { error: "no keys yet" };
   webpush.setVapidDetails("mailto:hello@cozjem.com", v.publicKey, v.privateKey);
   let sent = 0, gone = 0, from = 0;
   while (true) {

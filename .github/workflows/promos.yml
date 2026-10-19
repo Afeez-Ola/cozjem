@@ -34,7 +34,7 @@ jobs:
 
       # Alerts are sent by the Supabase "push" function. It reads the new promos.json,
       # notifies only about deals it has not announced before, personalises each alert
-      # (language, the user's ingredients) and never sends more than once in 18 hours,
+      # (language, the user's ingredients) and never sends more than once in 6 hours,
       # so no keys or secrets are needed here.
       - name: Send promotion alerts
         if: steps.commit_promos.outputs.changed == 'true'

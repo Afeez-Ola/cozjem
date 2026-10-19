@@ -21,7 +21,7 @@ MATCH = {
  "mozzarella": [r"\bmozzarella\b"], "grana": [r"grana padano", r"parmezan", r"parmigiano"], "ricotta": [r"\bricotta\b"],
  "skyr": [r"\bskyr\b"], "jogurt": [r"jogurt naturalny"], "kefir": [r"\bkefir\b"],
  "kurczak": [r"filet z (piersi )?kurczaka", r"pierś z kurczaka", r"filet z piersi"], "udka": [r"\budka\b", r"\bpodudzia\b", r"udziec z kurczaka", r"ćwiartka"],
- "indyk": [r"\bindyk", r"z indyka"], "mielone": [r"mięso mielone", r"\bmielone\b"], "schab": [r"\bschab\b"], "boczek": [r"\bboczek\b"],
+ "indyk": [r"\bindyk", r"z indyka"], "mielone": [r"mięso mielone", r"mielone (wieprzow|wołow|z indyka|drobiow|z kurczaka)"], "schab": [r"\bschab\b"], "boczek": [r"\bboczek\b"],
  "kielbasa": [r"\bkiełbas"], "szynka": [r"\bszynka\b"], "parowki": [r"\bparówki\b"], "wolowina": [r"\bwołow"], "watrobka": [r"wątróbk"],
  "chorizo": [r"\bchorizo\b"], "ryba": [r"\bmintaj"], "dorsz": [r"\bdorsz"], "losos": [r"\błoso"], "makrela": [r"\bmakrel"], "tunczyk": [r"\btuńczyk"],
  "krewetki": [r"\bkrewetk"],
@@ -38,7 +38,10 @@ MATCH = {
  "ciecierzyca": [r"\bciecierzyc"], "soczewica": [r"\bsoczewic"], "oliwki": [r"\boliwki\b"], "pesto": [r"\bpesto\b"], "miod": [r"\bmiód\b"],
  "cukier": [r"\bcukier\b"], "maslo_orz": [r"masło orzechowe"],
 }
+MATCH["fasolkasz"] = [r"fasol(a|ka) szparagow"]
 RX = {k: [re.compile(p, re.I) for p in v] for k, v in MATCH.items()}
+FIRST = ["passata", "koncentrat", "kiszone", "kwaszona", "fasolkasz", "maslo_orz", "kokos", "kaszag", "smietanka"]
+ORDER = FIRST + [k for k in RX if k not in FIRST]
 
 def get(url):
     import subprocess, shutil
@@ -56,10 +59,12 @@ def get(url):
             print("retry", a, e, file=sys.stderr); time.sleep(5 * (a + 1))
     raise RuntimeError("Lidl data unavailable")
 
+NOT_INGREDIENT = re.compile(r"\bsmak|o smaku|actimel|danio|jogurt pitny|napój|baton|ciast|wafel|wafl|cukierk|chips|lody|\bsok\b|nektar|deser|czekolad|żelk|musli|płatki śniadaniowe|przekąsk|krem do|pasta do|karma|dla (psa|kota)|sernik(?! )|niedźwiedzi|\bw sosie\b|\bsos\b|gotowe danie|kotányi|goździk", re.I)
 def match(title):
     t = title.lower()
-    for k, rxs in RX.items():
-        if any(r.search(t) for r in rxs): return k
+    if NOT_INGREDIENT.search(t): return None
+    for k in ORDER:
+        if any(r.search(t) for r in RX[k]): return k
     return None
 
 def fetch_text(url, headers=None):
@@ -87,33 +92,55 @@ def biedronka_leaflets():
         end = start + datetime.timedelta(days=6)
         if end < today: continue
         title = re.sub(r"-(od-)?\d{1,2}-\d{1,2}$", "", slug).replace("-p-", " ").replace("-", " ").strip().capitalize()
-        img = ""
-        try: img = biedronka_cover(url, slug)
-        except Exception as e: print("Biedronka cover failed", slug, e, file=sys.stderr)
+        img, pages = "", []
+        try:
+            img, pages, nice = biedronka_pages(url, slug)
+            if nice: title = nice
+        except Exception as e: print("Biedronka pages failed", slug, e, file=sys.stderr)
         out.append({"t": title, "from": int(datetime.datetime(start.year, start.month, start.day).timestamp() * 1000),
                     "until": int(datetime.datetime(end.year, end.month, end.day, 23, 59).timestamp() * 1000),
-                    "url": url, "img": img})
+                    "url": url, "img": img, "pages": pages})
     return out
 
 LEAF_DIR = OUT.parent / "img" / "leaf"
-def biedronka_cover(url, slug):
-    """Biedronka's covers are multi-MB PNGs, so keep a small WebP copy on cozjem.com."""
-    name = re.sub(r"[^a-z0-9-]", "", slug.lower())[:60] + ".webp"
-    dst = LEAF_DIR / name
-    if dst.exists(): return "img/leaf/" + name
-    page = fetch_text(url)
-    m = re.search(r'galleryLeaflet\.init\("([0-9a-f-]{36})"\)', page)
-    if not m: return ""
-    d = json.loads(fetch_text(f"https://leaflet-api.prod.biedronka.cloud/api/leaflets/{m.group(1)}?ctx=web"))
-    pages = (d.get("images_mobile") or []) + (d.get("images_desktop") or [])
-    src = next((i for pg in pages for i in ([pg.get("image")] + list(pg.get("images") or [])) if i), "")
-    if not src: return ""
+MAX_PAGES = 14
+def biedronka_pages(url, slug):
+    """Biedronka publishes leaflets as multi-MB PNG pages. Keep small WebP copies of the first
+    pages on cozjem.com so the app can show them, and link each one to the full-size original."""
     import subprocess, io
     from PIL import Image
-    raw = subprocess.run(["curl", "-s", "-m", "60", "-A", UA, src], capture_output=True).stdout
-    im = Image.open(io.BytesIO(raw)).convert("RGB"); im.thumbnail((420, 640))
-    LEAF_DIR.mkdir(parents=True, exist_ok=True); im.save(dst, "WEBP", quality=78)
-    return "img/leaf/" + name
+    name = re.sub(r"[^a-z0-9-]", "", slug.lower())[:60]
+    folder = LEAF_DIR / name
+    page = fetch_text(url)
+    m = re.search(r'galleryLeaflet\.init\("([0-9a-f-]{36})"\)', page)
+    tm = re.search(r"<title>(.*?)</title>", page, re.S)
+    nice = ""
+    if tm:
+        import html as H
+        nice = H.unescape(re.sub(r"\s+", " ", tm.group(1))).split(" - Gazetka")[0]
+        nice = re.sub(r"\s*-?\s*(oferta\s+)?od\s+\d{1,2}\.\d{1,2}.*$", "", nice, flags=re.I)
+        nice = re.sub(r"\s*-\s*\d{1,2}\.\d{1,2}\.?(\s*-\s*\d{1,2}\.\d{1,2}\.?)?$", "", nice)
+        nice = re.sub(r"\s+P$", "", nice).strip(" -")
+    if not m: return "", [], nice
+    d = json.loads(fetch_text(f"https://leaflet-api.prod.biedronka.cloud/api/leaflets/{m.group(1)}?ctx=web"))
+    srcs = []
+    for pg in (d.get("images_mobile") or d.get("images_desktop") or []):
+        for i in [pg.get("image")] + list(pg.get("images") or []):
+            if i and i not in srcs: srcs.append(i)
+    srcs = srcs[:MAX_PAGES]
+    folder.mkdir(parents=True, exist_ok=True)
+    pages = []
+    for n, src in enumerate(srcs, 1):
+        dst = folder / f"p{n:02d}.webp"
+        if not dst.exists():
+            raw = subprocess.run(["curl", "-s", "-m", "90", "-A", UA, src], capture_output=True).stdout
+            try:
+                im = Image.open(io.BytesIO(raw)).convert("RGB")
+            except Exception:
+                continue
+            im.thumbnail((620, 1000)); im.save(dst, "WEBP", quality=72)
+        pages.append({"img": f"img/leaf/{name}/{dst.name}", "full": src})
+    return (pages[0]["img"] if pages else ""), pages, nice
 
 AUCHAN_SHELF = "https://zakupy.auchan.pl/shop-in-shop/gazetka-produkty-online"
 SKIP_A = re.compile(r"zwierz|alkohol|chemia|kosmet|drogeria|higien|dom |dom,|ogr|elektr|zabawk|dziecko i mama|papier", re.I)
@@ -167,7 +194,7 @@ def auchan_items():
                 rid = p.get("retailerProductId") or ""
                 items.append({"t": title, "p": round(unit, 2) if unit else round(price, 2), "op": round(price, 2) if unit and unit < price else None,
                               "pct": pct if pct and pct > 0 else None, "hl": desc[:40], "lp": False,
-                              "unit": (p.get("packSizeDescription") or "")[:30], "from": None, "until": int(now + 3 * 86400000),
+                              "unit": re.sub(r"\s*\d{5,}\s*g$", "", (p.get("packSizeDescription") or "")).strip()[:30], "from": None, "until": int(now + 3 * 86400000),
                               "url": f"https://zakupy.auchan.pl/products/p/{rid}" if rid else AUCHAN_SHELF,
                               "img": (p.get("image") or {}).get("src", ""), "k": match(title), "online": True})
             time.sleep(1)
@@ -254,10 +281,11 @@ def main():
     except BaseException as e:
         print("Auchan products failed, keeping previous:", e, file=sys.stderr); stores["Auchan"]["items"] = previous("Auchan")[0]
     stores["Auchan"]["source"] = AUCHAN_SHELF
-    if LEAF_DIR.exists():  # drop covers of leaflets that have ended
-        keep = {l.get("img", "").split("/")[-1] for l in stores["Biedronka"]["leaflets"]}
-        for f in LEAF_DIR.glob("*.webp"):
-            if f.name not in keep: f.unlink()
+    if LEAF_DIR.exists():  # drop pages of leaflets that have ended
+        import shutil
+        keep = {l.get("img", "").split("/")[2] for l in stores["Biedronka"]["leaflets"] if l.get("img", "").count("/") >= 3}
+        for f in LEAF_DIR.iterdir():
+            if f.name not in keep: (shutil.rmtree(f) if f.is_dir() else f.unlink())
     stores["Aldi"] = {"items": [], "leaflets": [], "source": "https://www.aldi.pl/oferty.html"}
     out = {"updated": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="minutes"), "stores": stores}
     OUT.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")))
