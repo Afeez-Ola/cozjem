@@ -221,6 +221,66 @@ def auchan_leaflets():
         out.append({"t": t, "from": int(st_.timestamp() * 1000), "until": int(en.timestamp() * 1000), "url": "https://www.auchan.pl/pl/gazetka/" + slug, "img": img})
     return out
 
+ALDI_URL = "https://www.aldi.pl/oferty.html"
+ALDI_SKIP_CAT = re.compile(r"higien|dom i ogr|chemia|kosmet|zwierz|odzie|elektr|zabawk|alkohol|piwo|wino", re.I)
+ALDI_NONFOOD = re.compile(r"znicz|spryskiwacz|poduszk|pajac|kołdr|pościel|odkurzacz|chryzantem|kurtk|płaszcz|piżam|\bbuty\b|bluz|spodnie|koszul|\bmata\b|pokrowiec|forma do|fartuch|uchwyt|pojemnik|waga|gofrownic|śpiwor|kardigan|ręcznik|papier|wkład|świec", re.I)
+def _num(txt):
+    m = re.search(r"(\d+)[,.](\d{2})\s*zł", txt or "")
+    return int(m.group(1)) + int(m.group(2)) / 100 if m else None
+def aldi_items():
+    """Aldi's offers page carries this week's promotions as structured data inside its __NEXT_DATA__ block."""
+    page = fetch_text(ALDI_URL, {"Accept-Language": "pl-PL"})
+    m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', page, re.S)
+    if not m: raise RuntimeError("Aldi page layout changed")
+    found = {}
+    def walk(o):
+        if isinstance(o, dict):
+            if "productSlug" in o and "name" in o:
+                found[str(o.get("objectID") or o["productSlug"])] = o; return
+            for v in o.values(): walk(v)
+        elif isinstance(o, list):
+            for v in o: walk(v)
+        elif isinstance(o, str) and len(o) > 200 and o.lstrip()[:1] in "{[" and "productSlug" in o:
+            try: walk(json.loads(o))
+            except Exception: pass
+    walk(json.loads(m.group(1)))
+    items = []
+    for x in found.values():
+        cp = x.get("currentPrice") or {}
+        promos = x.get("promotionPrices") or []
+        pr = promos[0] if promos else cp
+        lab = (pr.get("priceTagLabels") or cp.get("priceTagLabels") or {})
+        promo = re.sub(r"\s+", " ", lab.get("promoText1") or "").strip()
+        price = pr.get("priceValue")
+        cats = " ".join((x.get("hierarchicalCategories") or {}).get("lvl0") or [])
+        name = re.sub(r"\s+", " ", x.get("name") or "").strip()
+        if not promo or not isinstance(price, (int, float)) or ALDI_SKIP_CAT.search(cats) or ALDI_NONFOOD.search(name): continue
+        if re.search(r"ZA SZT", promo) and not cats: continue
+        info = " ".join(b.get("basePriceAdditionalInformation") or "" for b in (pr.get("basePrice") or []))
+        old = _num(re.split(r"(?i)cena regularna", info)[-1]) if re.search(r"(?i)cena regularna", info) else None
+        if old is None: old = (lambda t: float(re.search(r"(\d+(?:\.\d+)?)\s*zł", t).group(1)) if re.search(r"(\d+(?:\.\d+)?)\s*zł", t) else None)(lab.get("bestPricesWithin30daysText") or "")
+        unit_price, pct = float(price), None
+        mm = re.search(r"-?(\d+)%", promo)
+        if re.search(r"(?i)co drug", promo) and mm and old:          # second item cheaper: average of two
+            unit_price = old * (1 - int(mm.group(1)) / 200)
+        elif re.search(r"(?i)(\d+)\s*\+\s*(\d+)\s*gratis", promo) and old:
+            a, b = map(int, re.search(r"(\d+)\s*\+\s*(\d+)", promo).groups()); unit_price = old * a / (a + b)
+        if mm and re.search(r"(?i)taniej", promo): pct = int(mm.group(1))
+        elif old and old > unit_price: pct = round((1 - unit_price / old) * 100)
+        elif mm: pct = int(mm.group(1))
+        frm, until = pr.get("validFrom") or cp.get("validFrom"), pr.get("validUntil") or cp.get("validUntil")
+        if not until: continue
+        img = next((a.get("url") for a in x.get("assets") or [] if a.get("type") == "primary"), "")
+        items.append({"t": name,
+                      "p": round(unit_price, 2), "op": round(old, 2) if old and old > unit_price else None, "pct": pct if pct and pct > 0 else None,
+                      "hl": promo[:40], "lp": False, "unit": (x.get("salesUnit") or "").strip()[:30],
+                      "from": int(frm) * 1000 if frm else None, "until": int(until) * 1000,
+                      "url": f"https://www.aldi.pl/produkt-szczegoly/{x['productSlug']}.html",
+                      "img": (img + "?wid=300&fmt=webp-alpha") if img else "", "k": match(name)})
+    items.sort(key=lambda x: (x["k"] is None, -(x["pct"] or 0)))
+    if not items: raise RuntimeError("no Aldi promotions found")
+    return items
+
 def lidl_items():
     items, off, total = [], 0, None
     while True:
@@ -286,10 +346,13 @@ def main():
         keep = {l.get("img", "").split("/")[2] for l in stores["Biedronka"]["leaflets"] if l.get("img", "").count("/") >= 3}
         for f in LEAF_DIR.iterdir():
             if f.name not in keep: (shutil.rmtree(f) if f.is_dir() else f.unlink())
-    stores["Aldi"] = {"items": [], "leaflets": [], "source": "https://www.aldi.pl/oferty.html"}
+    try: aldi = aldi_items()
+    except BaseException as e:
+        print("Aldi failed, keeping previous:", e, file=sys.stderr); aldi = previous("Aldi")[0]
+    stores["Aldi"] = {"items": aldi, "leaflets": [], "source": ALDI_URL}
     out = {"updated": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="minutes"), "stores": stores}
     OUT.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")))
-    print(f"Lidl: {len(items)} food offers, {sum(1 for i in items if i['k'])} matched; Auchan: {len(stores['Auchan']['items'])} promo products; leaflets: " + ", ".join(f"{k} {len(v['leaflets'])}" for k, v in stores.items()))
+    print(f"Lidl: {len(items)} food offers, {sum(1 for i in items if i['k'])} matched; Auchan: {len(stores['Auchan']['items'])} promo products; Aldi: {len(stores['Aldi']['items'])}; leaflets: " + ", ".join(f"{k} {len(v['leaflets'])}" for k, v in stores.items()))
 
 if __name__ == "__main__":
     main()
