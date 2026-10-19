@@ -1005,7 +1005,7 @@ const T = {
   disc:"Wartości kalorii i białka są przybliżone. To ogólne wskazówki, nie porada medyczna. Jeśli masz choroby przewlekłe lub specjalną dietę, skonsultuj się z dietetykiem.",
   signIn:"Zaloguj", synced:"Zsynchronizowano", syncing:"Synchronizuję…", acctH:"Konto i synchronizacja",
   acctWhy:"Zaloguj się e-mailem, a Twoje zapisane dania, ceny, promocje i listy będą dostępne na telefonie i komputerze. Bez hasła.",
-  emailPh:"Twój e-mail", sendLink:"Wyślij link logowania", linkSent:e=>`Wysłaliśmy link logowania na ${e}. Kliknij go w e-mailu na tym urządzeniu, a zalogujesz się automatycznie. Nie widzisz go? Sprawdź spam.`,
+  emailPh:"Twój e-mail", sendLink:"Wyślij link logowania", linkSent:e=>`Wysłaliśmy e-mail na ${e}. Kliknij link albo wpisz poniżej kod z wiadomości. Nie widzisz go? Sprawdź spam.`,
   codeL:"Kod z e-maila", verify:"Potwierdź", badEmail:"Wpisz poprawny adres e-mail.", sendFail:"Nie udało się wysłać linku. Spróbuj ponownie za chwilę.",
   tooMany:"Za dużo prób. Odczekaj kilka minut i spróbuj ponownie.", badCode:"Kod jest nieprawidłowy lub wygasł.",
   signedAs:"Zalogowano jako", syncedAt:x=>`Zsynchronizowano o ${x}`, syncErr:"Nie udało się zsynchronizować. Spróbujemy ponownie przy następnej zmianie.",
@@ -1091,7 +1091,7 @@ const T = {
   disc:"Calorie and protein values are approximate. This is general guidance, not medical advice. If you have a health condition or a special diet, talk to a dietitian.",
   signIn:"Sign in", synced:"Synced", syncing:"Syncing…", acctH:"Account and sync",
   acctWhy:"Sign in with your email and your saved meals, prices, promotions and lists follow you to your phone and laptop. No password.",
-  emailPh:"Your email", sendLink:"Email me a sign-in link", linkSent:e=>`We sent a sign-in link to ${e}. Tap it in the email on this device and you will be signed in automatically. Not there? Check your spam folder.`,
+  emailPh:"Your email", sendLink:"Email me a sign-in link", linkSent:e=>`We sent an email to ${e}. Tap the link in it, or enter the code from the email below. Not there? Check your spam folder.`,
   codeL:"Code from the email", verify:"Verify", badEmail:"Enter a valid email address.", sendFail:"Couldn't send the link. Try again in a moment.",
   tooMany:"Too many attempts. Wait a few minutes and try again.", badCode:"That code is wrong or has expired.",
   signedAs:"Signed in as", syncedAt:x=>`Synced at ${x}`, syncErr:"Couldn't sync. We'll try again on your next change.",
@@ -1398,7 +1398,7 @@ function renderAcct(){
       <form id="emailForm" class="pform" autocomplete="on"><input id="acctEmail" type="email" inputmode="email" autocomplete="email" placeholder="${t.emailPh}" aria-label="${t.emailPh}" value="${esc(cloud.sent||"")}">
         <button class="btn primary" type="submit">${t.sendLink}</button></form>
       ${cloud.sent?`<p class="acctst ok" style="margin:0">${t.linkSent(esc(cloud.sent))}</p>
-`:""}
+      <form id="codeForm" class="pform" autocomplete="one-time-code"><input id="acctCode" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456" aria-label="${t.codeL}"><button class="btn" type="submit">${t.verify}</button></form>`:""}
       <p class="pferr" role="alert">${esc(cloud.err)}</p>
       <p class="hint" style="margin:0">${t.acctNote}</p></div>`;
   }
@@ -2429,7 +2429,7 @@ document.addEventListener("submit",e=>{
     save(); all(); window.scrollTo({top:0,behavior:"smooth"}); flash(); return; }
   if(e.target.id==="addrForm"){e.preventDefault(); nearState.q=$("addrIn").value; geocode(nearState.q); return;}
   if(e.target.id==="emailForm"){e.preventDefault(); sendLink(($("acctEmail").value||"").trim()); return;}
-  if(e.target.id==="codeForm"){e.preventDefault(); const c=($("acctCode").value||"").replace(/\D/g,""); if(c.length===6) verifyCode(c); return;}
+  if(e.target.id==="codeForm"){e.preventDefault(); const c=($("acctCode").value||"").replace(/\D/g,""); if(c.length>=6&&c.length<=10) verifyCode(c); return;}
   if(e.target.id!=="priceForm") return; e.preventDefault(); const t=L();
   const raw=$("pfItem").value.trim(), k=findKey(raw), p=Math.round(parseFloat(String($("pfPrice").value).replace(",","."))*100)/100, store=$("pfStore").value;
   const err=m=>{$("pfErr").textContent=m;};
